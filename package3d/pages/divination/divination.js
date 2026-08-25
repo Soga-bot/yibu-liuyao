@@ -77,8 +77,8 @@ const GROUP_TIGHT = 0.55       // 洞口处间距系数（1=原间距，0.55≈�
 const GROUP_LIFT = 0.25        // 整体提起高度（抓住=拿起一叠）
 const HOP_DUR = 0.4            // 单枚跳入壳内动画时长(s)
 const HOP_STAGGER = 0.45       // 三钱依次起跳间隔（HOP_DUR 的倍数）
-const HOP_UP = 1.8             // 跳入路线：起点正上方提起高度（控制点1，先竖直拔起）
-const HOP_OVER = 1.5           // 跳入路线：壳口上方高度（控制点2，越过口沿）
+const HOP_UP = 3.5             // 跳入路线：起点正上方提起高度（控制点1，先竖直拔起）
+const HOP_OVER = 3.4           // 跳入路线：壳口上方高度（控制点2，越过口沿）
 const HOP_FWD = 0.5            // 跳入路线：控制点2在碗心前方偏移（压住「从前面进」）
 const HOP_SCALE = 0.18         // 跳入途中微放大（提起感）
 
