@@ -77,7 +77,9 @@ const GROUP_TIGHT = 0.55       // 洞口处间距系数（1=原间距，0.55≈�
 const GROUP_LIFT = 0.25        // 整体提起高度（抓住=拿起一叠）
 const HOP_DUR = 0.4            // 单枚跳入壳内动画时长(s)
 const HOP_STAGGER = 0.45       // 三钱依次起跳间隔（HOP_DUR 的倍数）
-const HOP_OVER = 1.2           // 跳入路线控制点高度（壳口上方，先越过口沿再落碗心）
+const HOP_UP = 1.8             // 跳入路线：起点正上方提起高度（控制点1，先竖直拔起）
+const HOP_OVER = 1.5           // 跳入路线：壳口上方高度（控制点2，越过口沿）
+const HOP_FWD = 0.5            // 跳入路线：控制点2在碗心前方偏移（压住「从前面进」）
 const HOP_SCALE = 0.18         // 跳入途中微放大（提起感）
 
 const POS_SHORT = ['初', '二', '三', '四', '五', '上']
@@ -322,8 +324,9 @@ Page({
       this._shakeAmp *= 0.96
     }
 
-    // 铜钱跳入壳内动画（t<0 = 排队起跳）：二次贝塞尔 P0桌面→P1壳口上方→P2碗心，
-    // 从壳前方越过口沿落入（直线插值会穿壳身），途中微放大
+    // 铜钱跳入壳内动画（t<0 = 排队起跳）：三次贝塞尔
+    // P0桌面 → C1起点正上方(竖直拔起) → C2壳口上方前方(越过口沿) → P2碗心(垂直落入)。
+    // 直线/二次贝塞尔的弧鼓包不足，看起来仍平直穿壳身到中心，故用双控制点强化绕沿。
     if (this._coins) {
       for (const c of this._coins) {
         if (!c.anim) continue
@@ -331,13 +334,15 @@ Page({
         if (c.anim.t <= 0) continue
         const k = Math.min(c.anim.t, 1)
         const a = c.anim
-        const w0 = (1 - k) * (1 - k)
-        const w1 = 2 * (1 - k) * k
-        const w2 = k * k
+        const u = 1 - k
+        const b0 = u * u * u
+        const b1 = 3 * u * u * k
+        const b2 = 3 * u * k * k
+        const b3 = k * k * k
         c.mesh.position.set(
-          w0 * a.from.x + w1 * a.over.x + w2 * a.to.x,
-          w0 * a.from.y + w1 * a.over.y + w2 * a.to.y,
-          w0 * a.from.z + w1 * a.over.z + w2 * a.to.z
+          b0 * a.from.x + b1 * a.c1.x + b2 * a.c2.x + b3 * a.to.x,
+          b0 * a.from.y + b1 * a.c1.y + b2 * a.c2.y + b3 * a.to.y,
+          b0 * a.from.z + b1 * a.c1.z + b2 * a.c2.z + b3 * a.to.z
         )
         const pulse = Math.sin(Math.PI * k)
         c.mesh.scale.setScalar(c.baseScale * (1 + HOP_SCALE * pulse))
@@ -733,9 +738,10 @@ Page({
       c.loaded = true
       const from = c.mesh.position.clone()
       const to = new THREE.Vector3(c0.x + rand(-0.18, 0.18), c0.y - 0.35, c0.z + rand(-0.18, 0.18))
-      // 贝塞尔控制点：起终点中点、抬到壳口上方（从壳前面越过口沿进，不穿壳身）
-      const over = new THREE.Vector3((from.x + to.x) / 2, c0.y + HOP_OVER, (from.z + to.z) / 2)
-      c.anim = { from, to, over, t: -i * HOP_STAGGER }   // t<0 = 排队起跳，三钱一前一后
+      // 双控制点：C1 起点正上方（先提起），C2 壳口上方·碗心前方（越沿后垂直落入）
+      const c1 = new THREE.Vector3(from.x, from.y + HOP_UP, from.z)
+      const c2 = new THREE.Vector3(to.x, to.y + HOP_OVER, to.z + HOP_FWD)
+      c.anim = { from, to, c1, c2, t: -i * HOP_STAGGER }   // t<0 = 排队起跳，三钱一前一后
       i += 1
     })
     this._loadCount = 3
