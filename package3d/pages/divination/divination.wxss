@@ -91,6 +91,15 @@
   color: #a8916e;
   font-size: 20rpx;
 }
+/* 新得之爻弹入：最新一格缩放浮现（旧爻静止，形成「又得一爻」的节奏感） */
+.line-slot.pop {
+  animation: linePop 0.5s ease-out;
+}
+@keyframes linePop {
+  0% { transform: scale(0.3); opacity: 0; }
+  55% { transform: scale(1.22); opacity: 1; }
+  100% { transform: scale(1); }
+}
 
 /* 清零重摇（小按钮，主按钮上方） */
 .reset {

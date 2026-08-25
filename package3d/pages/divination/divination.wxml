@@ -18,7 +18,7 @@
 
   <!-- 爻进度：左→右 = 初→上，摇一枚亮一格 -->
   <view wx:if="{{lines.length}}" class="lines">
-    <view class="line-slot" wx:for="{{lines}}" wx:key="posName">
+    <view class="line-slot {{item.justSet ? 'pop' : ''}}" wx:for="{{lines}}" wx:key="posName">
       <view class="line-sym {{item.dong ? 'line-dong' : ''}}">{{item.yin ? '━ ━' : '━━━'}}</view>
       <view class="line-name">{{item.posName}}·{{item.name}}</view>
     </view>

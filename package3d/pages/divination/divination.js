@@ -56,6 +56,8 @@ const BACKS_TO_YAO = {
   1: { yin: false, dong: false, name: '少阳', mark: '、' },
   2: { yin: true,  dong: false, name: '少阴', mark: '、、' }
 }
+// 读面播报（提示行 + 监测日志共用）：背数的传统说法
+const BACKS_TEXT = { 3: '三背', 2: '两背一字', 1: '一背两字', 0: '三字' }
 
 // ====== 摇一摇（加速度计）参数 ======
 const ACC_INTERVAL = 'game'     // ~20ms，最流畅
@@ -284,7 +286,7 @@ Page({
     this._released = false
     this._shaking = true
     this._shakeAmp = 1
-    this.updateBtn({ phase: 'shaking', shaking: true, tip: '摇一摇手机（或连点屏幕）' })
+    this.updateBtn({ phase: 'shaking', shaking: true, tip: '第' + (this.data.lines.length + 1) + '爻 · 摇一摇手机（或连点屏幕）' })
   },
 
   // 一次有效晃动：壳摆一下，壳内铜钱翻个身
@@ -499,23 +501,28 @@ Page({
   // ====== 三钱成爻（闭环核心） ======
   // 铜钱全部落定：读正反面 → 数背 → 查表成爻 → 入 lines；满 6 爻跳排盘
   onCoinsSettled() {
+    const faces = this._coins.map((c) => (isBackUp(c) ? '背' : '字')).join('·')
     const backs = this._coins.filter(isBackUp).length
     const y = BACKS_TO_YAO[backs]
     if (!y) {   // 理论不可达（0~3 之外），防御
       this.setData({ tip: '读面异常，请重摇' })
       return
     }
+    // 监测：面是落定后从模型姿态读的（非隐藏随机数），屏幕所见即日志所记
+    console.log('[读面]', faces, '→', BACKS_TEXT[backs] + '，' + y.name + (y.dong ? '（动爻）' : ''))
     const pos = this.data.lines.length          // 0=初爻
-    const lines = this.data.lines.concat([{
+    const lines = this.data.lines.map((l) => Object.assign({}, l, { justSet: false }))
+    lines.push({
       yin: y.yin, dong: y.dong, name: y.name, mark: y.mark,
-      posName: POS_SHORT[pos] + '爻'
-    }])
+      posName: POS_SHORT[pos] + '爻', justSet: true   // 新爻格弹入动画标记
+    })
     wx.vibrateShort({ type: 'light', fail: () => {} })
+    const brief = POS_SHORT[pos] + '爻 · ' + BACKS_TEXT[backs] + ' → ' + y.name + (y.dong ? '（动）' : '')
 
     if (lines.length >= 6) {
       // 卦成：重震一下，稍候跳排盘（重新起卦走问事签独立页）
       wx.vibrateShort({ type: 'heavy', fail: () => {} })
-      this.updateBtn({ lines, done: true, tip: backs + '背 → ' + y.name + '，卦成！' })
+      this.updateBtn({ lines, done: true, tip: brief + '，卦成！' })
       const yaoKey = lines.map(l => l.yin ? '0' : '1').join('')
       const dongKey = lines.map(l => l.dong ? '1' : '0').join('')
       this._navTimer = setTimeout(() => {
@@ -526,13 +533,32 @@ Page({
         })
       }, 900)
     } else {
-      this.updateBtn({ lines, tip: '第' + (pos + 1) + '爻：' + backs + '背 → ' + y.name + (y.dong ? '（动）' : '') })
+      this.updateBtn({ lines, tip: brief })
+      // 展示片刻后自动续摇下一爻：钱自动跳回壳内，免每爻重新拖放
+      this._nextYaoTimer = setTimeout(() => this.nextYao(), 1500)
     }
+  },
+
+  // 自动续摇下一爻：钱从桌面落位直接跳回壳内（复用入壳弧线），立正后进摇动阶段。
+  // 只在回正/待机空档接管——用户已手动开始装钱则不打扰；重摇/退出由清理守卫兜住
+  nextYao() {
+    if (this._destroyed || this.data.done) return
+    if (this.data.lines.length >= 6) return
+    if (this._phase !== 'idle' && this._phase !== 'returning') return
+    if (this._dragGroup) return
+    this._phase = 'loading'
+    this._loadCount = 0
+    this._tiltCb = null
+    this._coins.forEach((c) => { c.loaded = false; c.anim = null })
+    this._tiltTarget = LOAD_ANGLE
+    this.updateBtn({ phase: 'loading', loadCount: 0, tip: '铜钱归壳，续摇下一爻…' })
+    this.enterShell()
   },
 
   // 清零重摇（同一所问之内重摇，_qiu 保留）
   onReset() {
     if (this._navTimer) { clearTimeout(this._navTimer); this._navTimer = null }
+    if (this._nextYaoTimer) { clearTimeout(this._nextYaoTimer); this._nextYaoTimer = null }
     this._shakeAmp = 0
     this._phase = 'idle'
     this._tilt = 0
@@ -842,6 +868,7 @@ Page({
   onUnload() {
     this.stopLoopHard()
     if (this._navTimer) clearTimeout(this._navTimer)
+    if (this._nextYaoTimer) clearTimeout(this._nextYaoTimer)
   }
 })
 
