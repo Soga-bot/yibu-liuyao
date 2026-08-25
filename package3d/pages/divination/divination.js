@@ -62,10 +62,10 @@ const BACKS_TEXT = { 3: '三背', 2: '两背一字', 1: '一背两字', 0: '三�
 
 // ====== 摇一摇（加速度计）参数 ======
 const ACC_INTERVAL = 'game'     // ~20ms，最流畅
-const SHAKE_DELTA = 6           // 相邻两次读数 |Δx|+|Δy|+|Δz| 超过此值算一次有效摇晃
-                                // （game 档 ~20ms 采样，真机常态甩动 Δ≈3~8；原值 12 要
-                                // 甩得极暴力才命中，真机形同虚设——工具里正常是因连点不走这）
-const SHAKE_COOLDOWN = 650      // 两次触发最小间隔(ms)，防止一甩连触发（自然摇频 3~4Hz 可达）
+const SHAKE_DELTA = 3.5         // 摇动阶段计数门槛：相邻读数 |Δx|+|Δy|+|Δz| 超过即算
+                                // （game 档 ~20ms 采样，轻甩即有 2~5；进阶段后越灵越好）
+const SHAKE_DELTA_START = 6     // 待机起摇门槛：稍高，防走路/颠簸误触发起卦
+const SHAKE_COOLDOWN = 500      // 两次触发最小间隔(ms)，防止一甩连触发（自然摇频 3~4Hz 可达）
 
 // ====== 装钱→摇动→倒出流程 ======
 const SHAKE_HITS = 3           // 有效晃动达此次数 = 摇够（约 2 秒自然摇晃；每次命中震动反馈）
@@ -116,14 +116,18 @@ Page({
     loadCount: 0,    // 已入壳铜钱数
     btnLabel: '摇卦起卦',  // 按钮文案（JS 集中算：wxml 深层三元编译不过）
     btnHidden: false,      // 仪式阶段（装钱/立正/倒钱/落定/回正）隐藏按钮
-    sbTop: 28              // 返回键兜底版 top（px，onLoad 按状态栏高度重算）
+    sbTop: 28,             // 返回键兜底版 top（px，onLoad 按状态栏高度重算）
+    isDevtools: false      // 兜底返回键仅在开发者工具渲染（真机会与 view 版叠出双按钮）
   },
 
   onLoad(options) {
     this._accLast = null
     this._lastShakeAt = 0
-    // cover-view 兜底返回键的 top：真机有状态栏，css 的 env() 在 cover-view 里不可靠
-    this.setData({ sbTop: (wx.getWindowInfo().statusBarHeight || 20) + 8 })
+    this.setData({
+      // cover-view 兜底返回键的 top：真机有状态栏，css 的 env() 在 cover-view 里不可靠
+      sbTop: (wx.getWindowInfo().statusBarHeight || 20) + 8,
+      isDevtools: (wx.getDeviceInfo().platform || '') === 'devtools'
+    })
     // 所问之事由问事签独立页经 q 参数带入（直接进本页则视为未问，流程照常）
     this._qiu = options && options.q ? decodeURIComponent(options.q).slice(0, 30) : ''
     console.log('[流程] 3D 页进入，所问 =', this._qiu || '(未填)')
@@ -142,12 +146,6 @@ Page({
         }
         this.init(res[0].node)
       })
-    // 【临时自检】视图层布局探针：返回键若不可见，看此 rect 是否正常（区分「没布局」与「被原生层盖住」）
-    setTimeout(() => {
-      wx.createSelectorQuery().select('.back').boundingClientRect((r) => {
-        console.log('[自检] 返回键 rect =', r)
-      }).exec()
-    }, 800)
   },
 
   async init(canvas) {
@@ -885,13 +883,18 @@ Page({
       this._accLast = [res.x, res.y, res.z]
       if (!last) return
       const delta = Math.abs(res.x - last[0]) + Math.abs(res.y - last[1]) + Math.abs(res.z - last[2])
-      if (delta < SHAKE_DELTA) return
       const now = Date.now()
       if (now - this._lastShakeAt < SHAKE_COOLDOWN) return
-      this._lastShakeAt = now
-      // 待起卦：晃手机=起卦；摇动阶段：计一次有效晃动
-      if (this._phase === 'shaking') this.addShakeHit()
-      else if (this._phase === 'idle') this.triggerShake()
+      // 两档门槛：待机要甩得稍用力才起卦（防口袋/走路误触）；摇动阶段轻晃即计数
+      if (this._phase === 'shaking') {
+        if (delta < SHAKE_DELTA) return
+        this._lastShakeAt = now
+        this.addShakeHit()
+      } else if (this._phase === 'idle') {
+        if (delta < SHAKE_DELTA_START) return
+        this._lastShakeAt = now
+        this.triggerShake()
+      }
     }
     wx.onAccelerometerChange(this._accHandler)
   },
