@@ -72,6 +72,25 @@ Page({
       tag: l.isShi ? '世' : (l.isYing ? '应' : ''),
       kong: l.kong
     }))
+    // 有动爻：变卦并排展示用视图模型（名/宫/五行 + 卦象爻 + 古文讲解）
+    let bian = null
+    if (yao.some((l) => l.dong)) {
+      const bianKey = yao.map((l) => (l.dong ? (l.yin ? '1' : '0') : (l.yin ? '0' : '1'))).join('')
+      const kb2 = GUA_DATA[bianKey] || {}
+      const r2 = paipan({
+        yao: bianKey.split('').map((b) => ({ yin: b === '0', dong: false })),
+        dayGan: jz[0], dayZhi: jz[1]
+      })
+      bian = {
+        name: r2.name,
+        gong: r2.gong,
+        gongWuxing: r2.gongWuxing,
+        desc: kb2.desc || '',
+        daxiang: kb2.daxiang || '',
+        guaci: kb2.guaci || '',
+        yao: bianKey.split('').map((b) => ({ yin: b === '0' })).reverse()   // 上→初
+      }
+    }
     this.setData({
       qiu,
       gz: jz,
@@ -80,6 +99,8 @@ Page({
         daxiang: kb.daxiang || '',
         guaci: kb.guaci || ''
       }),
+      ben: { yao: rows.map((w) => ({ yin: w.yin, dong: w.dong })) },   // 上→初
+      bian,
       rows
     })
     // 落摇卦历史（与手动排盘同库：mine 页统一渲染）

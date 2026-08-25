@@ -16,11 +16,53 @@
 
     <!-- 排盘结果（与手动排盘同观感，只读） -->
     <view wx:if="{{result}}" class="result-card">
-      <view class="gua-head">
+      <!-- 有动爻：本卦/变卦并排两框，讲解在下方分列（先本卦后变卦） -->
+      <block wx:if="{{bian}}">
+        <view class="gua-pair">
+          <view class="gua-box">
+            <view class="g-label">本 卦</view>
+            <view class="g-name font-kai">{{result.name}}</view>
+            <view class="gbars">
+              <view class="gyao" wx:for="{{ben.yao}}" wx:key="index">
+                <view wx:if="{{!item.yin}}" class="gbar yang"></view>
+                <view wx:else class="gbar yin"><view class="gseg"></view><view class="gseg"></view></view>
+                <text wx:if="{{item.dong}}" class="gmark">{{item.yin ? '✕' : '○'}}</text>
+              </view>
+            </view>
+            <view class="g-meta">{{result.gong}}宫 · {{result.gongWuxing}}</view>
+          </view>
+          <view class="gua-box">
+            <view class="g-label g-label-bian">变 卦</view>
+            <view class="g-name font-kai">{{bian.name}}</view>
+            <view class="gbars">
+              <view class="gyao" wx:for="{{bian.yao}}" wx:key="index">
+                <view wx:if="{{!item.yin}}" class="gbar yang"></view>
+                <view wx:else class="gbar yin"><view class="gseg"></view><view class="gseg"></view></view>
+              </view>
+            </view>
+            <view class="g-meta">{{bian.gong}}宫 · {{bian.gongWuxing}}</view>
+          </view>
+        </view>
+
+        <view class="ex-block">
+          <view class="ex-title font-kai">本卦 · {{result.name}}</view>
+          <view wx:if="{{result.desc}}" class="gua-desc">{{result.desc}}</view>
+          <view wx:if="{{result.daxiang}}" class="gua-daxiang font-kai">象曰：{{result.daxiang}}</view>
+          <view wx:if="{{result.guaci}}" class="gua-guaci font-kai">卦辞：{{result.guaci}}</view>
+        </view>
+        <view class="ex-block">
+          <view class="ex-title font-kai">变卦 · {{bian.name}}</view>
+          <view wx:if="{{bian.desc}}" class="gua-desc">{{bian.desc}}</view>
+          <view wx:if="{{bian.daxiang}}" class="gua-daxiang font-kai">象曰：{{bian.daxiang}}</view>
+          <view wx:if="{{bian.guaci}}" class="gua-guaci font-kai">卦辞：{{bian.guaci}}</view>
+        </view>
+      </block>
+
+      <!-- 无动爻：单卦头 -->
+      <view wx:else class="gua-head">
         <view class="gua-name font-kai">{{result.name}}卦</view>
         <view class="gua-meta">
           <text>{{result.gong}}宫 · {{result.gongWuxing}}</text>
-          <text wx:if="{{result.bian}}" class="bian"> → {{result.bian.name}}</text>
         </view>
         <view wx:if="{{result.desc}}" class="gua-desc">{{result.desc}}</view>
         <view wx:if="{{result.daxiang}}" class="gua-daxiang font-kai">象曰：{{result.daxiang}}</view>
