@@ -137,6 +137,12 @@ Page({
         }
         this.init(res[0].node)
       })
+    // 【临时自检】视图层布局探针：返回键若不可见，看此 rect 是否正常（区分「没布局」与「被原生层盖住」）
+    setTimeout(() => {
+      wx.createSelectorQuery().select('.back').boundingClientRect((r) => {
+        console.log('[自检] 返回键 rect =', r)
+      }).exec()
+    }, 800)
   },
 
   async init(canvas) {

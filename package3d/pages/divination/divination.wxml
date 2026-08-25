@@ -1,6 +1,7 @@
 <!-- pages/divination/divination.wxml — 3D 起卦页（全屏画布 + 视图浮层）-->
-<!-- canvas type="webgl" 为同层渲染，浮层用普通 view 即可盖在画布上；
-     勿用 cover-view（那是旧版原生组件专用，压同层画布在工具/部分真机上不显示） -->
+<!-- canvas type="webgl" 为同层渲染，浮层用普通 view 盖画布；
+     另备一枚 cover-view 返回键兜底：同层渲染偶发失效时原生画布浮到所有 view 之上，
+     view 版返回键跟着隐没，cover-view 属原生层仍可见（同层正常时它不显示，二者不会同屏） -->
 <view class="page">
   <!-- 全屏 WebGL 画布；手势拨动：横向拖动龟壳绕中心 360° 旋转（跟手+惯性），位置不变 -->
   <canvas type="webgl" id="gl" class="gl"
@@ -10,8 +11,11 @@
   <!-- 加载中提示 -->
   <view wx:if="{{loading}}" class="status">{{status}}</view>
 
-  <!-- 返回 -->
+  <!-- 返回（视图层版） -->
   <view class="back" hover-class="back-hover" bindtap="onBack">‹</view>
+
+  <!-- 返回（原生层兜底版：仅在同层渲染失效、view 版隐没时可见） -->
+  <cover-view class="cback" bindtap="onBack">‹</cover-view>
 
   <!-- 提示文案（最近一爻结果 / 引导） -->
   <view wx:if="{{tip}}" class="tip">{{tip}}</view>

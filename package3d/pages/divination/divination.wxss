@@ -53,6 +53,23 @@
   background: #F3E7CB;
 }
 
+/* 返回兜底（cover-view 原生层）：仅用其支持的 css 子集（无 border/box-shadow） */
+.cback {
+  position: fixed;
+  top: 24rpx;
+  left: 24rpx;
+  width: 68rpx;
+  height: 68rpx;
+  border-radius: 34rpx;
+  background-color: #FFFAEB;
+  color: #5A3E22;
+  font-size: 44rpx;
+  font-weight: bold;
+  text-align: center;
+  line-height: 68rpx;
+  z-index: 99;
+}
+
 /* 提示文案（最近一爻结果/引导） */
 .tip {
   position: absolute;
