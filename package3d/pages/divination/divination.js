@@ -83,6 +83,7 @@ Page({
     tip: '',         // 最近一爻结果 / 引导文案
     asking: false,   // 问事签弹卡中
     qiu: '',         // 所问之事（输入框值）
+    failed: false,   // 3D 初始化失败（画布/模型）：按钮变「重新加载」
     phase: 'idle',   // 流程阶段（按钮文案用）
     loadCount: 0,    // 已入壳铜钱数
     btnLabel: '摇卦起卦'  // 按钮文案（JS 集中算：wxml 深层三元编译不过）
@@ -96,7 +97,8 @@ Page({
       .fields({ node: true })
       .exec((res) => {
         if (!res[0] || !res[0].node) {
-          this.setData({ status: '画布初始化失败' })
+          console.error('画布节点获取失败', res)
+          this.setData({ failed: true, btnLabel: '重新加载', status: '画布初始化失败，点下方按钮重试' })
           return
         }
         this.init(res[0].node)
@@ -193,8 +195,10 @@ Page({
       }
       this.placeCoinsIdle()
     } catch (e) {
-      console.error('模型加载失败', e)
-      this.setData({ status: '模型加载失败：请确认是非 Draco 的 glb' })
+      // 真实原因带出来（readFile 的 errMsg / GL 上下文失败等），别再只写推测文案
+      console.error('3D 初始化失败', e)
+      const msg = (e && (e.errMsg || e.message)) || '未知错误'
+      this.setData({ failed: true, btnLabel: '重新加载', status: '加载失败：' + msg })
       return
     }
 
@@ -235,7 +239,7 @@ Page({
     this._phase = 'loading'
     this._loadCount = 0
     this._tiltTarget = LOAD_ANGLE
-    this._tiltCb = null
+    this._tiltCb = () => this.selfTestPick()   // 【临时自检】调通后改回 null
     this._coins.forEach((c) => { c.loaded = false; c.anim = null })
     this.updateBtn({ phase: 'loading', loadCount: 0, tip: '拖动铜钱放入壳中（0/3）' })
   },
@@ -556,6 +560,7 @@ Page({
     // 装钱态：拾起一枚未入壳的铜钱（提起 0.3），拖动只移钱不转壳
     if (this._phase === 'loading') {
       const coin = this.pickCoin(t.clientX, t.clientY)
+      console.log('[装钱] 触摸', t.clientX, t.clientY, coin ? '拾取成功' : '未命中')
       if (coin) {
         this._dragCoin = coin
         this._touchId = t.identifier
@@ -614,6 +619,28 @@ Page({
   },
 
   // ====== 装钱：射线拾取 / 桌面拖动 / 入壳判定 ======
+  // 【临时自检】壳后仰到位后自动跑一次：把每枚未入壳铜钱中心投影回屏幕坐标再反向拾取，
+  // 结果写进 tip + console——定位「铜钱没反应」断在哪一环（调通后整段删除）
+  selfTestPick() {
+    try {
+      const unloaded = this._coins.filter((c) => !c.loaded)
+      let ok = 0
+      const detail = unloaded.map((c) => {
+        const ndc = c.mesh.position.clone().project(this._camera)
+        const px = (ndc.x + 1) / 2 * this._winW
+        const py = (1 - ndc.y) / 2 * this._winH
+        const hit = this.pickCoin(px, py) === c
+        if (hit) ok++
+        return hit + '@(' + px.toFixed(0) + ',' + py.toFixed(0) + ')'
+      })
+      console.log('[自检] 屏幕坐标→拾取', detail, '窗口', this._winW + 'x' + this._winH)
+      this.setData({ tip: '自检 拾取' + ok + '/' + unloaded.length + ' ' + detail.join(' ') })
+    } catch (err) {
+      console.error('[自检] 异常', err)
+      this.setData({ tip: '自检异常：' + ((err && err.message) || err) })
+    }
+  },
+
   pickCoin(cx, cy) {
     this._ray = this._ray || new THREE.Raycaster()
     this._ray.setFromCamera({
@@ -671,6 +698,11 @@ Page({
   },
 
   onShakeTap() {
+    // 初始化失败：整页重载（redirectTo 自身 = 干净的新实例，避免残留半初始化状态）
+    if (this.data.failed) {
+      wx.redirectTo({ url: '/package3d/pages/divination/divination', fail: () => {} })
+      return
+    }
     // 摇动阶段点按钮 = 补一次有效晃动（开发者工具模拟不了加速度计的兜底）
     if (this._phase === 'shaking') { this.addShakeHit(); return }
     this.triggerShake()
@@ -694,6 +726,15 @@ Page({
     this._destroyed = true
     this.stopAcc()
     if (this._navTimer) clearTimeout(this._navTimer)
+    // 释放 GL 上下文：反复进出页面不释放，devtools/真机会耗尽上下文，
+    // 表现为下次进入画布空白只剩浮层（时好时坏的根源）
+    if (this._renderer) {
+      try {
+        this._renderer.dispose()
+        if (this._renderer.forceContextLoss) this._renderer.forceContextLoss()
+      } catch (e) { /* 上下文已失效则忽略 */ }
+      this._renderer = null
+    }
   }
 })
 
