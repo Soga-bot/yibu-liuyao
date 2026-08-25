@@ -592,7 +592,10 @@ Page({
       }
     } else if (s.stage === 'carve') {
       const k = ease01(Math.min(s.t / INSC_CARVE, 1))   // 从中点向两侧「刻出」
-      s.bars.forEach((b) => { b.scale.x = Math.max(k, 0.02) })
+      s.bars.forEach((b) => {
+        if (b.userData.growAll) b.scale.setScalar(Math.max(k, 0.02))   // 老阳○环整体长出
+        else b.scale.x = Math.max(k, 0.02)
+      })
       if (s.t >= INSC_CARVE) { s.stage = 'hold'; s.t = 0; this._inscribedCount += 1 }
     } else if (s.stage === 'hold') {
       if (s.t >= INSC_HOLD + (isLast ? 0.7 : 0)) {      // 卦成多停一拍，看完整个卦象
@@ -646,7 +649,8 @@ Page({
     return { min, size, backY }
   },
 
-  // 在壳背刻下第 i 爻（0=初）：阳=一整条，阴=两段中空；动爻朱红（与界面动爻色一致）。
+  // 在壳背刻下第 i 爻（0=初）：阳=一整条，阴=两段中空。
+  // 动爻不改色、用传统刻记：老阳=线中央刻圈 ○（线穿圈而过），老阴=两段中缝刻 ✕。
   // 局部轴向（glb 实证推导）：+Y=拱面朝镜头 ⇒ 腹甲面 = backY；+Z→世界竖直 ⇒ 初爻刻在 -Z 端
   // 刻痕感三要素：细（笔画/厚度均为行距的小比例）、长（过半壳宽）、近贴面（微凸不入眼）
   carveLine(i) {
@@ -654,7 +658,7 @@ Page({
     const len = L.size.x * 0.46             // 爻线长度：过半壳宽（原 0.34 偏短）
     const gap = L.size.z * 0.1              // 六爻行距（六行共占半高）
     const line = this.data.lines[i]
-    const mat = new THREE.MeshStandardMaterial({ color: line.dong ? 0xC62828 : 0x2E1A0C })
+    const mat = new THREE.MeshStandardMaterial({ color: 0x2E1A0C })   // 统一墨色
     const y = L.backY + gap * 0.02          // 近贴面：细线刻痕，不做浮雕棍
     const z = L.min.z + L.size.z / 2 + (i - 2.5) * gap
     const bars = []
@@ -667,6 +671,27 @@ Page({
     }
     if (line.yin) { seg(-len * 0.30, len * 0.44); seg(len * 0.30, len * 0.44) }
     else seg(0, len)
+    if (line.dong) {
+      if (line.yin) {                                     // 老阴 ✕：中缝两臂斜刻
+        const l = gap * 0.5
+        ;[Math.PI / 4, -Math.PI / 4].forEach((a) => {
+          const m = new THREE.Mesh(new THREE.BoxGeometry(l, gap * 0.10, gap * 0.10), mat)
+          m.position.set(0, y, z)
+          m.rotation.y = a
+          m.scale.x = 0.02
+          this._marksGroup.add(m)
+          bars.push(m)
+        })
+      } else {                                            // 老阳 ○：环平贴面、线从环心穿过
+        const m = new THREE.Mesh(new THREE.TorusGeometry(gap * 0.34, gap * 0.05, 8, 24), mat)
+        m.rotation.x = Math.PI / 2
+        m.position.set(0, y, z)
+        m.scale.setScalar(0.02)
+        m.userData.growAll = true                         // carve 段整体缩放（环只缩 x 会变椭圆）
+        this._marksGroup.add(m)
+        bars.push(m)
+      }
+    }
     return bars
   },
 
