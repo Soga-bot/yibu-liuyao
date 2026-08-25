@@ -6,7 +6,7 @@ import { writeFileSync } from 'node:fs'
 import { XICI_SHANG, XICI_XIA, SHUOGUA } from '../data/shiyi.js'
 
 // 1) 结构校验：章号为汉字序数「一..十二」连续、每章有正文
-const CN = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二']
+const CN = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二', '十三']
 let bad = 0
 const check = (arr, name, expect) => {
   if (arr.length !== expect) { console.error(`✗ ${name} 章数 ${arr.length} ≠ ${expect}`); bad++ }
@@ -16,7 +16,7 @@ const check = (arr, name, expect) => {
   })
 }
 check(XICI_SHANG, '系辞上传', 12)
-check(XICI_XIA, '系辞下传', 11)
+check(XICI_XIA, '系辞下传', 13)
 check(SHUOGUA, '说卦传', 11)
 if (bad) { console.error(`共 ${bad} 处问题，未生成校对文件`); process.exit(1) }
 
@@ -26,7 +26,7 @@ const secs = [
   ['二', '系辞下传', XICI_XIA],
   ['三', '说卦传', SHUOGUA]
 ]
-let t = `待校对：data/shiyi.js（系辞上传 12 章 + 系辞下传 11 章 + 说卦传 11 章）
+let t = `待校对：data/shiyi.js（系辞上传 12 章 + 系辞下传 13 章 + 说卦传 11 章）
 ====================================================================
 
 【背景】系辞、说卦由我按通行本录入，章号连续、无空章已程序校验，
