@@ -81,6 +81,8 @@ const HOP_UP = 3.5             // 跳入路线：起点正上方提起高度（�
 const HOP_OVER = 3.4           // 跳入路线：壳口上方高度（控制点2，越过口沿）
 const HOP_FWD = 0.5            // 跳入路线：控制点2在碗心前方偏移（压住「从前面进」）
 const HOP_SCALE = 0.18         // 跳入途中微放大（提起感）
+const FLAT_DUR = 0.22          // 落定压平动画时长(s)：摊开在桌面，杜绝立着收场
+const SETTLE_FORCE = 2500      // 倒出后该时长(ms)仍未落定的钱强制压平（乱滚/漂远保险丝）
 
 const POS_SHORT = ['初', '二', '三', '四', '五', '上']
 
@@ -199,6 +201,7 @@ Page({
       this._dragGroup = null
       this._released = false
       this._hits = 0
+      this._pourAt = 0     // 倒出时刻（落定保险丝用，0=未在倒出）
       this._shellBaseRotZ = shell.rotation.z   // 摇晃晃动以此为基准
       this._shakeT = 0
       this._shakeAmp = 0
@@ -255,6 +258,7 @@ Page({
       c.vel.set(0, 0, 0)
       c.angVel.set(0, 0, 0)
       c.anim = null
+      c.flat = null
       c.settled = true
     })
   },
@@ -314,6 +318,15 @@ Page({
       c.settled = false
     })
     this._phase = 'settling'
+    this._pourAt = Date.now()
+  },
+
+  // 落定：停物理，交给压平动画（update 里的 c.flat 段）平滑转到最近平躺朝向
+  settleCoin(c) {
+    c.vel.set(0, 0, 0)
+    c.angVel.set(0, 0, 0)
+    c.settled = true
+    c.flat = { t: 0, x0: c.mesh.rotation.x, z0: c.mesh.rotation.z }
   },
 
   // 每帧更新：壳晃动 / 跃入动画 / 拨动回位 / 倒钱流程 / 铜钱物理
@@ -351,6 +364,19 @@ Page({
           c.mesh.position.copy(a.to)
           c.mesh.scale.setScalar(c.baseScale)
           c.anim = null
+        }
+      }
+      // 落定压平：从当前姿态平滑转到最近平躺朝向（与待机摆钱同族），摊开在桌面
+      for (const c of this._coins) {
+        if (!c.flat) continue
+        c.flat.t += dt / FLAT_DUR
+        const k = Math.min(c.flat.t, 1)
+        c.mesh.rotation.x = c.flat.x0 + (snap(c.flat.x0) - c.flat.x0) * k
+        c.mesh.rotation.z = c.flat.z0 + (snap(c.flat.z0) - c.flat.z0) * k
+        if (k >= 1) {
+          c.mesh.rotation.x = snap(c.flat.x0)
+          c.mesh.rotation.z = snap(c.flat.z0)
+          c.flat = null
         }
       }
       // 三钱全部跳完（整体入壳）→ 壳立正进摇动阶段：钱落定碗内再立正，不穿帮
@@ -411,8 +437,18 @@ Page({
       if (c.settled) continue
       allSettled = false
 
+      // 保险丝：倒出太久还没落定的（乱滚/漂远速度一直降不下来）强制压平收场
+      if (this._pourAt && Date.now() - this._pourAt > SETTLE_FORCE) {
+        c.mesh.position.y = FLOOR_Y
+        this.settleCoin(c)
+        continue
+      }
+
       c.vel.y -= GRAVITY * dt
       c.mesh.position.addScaledVector(c.vel, dt)
+      // 桌面边界：别飞出视野（尤其朝镜头的 z 初速）
+      c.mesh.position.x = clamp(c.mesh.position.x, -1.6, 1.6)
+      c.mesh.position.z = clamp(c.mesh.position.z, -1.0, 1.7)
       c.mesh.rotation.x += c.angVel.x * dt
       c.mesh.rotation.y += c.angVel.y * dt
       c.mesh.rotation.z += c.angVel.z * dt
@@ -424,13 +460,7 @@ Page({
         c.vel.z *= 0.62
         c.angVel.multiplyScalar(0.5)
 
-        if (Math.abs(c.vel.y) < 0.25 && c.vel.length() < SETTLE_VEL) {
-          c.mesh.rotation.x = snap(c.mesh.rotation.x)
-          c.mesh.rotation.z = snap(c.mesh.rotation.z)
-          c.vel.set(0, 0, 0)
-          c.angVel.set(0, 0, 0)
-          c.settled = true
-        }
+        if (Math.abs(c.vel.y) < 0.25 && c.vel.length() < SETTLE_VEL) this.settleCoin(c)
       }
     }
     if (allSettled) {
