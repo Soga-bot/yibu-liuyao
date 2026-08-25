@@ -12,6 +12,7 @@
 // ⚠️ 模型必须是非 Draco 压缩的 glb（本 threejs-miniprogram 不含 DRACOLoader）
 import { createScopedThreejs } from '../../libs/three/index.js'
 import { registerGLTFLoader } from '../../libs/three/gltf-loader.js'
+import { GUA_DATA } from '../../../data/gua.js'   // 卦成时报卦名（主包数据，分包可引）
 
 // ====== 模型来源 ======
 // FileSystemManager 按小程序根路径读取。体积平衡：龟壳留分包，铜钱放主包 models/
@@ -87,6 +88,12 @@ const FLAT_DUR = 0.28          // 落定压平+滑位动画时长(s)：摊开在
 const SETTLE_FORCE = 2500      // 倒出后该时长(ms)仍未落定的钱强制压平（乱滚/漂远保险丝）
 const POUR_SLOTS = [[-0.5, 1.05], [0.5, 1.05], [0, 1.35]]   // 三钱落位(x,z)：桌面下前方摊开（收紧版）
 const POUR_T = 0.35            // 出壳抛射飞行时长(s)：初速按落位抛体反解
+
+// ====== 刻爻上壳仪式（每得一爻：壳转背面刻录 → 停留赏看 → 转回正面续下一爻） ======
+// 暗合古法龟甲刻辞；刻线挂在壳上随壳转，平时随手拨壳也能翻看已得之爻
+const INSC_TURN = 0.7          // 转到背面 / 转回正面时长(s)
+const INSC_CARVE = 0.45        // 爻线「刻出」动画时长(s)：从中点向两侧生长
+const INSC_HOLD = 1.1          // 背面停留赏看时长(s)；卦成（第6爻）自动加长
 
 const POS_SHORT = ['初', '二', '三', '四', '五', '上']
 
@@ -172,6 +179,12 @@ Page({
     try {
       const shell = await this.loadModel(SHELL_SRC)
       fitObject(shell, SHELL_SIZE)
+      // 壳背刻爻定位基准：fitObject 后、姿态调整前的模型局部包围盒（腹甲面 = 局部 -Y）
+      this._shellBox = new THREE.Box3().setFromObject(shell)
+      this._marksGroup = new THREE.Group()   // 刻线挂壳上：随壳转/翻，天生贴背
+      shell.add(this._marksGroup)
+      this._inscribedCount = 0               // 已刻爻数（重摇清零）
+      this._inscribe = null                  // 刻录仪式时间线（进行中才有值）
       liftMaterial(shell, [1.5, 1.4, 1.25], [0.1, 0.07, 0.04]) // 壳贴图偏黑，提亮
       // 手动微调（见顶部 SHELL_ADJUST）
       shell.scale.multiplyScalar(SHELL_ADJUST.extraScale)
@@ -269,13 +282,14 @@ Page({
 
   // ====== 装钱→摇动→倒出流程 ======
   // 装钱态：壳保持竖直、可随意翻动；拖钱凑向壳口的过程中才逐渐后仰（见 moveGroupOnTable）
-  beginLoad() {
+  // tip 可带上一爻播报（续爻时「已得N爻 · 拖钱归壳…」），首爻用默认引导
+  beginLoad(tip) {
     this._phase = 'loading'
     this._loadCount = 0
     this._tiltTarget = 0
     this._tiltCb = null
     this._coins.forEach((c) => { c.loaded = false; c.anim = null })
-    this.updateBtn({ phase: 'loading', loadCount: 0, tip: '拖动三枚铜钱凑向壳口' })
+    this.updateBtn({ phase: 'loading', loadCount: 0, tip: tip || '拖动三枚铜钱凑向壳口' })
   },
 
   // 三钱入壳后：壳立正 → 进入摇动阶段
@@ -422,6 +436,8 @@ Page({
     }
 
     if (this._shellPivot) {
+      // 刻爻仪式：接管 yaw/pitch 走时间线（turn→carve→hold→back）
+      if (this._inscribe) this.stepInscribe(dt)
       // 手势回位弹簧在 idle 与装钱期生效（装钱期壳可随意翻、松手回正）；其余仪式阶段流程接管
       if ((this._phase === 'idle' || this._phase === 'loading') && !this._dragging && this._homing) {
         // 半隐式欧拉积分的欠阻尼弹簧：继承松手时的角速度，先顺势转、再平滑拉回，无跳变
@@ -492,7 +508,12 @@ Page({
       this._shaking = false
       this._phase = 'returning'   // 壳回正
       this._tiltTarget = 0
-      this._tiltCb = () => { this._phase = 'idle'; this.setData({ phase: 'idle' }) }
+      // 回正后不直接待机：转背面刻录本爻，刻完再进下一爻装钱（见 beginInscribe）
+      this._tiltCb = () => {
+        this._phase = 'idle'
+        this.setData({ phase: 'idle' })
+        this.beginInscribe()
+      }
       this.updateBtn({ shaking: false, phase: 'returning' })
       this.onCoinsSettled()       // 读面成爻
     }
@@ -520,45 +541,127 @@ Page({
     const brief = POS_SHORT[pos] + '爻 · ' + BACKS_TEXT[backs] + ' → ' + y.name + (y.dong ? '（动）' : '')
 
     if (lines.length >= 6) {
-      // 卦成：重震一下，稍候跳排盘（重新起卦走问事签独立页）
+      // 卦成：重震一下，亮卦名；跳排在刻录仪式演完后（goPaipan）进行
       wx.vibrateShort({ type: 'heavy', fail: () => {} })
-      this.updateBtn({ lines, done: true, tip: brief + '，卦成！' })
-      const yaoKey = lines.map(l => l.yin ? '0' : '1').join('')
-      const dongKey = lines.map(l => l.dong ? '1' : '0').join('')
-      this._navTimer = setTimeout(() => {
-        wx.navigateTo({
-          url: '/pages/paipan/paipan?yao=' + yaoKey + '&dong=' + dongKey +
-               '&q=' + encodeURIComponent(this._qiu || '') + '&from=3d',
-          fail: () => this.setData({ tip: '跳转失败，请手动打开排盘页' })
-        })
-      }, 900)
+      const gname = (GUA_DATA[lines.map((l) => l.yin ? '0' : '1').join('')] || {}).name || ''
+      this.updateBtn({ lines, done: true, tip: brief + '，卦成' + (gname ? '「' + gname + '」' : '') + '！' })
     } else {
       this.updateBtn({ lines, tip: brief })
-      // 展示片刻后自动续摇下一爻：钱自动跳回壳内，免每爻重新拖放
-      this._nextYaoTimer = setTimeout(() => this.nextYao(), 1500)
     }
   },
 
-  // 自动续摇下一爻：钱从桌面落位直接跳回壳内（复用入壳弧线），立正后进摇动阶段。
-  // 只在回正/待机空档接管——用户已手动开始装钱则不打扰；重摇/退出由清理守卫兜住
-  nextYao() {
-    if (this._destroyed || this.data.done) return
-    if (this.data.lines.length >= 6) return
-    if (this._phase !== 'idle' && this._phase !== 'returning') return
-    if (this._dragGroup) return
-    this._phase = 'loading'
-    this._loadCount = 0
-    this._tiltCb = null
-    this._coins.forEach((c) => { c.loaded = false; c.anim = null })
-    this._tiltTarget = LOAD_ANGLE
-    this.updateBtn({ phase: 'loading', loadCount: 0, tip: '铜钱归壳，续摇下一爻…' })
-    this.enterShell()
+  // ====== 刻爻上壳仪式（读面后由回正回调拉起） ======
+  // 壳转背面 → 最新一爻刻上壳背 → 停留赏看 → 转回正面 →
+  // 未满六爻：进装钱态等用户拖钱归壳（看得清、节奏自己掌握）；满六爻：跳排盘
+  beginInscribe() {
+    if (this._destroyed) return
+    if (this.data.lines.length === this._inscribedCount) {   // 无新爻（读面异常防御）
+      this.beginLoad('拖钱归壳，重摇此爻')
+      return
+    }
+    this._phase = 'inscribing'
+    this._dragging = false
+    this._homing = false
+    this._spinVel = 0
+    this._pitchVel = 0
+    const front = Math.round(this._shellYaw / (Math.PI * 2)) * Math.PI * 2   // 最近正面
+    this._inscribe = {
+      stage: 'turn', t: 0,
+      y0: this._shellYaw, y1: front + Math.PI,   // 转到背面
+      p0: this._shellPitch, p1: 0,
+      bars: []
+    }
+    this.updateBtn({ phase: 'inscribing' })
+  },
+
+  // 仪式时间线（update 每帧驱动；手势在此阶段被禁，yaw/pitch 全归仪式接管）
+  stepInscribe(dt) {
+    const s = this._inscribe
+    if (!s) return
+    s.t += dt
+    const isLast = this.data.lines.length >= 6
+    if (s.stage === 'turn') {
+      const k = ease01(Math.min(s.t / INSC_TURN, 1))
+      this._shellYaw = s.y0 + (s.y1 - s.y0) * k
+      this._shellPitch = s.p0 + (s.p1 - s.p0) * k
+      if (s.t >= INSC_TURN) {
+        s.stage = 'carve'; s.t = 0
+        s.bars = this.carveLine(this.data.lines.length - 1)
+      }
+    } else if (s.stage === 'carve') {
+      const k = ease01(Math.min(s.t / INSC_CARVE, 1))   // 从中点向两侧「刻出」
+      s.bars.forEach((b) => { b.scale.x = Math.max(k, 0.02) })
+      if (s.t >= INSC_CARVE) { s.stage = 'hold'; s.t = 0; this._inscribedCount += 1 }
+    } else if (s.stage === 'hold') {
+      if (s.t >= INSC_HOLD + (isLast ? 0.7 : 0)) {      // 卦成多停一拍，看完整个卦象
+        s.stage = 'back'; s.t = 0
+        s.y0 = this._shellYaw; s.y1 = s.y1 - Math.PI    // 转回正面
+      }
+    } else if (s.stage === 'back') {
+      const k = ease01(Math.min(s.t / INSC_TURN, 1))
+      this._shellYaw = s.y0 + (s.y1 - s.y0) * k
+      if (s.t >= INSC_TURN) {
+        this._inscribe = null
+        this._shellYaw = s.y1
+        this._homeYaw = s.y1
+        this._shellPitch = 0
+        this._phase = 'idle'
+        this.setData({ phase: 'idle' })
+        if (this.data.done) this.goPaipan()
+        else {
+          const n = this.data.lines.length
+          this.beginLoad('第' + n + '爻已录 · 拖钱归壳，续摇第' + (n + 1) + '爻')
+        }
+      }
+    }
+  },
+
+  // 在壳背刻下第 i 爻（0=初）：阳=一整条，阴=两段中空；动爻朱红（与界面动爻色一致）。
+  // 局部轴向（glb 实证推导）：+Y=拱面朝镜头 ⇒ 腹甲面 = min.Y；+Z→世界竖直 ⇒ 初爻刻在 -Z 端
+  carveLine(i) {
+    const b = this._shellBox
+    const sz = b.getSize(new THREE.Vector3())
+    const len = clamp(sz.x * 0.34, 0.55, 1.0)             // 爻线长度：按壳背可刻区域自适应
+    const gap = clamp(sz.z * 0.5 / 5, 0.16, 0.3)          // 六爻行距
+    const line = this.data.lines[i]
+    const mat = new THREE.MeshStandardMaterial({ color: line.dong ? 0xC62828 : 0x2E1A0C })
+    const y = b.min.y + 0.01                              // 半嵌壳背：像刻上去的浮雕
+    const z = b.min.z + sz.z / 2 + (i - 2.5) * gap
+    const bars = []
+    const seg = (x, l) => {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(l, 0.06, gap * 0.42), mat)
+      m.position.set(x, y, z)
+      m.scale.x = 0.02                                    // 从 0 长出（carve 段驱动）
+      this._marksGroup.add(m)
+      bars.push(m)
+    }
+    if (line.yin) { seg(-len * 0.29, len * 0.42); seg(len * 0.29, len * 0.42) }
+    else seg(0, len)
+    return bars
+  },
+
+  // 卦成跳排盘（刻录仪式收尾时调用，用户已看完壳背整卦）
+  goPaipan() {
+    const yaoKey = this.data.lines.map((l) => l.yin ? '0' : '1').join('')
+    const dongKey = this.data.lines.map((l) => l.dong ? '1' : '0').join('')
+    wx.navigateTo({
+      url: '/pages/paipan/paipan?yao=' + yaoKey + '&dong=' + dongKey +
+           '&q=' + encodeURIComponent(this._qiu || '') + '&from=3d',
+      fail: () => this.setData({ tip: '跳转失败，请手动打开排盘页' })
+    })
   },
 
   // 清零重摇（同一所问之内重摇，_qiu 保留）
   onReset() {
-    if (this._navTimer) { clearTimeout(this._navTimer); this._navTimer = null }
-    if (this._nextYaoTimer) { clearTimeout(this._nextYaoTimer); this._nextYaoTimer = null }
+    this._inscribe = null          // 刻录仪式进行中重摇：取消时间线
+    this._inscribedCount = 0
+    if (this._marksGroup) {        // 壳背刻线全清（几何/材质释放）
+      this._marksGroup.children.slice().forEach((m) => {
+        this._marksGroup.remove(m)
+        if (m.geometry) m.geometry.dispose()
+        if (m.material) m.material.dispose()
+      })
+    }
     this._shakeAmp = 0
     this._phase = 'idle'
     this._tilt = 0
@@ -568,6 +671,9 @@ Page({
     this._shaking = false
     if (this._coins) this._coins.forEach((c) => { c.anim = null; c.loaded = false })
     if (this._shell) this._shell.rotation.z = this._shellBaseRotZ
+    // 壳可能停在仪式半途的背面角度：给回位弹簧目标拉回正面
+    this._homeYaw = Math.round(this._shellYaw / (Math.PI * 2)) * Math.PI * 2
+    this._homing = true
     this.placeCoinsIdle()
     this.updateBtn({ lines: [], done: false, phase: 'idle', loadCount: 0, shaking: false, tip: '已重置，摇一摇或点按钮起卦' })
   },
@@ -620,8 +726,7 @@ Page({
     if (this.data.loading || this.data.shaking) return
     if (this._phase !== 'idle') return   // 仪式进行中不重复触发
     if (this.data.done) {
-      // 卦成后再摇 = 新的一卦：回问事签重新默祷（清掉待跳排盘的定时器防双跳）
-      if (this._navTimer) { clearTimeout(this._navTimer); this._navTimer = null }
+      // 卦成后再摇 = 新的一卦：回问事签重新默祷
       wx.redirectTo({ url: '/package3d/pages/ask/ask', fail: () => {} })
       return
     }
@@ -643,8 +748,8 @@ Page({
     else if (done) label = '重新起卦'
     else if (linesLen) label = '摇第' + (linesLen + 1) + '爻'
     else label = '摇卦起卦'
-    // 装钱/立正/倒钱/落定/回正阶段藏按钮（摇动保留：连点=补晃动兜底）
-    const hidden = ['loading', 'righting', 'pouring', 'settling', 'returning'].indexOf(phase) >= 0
+    // 装钱/立正/倒钱/落定/回正/刻录阶段藏按钮（摇动保留：连点=补晃动兜底）
+    const hidden = ['loading', 'righting', 'pouring', 'settling', 'returning', 'inscribing'].indexOf(phase) >= 0
     this.setData(Object.assign({ btnLabel: label, btnHidden: hidden }, p))
   },
 
@@ -867,8 +972,7 @@ Page({
   },
   onUnload() {
     this.stopLoopHard()
-    if (this._navTimer) clearTimeout(this._navTimer)
-    if (this._nextYaoTimer) clearTimeout(this._nextYaoTimer)
+    this._inscribe = null
   }
 })
 
@@ -920,3 +1024,5 @@ function fitObject(obj, size) {
 
 function rand(a, b) { return a + Math.random() * (b - a) }
 function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)) }
+// 平滑插值（smoothstep）：仪式转壳起步/收尾缓，中段快
+function ease01(t) { return t * t * (3 - 2 * t) }

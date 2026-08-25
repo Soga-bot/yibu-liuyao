@@ -24,9 +24,9 @@
     </view>
   </view>
 
-  <!-- 清零重摇 -->
+  <!-- 清零重摇（刻录仪式中藏：别打断转壳刻爻的节拍） -->
   <view
-    wx:if="{{lines.length && !shaking}}"
+    wx:if="{{lines.length && !shaking && phase !== 'inscribing'}}"
     class="reset"
     hover-class="reset-hover"
     bindtap="onReset"
