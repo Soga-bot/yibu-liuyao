@@ -73,6 +73,8 @@ const HOP_DUR = 0.35           // 铜钱落入壳内动画时长(s)
 const POS_SHORT = ['初', '二', '三', '四', '五', '上']
 
 let THREE = null
+// 热重载可能不触发 onUnload，旧实例渲染循环变僵尸抢帧（卡顿根源）——模块级强杀
+let livePage = null
 
 Page({
   data: {
@@ -205,6 +207,8 @@ Page({
 
     // ---- 启动渲染循环 + 摇一摇监听 ----
     if (this._destroyed) return   // 加载期间已退出页面：不再拉起
+    if (livePage && livePage !== this) livePage.stopLoopHard()
+    livePage = this
     this.setData({ loading: false, tip: '摇一摇手机，或点下方按钮起卦' })
     this._clock = new THREE.Clock()
     this.resumeLoop()
@@ -451,7 +455,7 @@ Page({
 
   // 渲染循环
   loop() {
-    if (!this._running) return
+    if (!this._running || this._destroyed) return
     const dt = Math.min(this._clock.getDelta(), 0.05)
     this.update(dt)
     this._renderer.render(this._scene, this._camera)
@@ -738,18 +742,21 @@ Page({
     // 从排盘页返回：恢复渲染循环与摇一摇（onHide 已停）
     this.resumeLoop()
     if (!this.data.loading) this.startAcc()
+    // 问事签兜底：init 时若因热重载竞态没弹出来，这里补弹（条件同 triggerShake 问询闸）
+    if (!this.data.loading && !this.data.asking && !this.data.done &&
+        !this.data.lines.length && !this._asked && this._phase === 'idle') {
+      this.setData({ asking: true })
+    }
   },
   onHide() {
     this._running = false
     this.stopAcc()
   },
-  onUnload() {
+  // 强停本实例：杀渲染循环/传感器，释放 GL 上下文（onUnload 与热重载杀旧实例共用）
+  stopLoopHard() {
     this._running = false
     this._destroyed = true
     this.stopAcc()
-    if (this._navTimer) clearTimeout(this._navTimer)
-    // 释放 GL 上下文：反复进出页面不释放，devtools/真机会耗尽上下文，
-    // 表现为下次进入画布空白只剩浮层（时好时坏的根源）
     if (this._renderer) {
       try {
         this._renderer.dispose()
@@ -757,6 +764,10 @@ Page({
       } catch (e) { /* 上下文已失效则忽略 */ }
       this._renderer = null
     }
+  },
+  onUnload() {
+    this.stopLoopHard()
+    if (this._navTimer) clearTimeout(this._navTimer)
   }
 })
 
