@@ -66,7 +66,7 @@ const LOAD_ANGLE = 1.5         // 装钱态：壳后仰成碗（口朝上）
 const POUR_ANGLE = -1.9        // 倒钱态：壳前倾（口转向桌面）
 const TILT_SPEED = 6           // 壳姿态角指数趋近系数（越大转得越快）
 const POUR_RELEASE = 0.55      // 前倾角走过该比例时松钱
-const LOAD_RADIUS = 1.05       // 拖钱入壳判定：落点距壳心该半径内算入
+const LOAD_RADIUS = 1.15       // 拖钱入壳判定：距壳心该半径内自动聚拢入壳
 const HOP_DUR = 0.35           // 铜钱落入壳内动画时长(s)
 
 const POS_SHORT = ['初', '二', '三', '四', '五', '上']
@@ -86,7 +86,8 @@ Page({
     failed: false,   // 3D 初始化失败（画布/模型）：按钮变「重新加载」
     phase: 'idle',   // 流程阶段（按钮文案用）
     loadCount: 0,    // 已入壳铜钱数
-    btnLabel: '摇卦起卦'  // 按钮文案（JS 集中算：wxml 深层三元编译不过）
+    btnLabel: '摇卦起卦',  // 按钮文案（JS 集中算：wxml 深层三元编译不过）
+    btnHidden: false       // 仪式阶段（装钱/立正/倒钱/落定/回正）隐藏按钮
   },
 
   onLoad() {
@@ -209,6 +210,10 @@ Page({
     this.resumeLoop()
     this.startAcc()
     this.selfTestPick()   // 【临时自检】进页面即验证拾取链路，调通后删
+    // 进页即弹问事签：免按钮直达流程（点首页「摇卦起卦」→ 这里直接问所求）
+    if (!this._asked && !this.data.done && !this.data.lines.length) {
+      this.setData({ asking: true })
+    }
   },
 
   // 铜钱状态对象
@@ -253,7 +258,7 @@ Page({
     this._released = false
     this._shaking = true
     this._shakeAmp = 1
-    this.updateBtn({ phase: 'shaking', shaking: true, tip: '摇动手机，或连点下方按钮' })
+    this.updateBtn({ phase: 'shaking', shaking: true, tip: '摇一摇手机（或连点屏幕）' })
   },
 
   // 一次有效晃动：壳摆一下，壳内铜钱翻个身
@@ -347,8 +352,9 @@ Page({
         this._tiltCb = null
         cb()
       }
-      this._shellPivot.rotation.y = this._shellYaw
-      this._shellPivot.rotation.x = this._shellPitch + this._tilt
+      this._shellPivot.rotation.y = this._shellYaw + Math.sin(this._shakeT * 10) * 0.3 * this._shakeAmp
+      this._shellPivot.rotation.x = this._shellPitch + this._tilt +
+        Math.sin(this._shakeT * 10 + 1.5) * 0.08 * this._shakeAmp
     }
 
     // 铜钱自由落体物理：仅 settling 阶段（倒出后到落定）
@@ -514,7 +520,9 @@ Page({
     else if (done) label = '重新起卦'
     else if (linesLen) label = '摇第' + (linesLen + 1) + '爻'
     else label = '摇卦起卦'
-    this.setData(Object.assign({ btnLabel: label }, p))
+    // 装钱/立正/倒钱/落定/回正阶段藏按钮（摇动保留：连点=补晃动兜底）
+    const hidden = ['loading', 'righting', 'pouring', 'settling', 'returning'].indexOf(phase) >= 0
+    this.setData(Object.assign({ btnLabel: label, btnHidden: hidden }, p))
   },
 
   // ====== 问事签：起卦前默祷所求（可不填），为后续解读提供上下文 =====
@@ -559,6 +567,8 @@ Page({
     if (!this._shellPivot) return
     const t = e.changedTouches[0]
     console.log('[触摸]', this._phase, t.clientX, t.clientY)   // 【临时自检】调通后删
+    // 摇动阶段：点画布任意处 = 补一次有效晃动（工具模拟不了加速度计的兜底）
+    if (this._phase === 'shaking') { this.addShakeHit(); return }
     // 待机时点/拖到铜钱 = 想起卦：等价点「摇卦起卦」按钮（先弹问事签，续爻则直接装钱）
     if (this._phase === 'idle' && this.pickCoin(t.clientX, t.clientY)) {
       this.triggerShake()
@@ -690,6 +700,14 @@ Page({
     if (!this._ray.ray.intersectPlane(this._tablePlane, p)) return
     coin.mesh.position.x = clamp(p.x, -1.3, 1.3)
     coin.mesh.position.z = clamp(p.z, -0.3, 1.5)
+    // 靠近壳口自动聚拢入壳：拖到壳口附近即被吸入，不必精确松手
+    const c0 = this._shellPivot.position
+    const dx = coin.mesh.position.x - c0.x
+    const dz = coin.mesh.position.z - c0.z
+    if (dx * dx + dz * dz < LOAD_RADIUS * LOAD_RADIUS) {
+      this.dropCoin(coin)
+      if (this._dragCoin === coin) this._dragCoin = null
+    }
   },
 
   dropCoin(coin) {

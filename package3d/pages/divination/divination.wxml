@@ -32,8 +32,9 @@
     bindtap="onReset"
   >重摇</view>
 
-  <!-- 摇卦按钮（浮于底部）：真机上也可直接摇一摇手机 -->
+  <!-- 摇卦按钮：仅待机/摇动/卦成态显示（装钱等仪式阶段隐藏，入口由问事签自动弹出承担） -->
   <view
+    wx:if="{{!btnHidden}}"
     class="btn {{shaking ? 'btn-disabled' : ''}}"
     hover-class="btn-hover"
     hover-stay-time="80"
