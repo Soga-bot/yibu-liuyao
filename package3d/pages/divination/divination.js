@@ -330,6 +330,7 @@ Page({
     this._hits += 1
     this._lastHitAt = Date.now()
     this._shakeAmp = 1
+    this.buzz('medium')   // 每次有效晃动一记中震：手腕发力的触觉回响
     this._coins.forEach((c) => {
       c.mesh.rotation.x += rand(-0.6, 0.6)
       c.mesh.rotation.y += rand(-0.6, 0.6)
@@ -374,6 +375,7 @@ Page({
   //（翻倒方向由法线 y 符号定，保留翻滚物理得出的正反面），同时滑到落位
   settleCoin(c) {
     this.play('dump')   // 落地一响（三枚错开落，池轮转可叠声）
+    this.buzz('light')  // 落桌一记轻震
     c.vel.set(0, 0, 0)
     c.angVel.set(0, 0, 0)
     c.settled = true
@@ -408,7 +410,7 @@ Page({
         if (!c.anim) continue
         c.anim.t += dt / HOP_DUR
         if (c.anim.t <= 0) continue
-        if (!c.anim.started) { c.anim.started = true; this.play('getIn') }   // 真起跳那一帧入壳一响
+        if (!c.anim.started) { c.anim.started = true; this.play('getIn'); this.buzz('light') }   // 真起跳那一帧：入壳一响+轻震
         const k = Math.min(c.anim.t, 1)
         const a = c.anim
         const u = 1 - k
@@ -562,12 +564,12 @@ Page({
       yin: y.yin, dong: y.dong, name: y.name, mark: y.mark,
       posName: POS_SHORT[pos] + '爻', justSet: true   // 新爻格弹入动画标记
     })
-    wx.vibrateShort({ type: 'light', fail: () => {} })
+    this.buzz('light')   // 成爻一记
     const brief = POS_SHORT[pos] + '爻 · ' + BACKS_TEXT[backs] + ' → ' + y.name + (y.dong ? '（动）' : '')
 
     if (lines.length >= 6) {
       // 卦成：重震一下，亮卦名；跳排在刻录仪式演完后（goPaipan）进行
-      wx.vibrateShort({ type: 'heavy', fail: () => {} })
+      this.buzz('heavy')
       const gname = (GUA_DATA[lines.map((l) => l.yin ? '0' : '1').join('')] || {}).name || ''
       this.updateBtn({ lines, done: true, tip: brief + '，卦成' + (gname ? '「' + gname + '」' : '') + '！' })
     } else {
@@ -611,6 +613,7 @@ Page({
       this._shellPitch = s.p0 + (s.p1 - s.p0) * k
       if (s.t >= INSC_TURN) {
         s.stage = 'carve'; s.t = 0
+        this.buzz('heavy')   // 落刀一刻重震
         s.bars = this.carveLine(this.data.lines.length - 1)
         if (isLast) s.bars = s.bars.concat(this.carveGuaName())   // 卦成：上爻上方再刻卦名
       }
@@ -898,6 +901,12 @@ Page({
     this._loopSfx.loop = true
     this._loopSfx.volume = 0.7
   },
+  // 短触觉（微信只有短脉冲无连震马达）：绑物理事件，与音效同点触发——
+  // 晃动命中=中、钱落桌/钱入壳=轻、刻爻落刀=重、成爻=轻、卦成=重
+  buzz(type) {
+    wx.vibrateShort({ type: type || 'light', fail: () => {} })
+  },
+
   play(name) {
     if (!this._sfxPool || this._destroyed) return
     try {
