@@ -51,5 +51,9 @@ Page({
 
   goDetail(e) {
     wx.navigateTo({ url: '/pages/dianji/detail?key=' + e.currentTarget.dataset.key })
+  },
+
+  goShiyi() {
+    wx.navigateTo({ url: '/pages/dianji/shiyi' })
   }
 })

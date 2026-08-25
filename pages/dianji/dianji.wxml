@@ -11,6 +11,16 @@
       <text class="search-count">{{list.length}}/{{total}}</text>
     </view>
 
+    <!-- 十翼通读入口（系辞 / 说卦；文言、序卦、杂卦随各卦详情展示） -->
+    <view class="shiyi-entry" bindtap="goShiyi" hover-class="card-hover">
+      <text class="shiyi-glyph font-kai">翼</text>
+      <view class="shiyi-info">
+        <text class="shiyi-name font-kai">十翼 · 通读</text>
+        <text class="shiyi-sub">系辞上传 / 系辞下传 / 说卦传</text>
+      </view>
+      <text class="g-arrow">›</text>
+    </view>
+
     <!-- 64 卦列表（文王序） -->
     <view class="gua-card" wx:for="{{list}}" wx:key="key"
           data-key="{{item.key}}" bindtap="goDetail" hover-class="card-hover">

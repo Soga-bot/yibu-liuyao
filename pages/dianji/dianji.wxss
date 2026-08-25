@@ -38,6 +38,44 @@
   margin-left: 20rpx;
 }
 
+/* ---------- 十翼通读入口 ---------- */
+.shiyi-entry {
+  display: flex;
+  align-items: center;
+  background: #fffaf0;
+  border: 1rpx solid rgba(139,105,20,0.22);
+  border-left: 6rpx solid #c9a86a;
+  border-radius: 16rpx;
+  padding: 20rpx 26rpx;
+  margin-top: 20rpx;
+  box-shadow: 0 3rpx 12rpx rgba(62,39,35,0.05);
+}
+.shiyi-glyph {
+  flex: 0 0 72rpx;
+  height: 72rpx;
+  line-height: 72rpx;
+  text-align: center;
+  font-size: 40rpx;
+  color: #8a5e15;
+  background: rgba(201,168,106,0.14);
+  border-radius: 12rpx;
+}
+.shiyi-info { flex: 1; margin-left: 24rpx; min-width: 0; }
+.shiyi-name {
+  display: block;
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #3E2723;
+  letter-spacing: 3rpx;
+}
+.shiyi-sub {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: #8a7355;
+  letter-spacing: 1rpx;
+}
+
 /* ---------- 卦列表 ---------- */
 .gua-card {
   display: flex;

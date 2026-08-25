@@ -1,0 +1,59 @@
+/* pages/dianji/shiyi.wxss — 十翼通读页（样式对齐 detail 页） */
+.status-bar { width: 100%; }
+.page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f6efe2 0%, #efe6d3 100%);
+}
+.topbar {
+  display: flex;
+  align-items: center;
+  height: 88rpx;
+  padding: 0 30rpx;
+}
+.back {
+  width: 80rpx;
+  font-size: 60rpx;
+  color: #5D4037;
+  line-height: 1;
+}
+.title {
+  flex: 1;
+  text-align: center;
+  font-size: 34rpx;
+  color: #3d2b1f;
+  margin-right: 80rpx;
+}
+.content {
+  padding: 10rpx 30rpx 60rpx;
+}
+.book-name {
+  margin: 40rpx 0 20rpx;
+  text-align: center;
+  font-size: 38rpx;
+  color: #5D4037;
+  letter-spacing: 6rpx;
+}
+.sec {
+  margin-top: 20rpx;
+  padding: 24rpx 28rpx;
+  background: rgba(255, 252, 245, 0.72);
+  border-radius: 16rpx;
+}
+.sec-title {
+  font-size: 26rpx;
+  color: #8a5e15;
+  letter-spacing: 4rpx;
+  margin-bottom: 12rpx;
+}
+.daxiang {
+  font-size: 28rpx;
+  color: #4a3f35;
+  line-height: 1.9;
+  letter-spacing: 2rpx;
+}
+.src-note {
+  margin-top: 30rpx;
+  text-align: center;
+  font-size: 22rpx;
+  color: #a8916e;
+}
