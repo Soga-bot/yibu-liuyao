@@ -626,25 +626,37 @@ Page({
   },
 
   // ====== 装钱：射线拾取 / 桌面拖动 / 入壳判定 ======
-  // 【临时自检】壳后仰到位后自动跑一次：把每枚未入壳铜钱中心投影回屏幕坐标再反向拾取，
-  // 结果写进 tip + console——定位「铜钱没反应」断在哪一环（调通后整段删除）
+  // 【临时自检】射线直射 1 号铜钱中心，倒出 raycast 内部状态定位 0/3 问题（调通后整段删除）
   selfTestPick() {
     try {
-      const unloaded = this._coins.filter((c) => !c.loaded)
-      let ok = 0
-      const detail = unloaded.map((c) => {
-        const ndc = c.mesh.position.clone().project(this._camera)
-        const px = (ndc.x + 1) / 2 * this._winW
-        const py = (1 - ndc.y) / 2 * this._winH
-        const hit = this.pickCoin(px, py) === c
-        if (hit) ok++
-        return hit + '@(' + px.toFixed(0) + ',' + py.toFixed(0) + ')'
+      const c = this._coins[0]
+      const ndc = c.mesh.position.clone().project(this._camera)
+      this._ray = this._ray || new THREE.Raycaster()
+      this._ray.setFromCamera({ x: ndc.x, y: ndc.y }, this._camera)
+      const coinHits = this._ray.intersectObjects(this._coins.map((x) => x.mesh), true)
+      const shellHits = this._shell ? this._ray.intersectObject(this._shell, true) : []
+      const first = coinHits[0]
+      console.log('[自检2-拾取] 钱hits=' + coinHits.length +
+        ' 首命中=' + (first ? first.object.type + '/' + (first.object.name || '?') + '/d=' + first.distance.toFixed(2) : '无') +
+        ' 壳hits=' + shellHits.length +
+        ' 相机=' + this._camera.position.x.toFixed(1) + ',' + this._camera.position.y.toFixed(1) + ',' + this._camera.position.z.toFixed(1) +
+        ' 射线向=' + this._ray.ray.direction.x.toFixed(2) + ',' + this._ray.ray.direction.y.toFixed(2) + ',' + this._ray.ray.direction.z.toFixed(2))
+      // 铜钱子树逐网格：世界坐标 / 世界缩放 / 几何包围球半径（原始局部值）
+      const parts = []
+      c.mesh.traverse((o) => {
+        if (!o.isMesh || parts.length >= 4) return
+        if (!o.geometry.boundingSphere) o.geometry.computeBoundingSphere()
+        const wp = o.getWorldPosition(new THREE.Vector3())
+        const ws = o.getWorldScale(new THREE.Vector3())
+        parts.push(o.type + '(' + (o.name || '?') + ') wp=' + wp.x.toFixed(2) + ',' + wp.y.toFixed(2) + ',' + wp.z.toFixed(2) +
+          ' 缩放=' + ws.x.toFixed(3) + ',' + ws.y.toFixed(3) + ',' + ws.z.toFixed(3) +
+          ' 球r=' + o.geometry.boundingSphere.radius.toFixed(2))
       })
-      console.log('[自检] 屏幕坐标→拾取', detail, '窗口', this._winW + 'x' + this._winH)
-      this.setData({ tip: '自检 拾取' + ok + '/' + unloaded.length + ' ' + detail.join(' ') })
+      console.log('[自检2-网格] 根pos=' + c.mesh.position.x.toFixed(2) + ',' + c.mesh.position.y.toFixed(2) + ',' + c.mesh.position.z.toFixed(2), parts)
+      this.setData({ tip: '自检2 钱=' + coinHits.length + ' 壳=' + shellHits.length + '，日志见console' })
     } catch (err) {
-      console.error('[自检] 异常', err)
-      this.setData({ tip: '自检异常：' + ((err && err.message) || err) })
+      console.error('[自检2] 异常', err)
+      this.setData({ tip: '自检2异常：' + ((err && err.message) || err) })
     }
   },
 
