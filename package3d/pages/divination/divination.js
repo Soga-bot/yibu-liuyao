@@ -456,10 +456,8 @@ Page({
 
     // 铜钱自由落体物理：仅 settling 阶段（倒出后到落定）
     if (this._phase !== 'settling') return
-    let allSettled = true
     for (const c of this._coins) {
-      if (c.settled && !c.flat) continue   // 压平动画没做完不算落定（读面要等法线稳定）
-      allSettled = false
+      if (c.settled) continue   // 已落定彻底退出物理（压平动画只管姿态/滑位，别再碰它）
 
       // 保险丝：倒出太久还没落定的（乱滚/漂远速度一直降不下来）强制压平收场
       if (this._pourAt && Date.now() - this._pourAt > SETTLE_FORCE) {
@@ -487,7 +485,8 @@ Page({
         if (Math.abs(c.vel.y) < 0.25 && c.vel.length() < SETTLE_VEL) this.settleCoin(c)
       }
     }
-    if (allSettled) {
+    // 全部落定 = 物理静止 + 压平动画播完（法线稳定才读面、壳才回正）
+    if (this._coins.every((c) => c.settled && !c.flat)) {
       this._shaking = false
       this._phase = 'returning'   // 壳回正
       this._tiltTarget = 0
