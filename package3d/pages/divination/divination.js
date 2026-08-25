@@ -171,6 +171,7 @@ Page({
     } catch (e) {
       console.error('离屏画布创建失败，卦名将不刻', e)
     }
+    this.initAudio()   // 音效提前创建预热（首次播放有加载延迟，事件短音尤其明显）
 
     // 复用一个 GLTFLoader
     this._gltfLoader = new THREE.GLTFLoader()
@@ -320,6 +321,7 @@ Page({
     this._released = false
     this._shaking = true
     this._shakeAmp = 1
+    this.playLoop()   // 摇卦过程音起（循环，倒出时停）
     this.updateBtn({ phase: 'shaking', shaking: true, tip: '第' + (this.data.lines.length + 1) + '爻 · 摇一摇手机（或连点屏幕）' })
   },
 
@@ -337,6 +339,7 @@ Page({
   // 摇够且静止 → 前倾倒钱
   beginPour() {
     this._phase = 'pouring'
+    this.stopLoop()   // 摇卦过程音止（摇动结束 → 前倾倒钱）
     this._tiltTarget = POUR_ANGLE
     this._tiltCb = null
     this._released = false
@@ -370,6 +373,7 @@ Page({
   // 落定：停物理，交给压平动画——四元数 slerp 到「就近翻倒」的平躺姿态
   //（翻倒方向由法线 y 符号定，保留翻滚物理得出的正反面），同时滑到落位
   settleCoin(c) {
+    this.play('dump')   // 落地一响（三枚错开落，池轮转可叠声）
     c.vel.set(0, 0, 0)
     c.angVel.set(0, 0, 0)
     c.settled = true
@@ -404,6 +408,7 @@ Page({
         if (!c.anim) continue
         c.anim.t += dt / HOP_DUR
         if (c.anim.t <= 0) continue
+        if (!c.anim.started) { c.anim.started = true; this.play('getIn') }   // 真起跳那一帧入壳一响
         const k = Math.min(c.anim.t, 1)
         const a = c.anim
         const u = 1 - k
@@ -831,6 +836,7 @@ Page({
 
   // 清零重摇（同一所问之内重摇，_qiu 保留）
   onReset() {
+    this.stopLoop()                // 摇动中重摇：过程音随之止
     this._inscribe = null          // 刻录仪式进行中重摇：取消时间线
     this._inscribedCount = 0
     if (this._marksGroup) {        // 壳背刻线全清（几何/贴图/材质逐一释放；每爻各持贴图）
@@ -870,6 +876,53 @@ Page({
     this._running = true
     this._clock.getDelta()   // 丢弃后台积压的 dt
     this.loop()
+  },
+
+  // ====== 音效：入壳/摇卦循环/倒出落地（挂接点对齐流程状态机，时长天然解耦） ======
+  initAudio() {
+    const mk = (src) => {
+      const a = wx.createInnerAudioContext()
+      a.src = src
+      a.volume = 1
+      a.obeyMuteSwitch = true
+      return a
+    }
+    // 短音用小池轮转：三枚铜钱错开落地的响声要能叠着放（单实例重播会掐断前一声）
+    this._sfxPool = {
+      getIn: [mk('/package3d/audio/get_into.mp3'), mk('/package3d/audio/get_into.mp3'), mk('/package3d/audio/get_into.mp3')],
+      dump: [mk('/package3d/audio/dump_out.mp3'), mk('/package3d/audio/dump_out.mp3'), mk('/package3d/audio/dump_out.mp3')]
+    }
+    this._sfxIdx = { getIn: 0, dump: 0 }
+    // 摇卦过程音：无缝循环——摇卦时长不定（用户行为），循环起停由状态机控制
+    this._loopSfx = mk('/package3d/audio/process.mp3')
+    this._loopSfx.loop = true
+    this._loopSfx.volume = 0.7
+  },
+  play(name) {
+    if (!this._sfxPool || this._destroyed) return
+    try {
+      const pool = this._sfxPool[name]
+      const i = this._sfxIdx[name]
+      this._sfxIdx[name] = (i + 1) % pool.length
+      const a = pool[i]
+      a.stop()   // 复用前归零（池够大时极少掐到未播完的声）
+      a.play()
+    } catch (e) { /* 音效失败不影响流程 */ }
+  },
+  playLoop() {
+    if (!this._loopSfx || this._destroyed) return
+    try { this._loopSfx.play() } catch (e) { /* 同上 */ }
+  },
+  stopLoop() {
+    if (!this._loopSfx) return
+    try { this._loopSfx.stop() } catch (e) { /* 同上 */ }
+  },
+  destroyAudio() {
+    this.stopLoop()
+    if (this._sfxPool) Object.keys(this._sfxPool).forEach((k) => this._sfxPool[k].forEach((a) => a.destroy()))
+    if (this._loopSfx) this._loopSfx.destroy()
+    this._sfxPool = null
+    this._loopSfx = null
   },
 
   // ====== 摇一摇（真机）：加速度计触发，等价于点按钮 ======
@@ -1139,12 +1192,14 @@ Page({
   onHide() {
     this._running = false
     this.stopAcc()
+    this.stopLoop()   // 退后台静音（回来后摇卦阶段重新起）
   },
   // 强停本实例：杀渲染循环/传感器，释放 GL 上下文（onUnload 与热重载杀旧实例共用）
   stopLoopHard() {
     this._running = false
     this._destroyed = true
     this.stopAcc()
+    this.destroyAudio()
     if (this._renderer) {
       try {
         this._renderer.dispose()
