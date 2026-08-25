@@ -301,14 +301,15 @@ Page({
     this.updateBtn({ phase: 'pouring', tip: '' })
   },
 
-  // 松钱：从壳口沿口朝向抛出（附向前初速让钱落在壳前桌面），交给自由落体物理
+  // 松钱：从壳底前缘（世界系朝镜头偏移）抛出，初速朝观众——
+  // 钱落在壳前下方桌面（屏幕更靠下、不藏壳脚后面），交给自由落体物理
   releaseCoins() {
-    const dir = new THREE.Vector3(0, 0, -1).applyQuaternion(this._shellPivot.quaternion)
-    const mouth = this._shellPivot.position.clone().addScaledVector(dir, 1.0)
+    const p0 = this._shellPivot.position
+    const mouth = new THREE.Vector3(p0.x, p0.y - 0.85, p0.z + 0.35)
     this._coins.forEach((c) => {
       c.anim = null
       c.mesh.position.set(mouth.x + rand(-0.15, 0.15), mouth.y + rand(0, 0.12), mouth.z + rand(-0.15, 0.15))
-      c.vel.set(dir.x * 3 + rand(-0.5, 0.5), dir.y * 3 - 0.4, dir.z * 3 + 1.2 + rand(-0.4, 0.4))
+      c.vel.set(rand(-0.5, 0.5), -1.4, 3.4 + rand(-0.5, 0.5))
       c.angVel.set(rand(-10, 10), rand(-10, 10), rand(-10, 10))
       c.settled = false
     })
