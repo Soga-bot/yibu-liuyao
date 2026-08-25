@@ -145,3 +145,12 @@
 /* 问事签已拆独立页（package3d/pages/ask）：弹卡曾长期被首进的原生画布层压住
    （同层渲染偶发失效，浮层全被盖），与画布同页无解，故移出本页 */
 
+
+/* 卦名离屏 2D 画布：移出视口但保持可渲染（display:none 拿得到节点但画不上/贴图上传异常） */
+.ink-cv {
+  position: fixed;
+  left: -2000px;
+  top: 0;
+  width: 256px;
+  height: 64px;
+}

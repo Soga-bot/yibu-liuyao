@@ -154,6 +154,11 @@ Page({
     this._winW = info.windowWidth    // 触摸坐标 ↔ 屏幕投影换算用
     this._winH = info.windowHeight
 
+    // 卦名贴图的离屏 2D 画布节点（小程序无 wx.createCanvas，WXML 藏一张 type=2d）
+    wx.createSelectorQuery().select('#ink').fields({ node: true }).exec((r) => {
+      this._inkNode = r[0] && r[0].node
+    })
+
     // 复用一个 GLTFLoader
     this._gltfLoader = new THREE.GLTFLoader()
 
@@ -650,87 +655,90 @@ Page({
     return { min, size, backY }
   },
 
-  // 在壳背刻下第 i 爻（0=初）——CanvasTexture 裂痕画法：
-  // 几何方块只能堆「粗块」，裂痕的细腻（抗锯齿细线、笔宽变化、随机分叉）是 2D 画布的原生能力。
-  // 整行画到离屏画布（抖动折线主笔 + 细笔补描 + 随机小分叉），一张透明贴图平贴腹甲。
-  // 老阳=线中央画○（线穿环）、老阴=中缝画✕。局部轴向：腹甲面=backY，+Z→世界竖直。
+  // 在壳背刻下第 i 爻（0=初）——「毛笔笔道」纯几何画法（不碰任何画布 API：
+  // wx.createCanvas 是小游戏接口，小程序里不存在）。
+  // 笔道 = 中心线微抖 + 端部收锋的变宽平面 Shape（零厚度，天生贴面无体积），
+  // 两端半圆封口（圆头）。老阳=线中央刻○（线穿环）、老阴=中缝刻✕。
+  // 局部轴向：腹甲面=backY，+Z→世界竖直。
   carveLine(i) {
     const L = this._shellLocal
     const len = L.size.x * 0.46             // 爻线长度：过半壳宽
     const gap = L.size.z * 0.1              // 六爻行距
     const line = this.data.lines[i]
-    const W = 512
-    const H = 128                           // 画布取 2 的幂（WebGL1 NPOT 贴图不能建 mipmap）
-    const cv = wx.createCanvas()
-    cv.width = W
-    cv.height = H
-    const ctx = cv.getContext('2d')
-    ctx.strokeStyle = '#1D1208'
-    ctx.lineCap = 'round'
-    // 一道裂纹 = 抖动折线两遍描（主笔 + 细笔略偏）+ 1~3 条随机小分叉
-    const crackStroke = (x0, x1, cy, w) => {
-      const n = Math.max(6, Math.round((x1 - x0) / 24))
+    const z0 = L.min.z + L.size.z / 2 + (i - 2.5) * gap
+    const y0 = L.backY + gap * 0.02         // 微浮于探测面（贴死会与壳面 z-fighting 闪面）
+    // 一道笔道：n+1 个中心点（纵向微抖 + 横向漂移），半宽正弦收锋（两头细中间丰）
+    const brushGeo = (xc, l, w0) => {
+      const n = 16
       const pts = []
       for (let k = 0; k <= n; k++) {
-        pts.push([x0 + (x1 - x0) * k / n + rand(-4, 4), cy + rand(-3, 3)])
+        const t = k / n
+        pts.push([
+          xc - l / 2 + l * t + rand(-0.008, 0.008) * l,
+          rand(-0.025, 0.025) * gap,
+          w0 * (0.4 + 0.6 * Math.sin(Math.PI * (0.12 + 0.76 * t))) * rand(0.93, 1.07)
+        ])
       }
-      for (let pass = 0; pass < 2; pass++) {
-        ctx.lineWidth = pass ? w * 0.5 : w
-        ctx.beginPath()
-        pts.forEach((p, k) => (k ? ctx.lineTo(p[0] + pass * 2, p[1] - pass) : ctx.moveTo(p[0], p[1])))
-        ctx.stroke()
-      }
-      for (let b = 0, br = 1 + Math.floor(Math.random() * 3); b < br; b++) {
-        const p = pts[1 + Math.floor(Math.random() * (pts.length - 2))]
-        ctx.lineWidth = w * 0.45
-        ctx.beginPath()
-        ctx.moveTo(p[0], p[1])
-        ctx.lineTo(p[0] + rand(5, 14), p[1] + (Math.random() < 0.5 ? -1 : 1) * rand(7, 16))
-        ctx.stroke()
-      }
+      const top = pts.map((p) => [p[0], p[1] + p[2]])
+      const bot = pts.slice().reverse().map((p) => [p[0], p[1] - p[2]])
+      const s = new THREE.Shape()
+      s.moveTo(top[0][0], top[0][1])
+      top.slice(1).forEach((p) => s.lineTo(p[0], p[1]))
+      s.absarc(pts[n][0], pts[n][1], pts[n][2], Math.PI / 2, -Math.PI / 2, true)   // 端圆头
+      bot.slice(1).forEach((p) => s.lineTo(p[0], p[1]))
+      s.absarc(pts[0][0], pts[0][1], pts[0][2], -Math.PI / 2, Math.PI / 2, true)
+      s.closePath()
+      const g = new THREE.ShapeGeometry(s)
+      g.rotateX(Math.PI / 2)   // 烘焙平躺：法线 -Y 朝壳外，笔道落进 XZ 面（mesh 旋转留给面内摆角）
+      return g
     }
-    const cy = H / 2
-    const w = 12
+    const bars = []
+    const add = (geo, y, opts) => {
+      const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0x1D1208 }))
+      m.position.set(0, y, z0)
+      if (opts && opts.ry) m.rotation.y = opts.ry
+      if (opts && opts.growAll) m.userData.growAll = true
+      m.scale.x = 0.02                          // 从中点向两侧「刻出」（carve 段驱动）
+      this._marksGroup.add(m)
+      bars.push(m)
+    }
     if (line.yin) {
-      crackStroke(W * 0.08, W * 0.52, cy, w)
-      crackStroke(W * 0.48, W * 0.92, cy, w)
-      if (line.dong) {                                      // 老阴 ✕：中缝
-        ctx.lineWidth = w * 0.7
-        ;[[1, 1], [1, -1]].forEach(([dx, dy]) => {
-          ctx.beginPath()
-          ctx.moveTo(W / 2 - 20 * dx, cy - 20 * dy)
-          ctx.lineTo(W / 2 + 20 * dx, cy + 20 * dy)
-          ctx.stroke()
-        })
+      add(brushGeo(-len * 0.30, len * 0.44, gap * 0.15), y0)
+      add(brushGeo(len * 0.30, len * 0.44, gap * 0.15), y0)
+      if (line.dong) {                          // 老阴 ✕：中缝两臂（错层 0.012 防相交闪面）
+        add(brushGeo(0, gap * 0.52, gap * 0.11), y0 + gap * 0.012, { ry: Math.PI / 4 })
+        add(brushGeo(0, gap * 0.52, gap * 0.11), y0 + gap * 0.024, { ry: -Math.PI / 4 })
       }
     } else {
-      crackStroke(W * 0.04, W * 0.96, cy, w)
-      if (line.dong) {                                      // 老阳 ○：线中央穿环
-        ctx.lineWidth = w * 0.7
-        ctx.beginPath()
-        ctx.arc(W / 2, cy, 26, 0, Math.PI * 2)
-        ctx.stroke()
+      add(brushGeo(0, len, gap * 0.15), y0)
+      if (line.dong) {                          // 老阳 ○：环平贴面、线从环心穿过（错层防闪面）
+        const r1 = gap * 0.30
+        const s = new THREE.Shape()
+        s.absarc(0, 0, r1, 0, Math.PI * 2, false)
+        const hole = new THREE.Path()
+        hole.absarc(0, 0, r1 - gap * 0.075, 0, Math.PI * 2, true)
+        s.holes.push(hole)
+        const g = new THREE.ShapeGeometry(s)
+        g.rotateX(Math.PI / 2)
+        add(g, y0 + gap * 0.012, { growAll: true })
       }
     }
-    const m = new THREE.Mesh(
-      new THREE.PlaneGeometry(len, gap * 1.1),
-      new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cv), transparent: true }))
-    m.rotation.x = Math.PI / 2   // 平躺贴背（与卦名贴片同法）
-    m.position.set(0, L.backY + gap * 0.02, L.min.z + L.size.z / 2 + (i - 2.5) * gap)
-    m.scale.x = 0.02                            // 从中点向两侧「刻出」（carve 段驱动）
-    this._marksGroup.add(m)
-    return [m]
+    return bars
   },
 
-  // 卦成：上爻上方刻卦名（上卦象+下卦象+卦名，如「地雷复」）。CanvasTexture 画字贴面平躺
+  // 卦成：上爻上方刻卦名（上卦象+下卦象+卦名，如「地雷复」）。
+  // 画字必须走 CanvasTexture：小程序没有 wx.createCanvas（小游戏接口），
+  // 用 WXML 里藏的 type=2d 画布节点（init 时取好 _inkNode）
   carveGuaName() {
     const g = GUA_DATA[this.data.lines.map((l) => l.yin ? '0' : '1').join('')]
     if (!g) return []
     const label = (g.waiXiang || '') + (g.neiXiang || '') + g.name
-    const cv = wx.createCanvas()
+    const cv = this._inkNode
+    if (!cv) return []                   // 画布节点未就绪：跳过卦名，不崩刻录流程
     cv.width = 512                       // 2 的幂（WebGL1 NPOT 贴图不能建 mipmap）
     cv.height = 128
     const ctx = cv.getContext('2d')
+    ctx.clearRect(0, 0, 512, 128)        // 画布节点跨局复用，先清残留
     ctx.fillStyle = '#1D1208'
     ctx.font = 'bold 96px sans-serif'
     ctx.textAlign = 'center'
