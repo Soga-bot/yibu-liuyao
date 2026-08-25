@@ -258,14 +258,14 @@ Page({
   },
 
   // ====== 装钱→摇动→倒出流程 ======
-  // 装钱态：壳后仰成碗，等用户把三枚铜钱拖入壳口
+  // 装钱态：壳保持竖直、可随意翻动；拖钱凑向壳口的过程中才逐渐后仰（见 moveGroupOnTable）
   beginLoad() {
     this._phase = 'loading'
     this._loadCount = 0
-    this._tiltTarget = LOAD_ANGLE
+    this._tiltTarget = 0
     this._tiltCb = null
     this._coins.forEach((c) => { c.loaded = false; c.anim = null })
-    this.updateBtn({ phase: 'loading', loadCount: 0, tip: '拖动铜钱放入壳中（0/3）' })
+    this.updateBtn({ phase: 'loading', loadCount: 0, tip: '拖动三枚铜钱凑向壳口' })
   },
 
   // 三钱入壳后：壳立正 → 进入摇动阶段
@@ -357,8 +357,8 @@ Page({
     }
 
     if (this._shellPivot) {
-      // 手势回位弹簧仅观赏态(idle)生效；仪式各阶段 pitch 由流程接管
-      if (this._phase === 'idle' && !this._dragging && this._homing) {
+      // 手势回位弹簧在 idle 与装钱期生效（装钱期壳可随意翻、松手回正）；其余仪式阶段流程接管
+      if ((this._phase === 'idle' || this._phase === 'loading') && !this._dragging && this._homing) {
         // 半隐式欧拉积分的欠阻尼弹簧：继承松手时的角速度，先顺势转、再平滑拉回，无跳变
         this._spinVel += (-SPRING_K * (this._shellYaw - this._homeYaw) - SPRING_C * this._spinVel) * dt
         this._shellYaw += this._spinVel * dt
@@ -604,10 +604,11 @@ Page({
         this._dragLY = t.clientY
         this._dragDist = this._camera.position.distanceTo(coin.mesh.position)
         rest.forEach((c) => { c.mesh.position.y = FLOOR_Y + GROUP_LIFT })
+        return
       }
-      return
+      // 没抓到钱：落回手势拨壳（装钱期壳仍可随意翻动，保持竖直观赏）
     }
-    if (this._phase !== 'idle') return   // 其余仪式阶段壳由流程接管
+    if (this._phase !== 'idle' && this._phase !== 'loading') return   // 其余仪式阶段壳由流程接管
     this._touchId = t.identifier
     this._touchLastX = t.clientX
     this._touchLastY = t.clientY
@@ -675,7 +676,13 @@ Page({
     return best
   },
 
-  // 整体拖动三钱：像素增量 → 世界增量平移簇心；间距随「距洞口距离」线性收紧
+  // 拖钱过程中壳的后仰角：簇心距壳心越近越仰，GROUP_ENTER 处到满角（拖远回正，可逆）
+  tiltForDist(d) {
+    const p = 1 - clamp((d - GROUP_ENTER) / (GROUP_FAR - GROUP_ENTER), 0, 1)
+    return LOAD_ANGLE * p
+  },
+
+  // 整体拖动三钱：像素增量 → 世界增量平移簇心；间距、壳后仰都随「距洞口距离」联动
   moveGroupOnTable(cx, cy) {
     const k = 2 * Math.tan(this._camera.fov * Math.PI / 360) * this._dragDist / this._winH
     const g = this._dragGroup
@@ -687,6 +694,7 @@ Page({
     const c0 = this._shellPivot.position
     const d = Math.sqrt((g.cx - c0.x) * (g.cx - c0.x) + (g.cz - c0.z) * (g.cz - c0.z))
     const s = GROUP_TIGHT + (1 - GROUP_TIGHT) * clamp((d - GROUP_ENTER) / (GROUP_FAR - GROUP_ENTER), 0, 1)
+    this._tiltTarget = this.tiltForDist(d)   // 壳随拖钱渐后仰（update 里指数趋近，自带缓冲）
     g.offs.forEach((o) => {
       o.c.mesh.position.x = clamp(g.cx + o.ox * s, -1.3, 1.3)
       o.c.mesh.position.z = clamp(g.cz + o.oz * s, -0.3, 1.5)
@@ -694,13 +702,14 @@ Page({
     if (d < GROUP_ENTER) this.enterShell()   // 拖到洞口：三钱依次跳入
   },
 
-  // 松手：簇心已在洞口 → 直接入壳；否则三钱落回桌面（保持当前聚拢间距，可再拖）
+  // 松手：簇心已在洞口 → 直接入壳；否则三钱落回桌面（保持当前聚拢间距，壳按距离回正）
   releaseGroup() {
     const g = this._dragGroup
     this._dragGroup = null
     if (!g) return
     const c0 = this._shellPivot.position
     const d = Math.sqrt((g.cx - c0.x) * (g.cx - c0.x) + (g.cz - c0.z) * (g.cz - c0.z))
+    this._tiltTarget = this.tiltForDist(d)
     if (d < GROUP_ENTER) this.enterShell()
     else g.offs.forEach((o) => { o.c.mesh.position.y = FLOOR_Y })
   },
@@ -709,6 +718,7 @@ Page({
   // （立正时机在 update 里等动画做完，见「三钱全部跳完」分支）
   enterShell() {
     this._dragGroup = null
+    this._tiltTarget = LOAD_ANGLE   // 入壳瞬间后仰锁定满角，张口接钱
     const c0 = this._shellPivot.position
     let i = 0
     this._coins.forEach((c) => {
