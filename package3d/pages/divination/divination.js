@@ -59,6 +59,14 @@ const ACC_INTERVAL = 'game'     // ~20ms，最流畅
 const SHAKE_DELTA = 12          // 相邻两次读数 |Δx|+|Δy|+|Δz| 超过此值算一次有效摇晃
 const SHAKE_COOLDOWN = 1200     // 两次触发最小间隔(ms)，防止一甩连触发
 
+// ====== 摇动→倒出流程 ======
+const SHAKE_HITS = 4           // 有效晃动达此次数 = 摇够
+const SHAKE_QUIET = 800        // 摇够后静默该时长(ms)判定摇动停止，自动倒出
+const POUR_ANGLE = -1.9        // 倒钱前倾角：壳口转向桌面
+const POUR_DUR = 0.55          // 前倾/回正时长(s)
+const POUR_RELEASE = 0.55      // 前倾进度到该比例时松钱
+const HOP_DUR = 0.35           // 铜钱跃入壳内时长(s)
+
 const POS_SHORT = ['初', '二', '三', '四', '五', '上']
 
 let THREE = null
@@ -153,6 +161,10 @@ Page({
       this._homing = false      // 松手后弹簧回位中
       this._homeYaw = 0         // 回位目标 = 最近整圈（≡正面朝镜头）
       this._dragging = false
+      this._phase = 'idle'     // idle 观赏/待起卦｜shaking 摇动中｜pouring 前倾倒钱｜settling 落定中｜returning 回正
+      this._pourT = 0
+      this._released = false
+      this._hits = 0
       this._shellBaseRotZ = shell.rotation.z   // 摇晃晃动以此为基准
       this._shakeT = 0
       this._shakeAmp = 0
@@ -200,34 +212,96 @@ Page({
       c.mesh.rotation.set(0, i * 0.6, 0) // 若铜钱默认是立着的，按需改 0,0,0
       c.vel.set(0, 0, 0)
       c.angVel.set(0, 0, 0)
+      c.anim = null
       c.settled = true
     })
   },
 
-  // 触发抛落动画（铜钱落在立壳前方的桌面：z 取正值区间）
-  startDrop() {
+  // ====== 摇动→倒出流程 ======
+  // 进入摇动阶段：三钱依次跃入壳内（藏进拱面后），提示摇手机
+  enterShake() {
+    const c0 = this._shellPivot.position
     this._coins.forEach((c, i) => {
-      c.mesh.position.set(rand(-0.5, 0.5), 3.2 + i * 0.3, rand(0.15, 0.9))
-      c.vel.set(rand(-0.6, 0.6), rand(-0.5, 0.8), rand(-0.3, 0.3))
+      c.anim = {                                        // 跃入动画：当前位置 → 壳内
+        from: c.mesh.position.clone(),
+        to: new THREE.Vector3(c0.x + rand(-0.25, 0.25), c0.y - 0.05, c0.z + rand(-0.2, 0.2)),
+        t: -i * 0.08                                    // 依次起跳，间隔 80ms
+      }
+      c.settled = true
+    })
+    this._phase = 'shaking'
+    this._hits = 0
+    this._lastHitAt = 0
+    this._pourT = 0
+    this._released = false
+    this._shaking = true
+    this._shakeAmp = 1
+    this.setData({ shaking: true, tip: '摇动手机，或连点下方按钮' })
+  },
+
+  // 一次有效晃动：壳摆一下，壳内铜钱翻个身
+  addShakeHit() {
+    this._hits += 1
+    this._lastHitAt = Date.now()
+    this._shakeAmp = 1
+    this._coins.forEach((c) => {
+      c.mesh.rotation.x += rand(-0.6, 0.6)
+      c.mesh.rotation.y += rand(-0.6, 0.6)
+    })
+  },
+
+  // 摇够且静止 → 前倾倒钱
+  beginPour() {
+    this._phase = 'pouring'
+    this._pourT = 0
+    this._released = false
+    this.setData({ tip: '' })
+  },
+
+  // 松钱：从壳口沿口朝向抛出（附向前初速让钱落在壳前桌面），交给自由落体物理
+  releaseCoins() {
+    const dir = new THREE.Vector3(0, 0, -1).applyQuaternion(this._shellPivot.quaternion)
+    const mouth = this._shellPivot.position.clone().addScaledVector(dir, 1.0)
+    this._coins.forEach((c) => {
+      c.anim = null
+      c.mesh.position.set(mouth.x + rand(-0.15, 0.15), mouth.y + rand(0, 0.12), mouth.z + rand(-0.15, 0.15))
+      c.vel.set(dir.x * 3 + rand(-0.5, 0.5), dir.y * 3 - 0.4, dir.z * 3 + 1.2 + rand(-0.4, 0.4))
       c.angVel.set(rand(-10, 10), rand(-10, 10), rand(-10, 10))
       c.settled = false
     })
-    this._shaking = true
-    this._shakeAmp = 1   // 龟壳跟着晃一下
-    this.setData({ shaking: true, tip: '' })
+    this._phase = 'settling'
   },
 
-  // 每帧物理更新
+  // 每帧更新：壳晃动 / 跃入动画 / 拨动回位 / 倒钱流程 / 铜钱物理
   update(dt) {
-    // 龟壳晃动（起卦时衰减摆动，模拟手摇）
+    // 龟壳晃动（每次有效晃动衰减摆动，模拟手摇）
     if (this._shakeAmp > 0.01 && this._shell) {
       this._shakeT += dt
       this._shell.rotation.z = this._shellBaseRotZ + Math.sin(this._shakeT * 28) * 0.06 * this._shakeAmp
       this._shakeAmp *= 0.96
     }
-    // 手势拨动：拖动中跟手；松手后弹簧回位（yaw 回最近整圈=正面，pitch 归零竖直），≈2.2s 回正
+
+    // 铜钱跃入壳内动画（t<0 = 排队起跳）
+    if (this._coins) {
+      for (const c of this._coins) {
+        if (!c.anim) continue
+        c.anim.t += dt / HOP_DUR
+        if (c.anim.t <= 0) continue
+        const k = Math.min(c.anim.t, 1)
+        c.mesh.position.lerpVectors(c.anim.from, c.anim.to, k)
+        if (k >= 1) c.anim = null
+      }
+    }
+
+    // 摇够了且静默 SHAKE_QUIET ms → 自动前倾倒钱（判定「摇动停止」）
+    if (this._phase === 'shaking' && this._hits >= SHAKE_HITS &&
+        this._lastHitAt && Date.now() - this._lastHitAt > SHAKE_QUIET) {
+      this.beginPour()
+    }
+
     if (this._shellPivot) {
-      if (!this._dragging && this._homing) {
+      // 手势回位弹簧仅观赏态(idle)生效；仪式各阶段 pitch 由流程接管
+      if (this._phase === 'idle' && !this._dragging && this._homing) {
         // 半隐式欧拉积分的欠阻尼弹簧：继承松手时的角速度，先顺势转、再平滑拉回，无跳变
         this._spinVel += (-SPRING_K * (this._shellYaw - this._homeYaw) - SPRING_C * this._spinVel) * dt
         this._shellYaw += this._spinVel * dt
@@ -242,11 +316,24 @@ Page({
           this._homing = false
         }
       }
+      // 倒钱前倾/回正：进度 0→1 前倾、1→0 回正，smoothstep 叠加在姿态 pitch 上
+      if (this._phase === 'pouring') {
+        this._pourT = Math.min(this._pourT + dt / POUR_DUR, 1)
+        if (!this._released && this._pourT >= POUR_RELEASE) {
+          this._released = true
+          this.releaseCoins()
+        }
+      } else if (this._phase === 'returning') {
+        this._pourT = Math.max(this._pourT - dt / POUR_DUR, 0)
+        if (this._pourT <= 0) this._phase = 'idle'
+      }
+      const e = this._pourT * this._pourT * (3 - 2 * this._pourT)
       this._shellPivot.rotation.y = this._shellYaw
-      this._shellPivot.rotation.x = this._shellPitch
+      this._shellPivot.rotation.x = this._shellPitch + e * POUR_ANGLE
     }
 
-    if (!this._shaking) return
+    // 铜钱自由落体物理：仅 settling 阶段（倒出后到落定）
+    if (this._phase !== 'settling') return
     let allSettled = true
     for (const c of this._coins) {
       if (c.settled) continue
@@ -277,7 +364,8 @@ Page({
     if (allSettled) {
       this._shaking = false
       this.setData({ shaking: false })
-      this.onCoinsSettled()
+      this._phase = 'returning'   // 壳回正，回观赏态
+      this.onCoinsSettled()       // 读面成爻
     }
   },
 
@@ -298,7 +386,8 @@ Page({
     wx.vibrateShort({ type: 'light', fail: () => {} })
 
     if (lines.length >= 6) {
-      // 卦成：重震一下，稍候跳排盘
+      // 卦成：重震一下，稍候跳排盘；下次起卦视为新卦，重新问所求
+      this._asked = false
       wx.vibrateShort({ type: 'heavy', fail: () => {} })
       this.setData({ lines, done: true, tip: backs + '背 → ' + y.name + '，卦成！' })
       const yaoKey = lines.map(l => l.yin ? '0' : '1').join('')
@@ -321,9 +410,13 @@ Page({
     this._shakeAmp = 0
     this._asked = false          // 重摇=新卦，下次起卦重新问所求
     this._qiu = ''
+    this._phase = 'idle'
+    this._pourT = 0
+    this._shaking = false
+    if (this._coins) this._coins.forEach((c) => { c.anim = null })
     if (this._shell) this._shell.rotation.z = this._shellBaseRotZ
     this.placeCoinsIdle()
-    this.setData({ lines: [], done: false, qiu: '', tip: '已重置，摇一摇或点按钮起卦' })
+    this.setData({ lines: [], done: false, qiu: '', shaking: false, tip: '已重置，摇一摇或点按钮起卦' })
   },
 
   // 渲染循环
@@ -356,7 +449,9 @@ Page({
       const now = Date.now()
       if (now - this._lastShakeAt < SHAKE_COOLDOWN) return
       this._lastShakeAt = now
-      this.triggerShake()
+      // 待起卦：晃手机=起卦；摇动阶段：计一次有效晃动
+      if (this._phase === 'shaking') this.addShakeHit()
+      else if (this._phase === 'idle') this.triggerShake()
     }
     wx.onAccelerometerChange(this._accHandler)
   },
@@ -376,7 +471,7 @@ Page({
       return
     }
     if (this.data.done) this.onReset()   // 卦成后再摇 = 重新起卦
-    this.startDrop()
+    this.enterShake()
   },
 
   // ====== 问事签：起卦前默祷所求（可不填），为后续解读提供上下文 =====
@@ -416,7 +511,7 @@ Page({
 
   // ====== 手势拨动龟壳：横拖=绕竖直轴 360°，纵拖=俯仰(±85°限位)；松手弹簧回位 =====
   onShellTouchStart(e) {
-    if (!this._shellPivot) return
+    if (!this._shellPivot || this._phase !== 'idle') return   // 仪式各阶段壳由流程接管，禁拖动
     const t = e.changedTouches[0]
     this._touchId = t.identifier
     this._touchLastX = t.clientX
@@ -454,7 +549,11 @@ Page({
     }
   },
 
-  onShakeTap() { this.triggerShake() },
+  onShakeTap() {
+    // 摇动阶段点按钮 = 补一次有效晃动（开发者工具模拟不了加速度计的兜底）
+    if (this._phase === 'shaking') { this.addShakeHit(); return }
+    this.triggerShake()
+  },
 
   onBack() {
     wx.navigateBack({ fail: () => wx.switchTab({ url: '/pages/index/index' }) })
