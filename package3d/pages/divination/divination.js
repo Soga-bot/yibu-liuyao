@@ -65,10 +65,12 @@ const ACC_INTERVAL = 'game'     // ~20ms，最流畅
 const SHAKE_DELTA = 3.5         // 摇动阶段计数门槛：相邻读数 |Δx|+|Δy|+|Δz| 超过即算
                                 // （game 档 ~20ms 采样，轻甩即有 2~5；进阶段后越灵越好）
 const SHAKE_DELTA_START = 6     // 待机起摇门槛：稍高，防走路/颠簸误触发起卦
-const SHAKE_COOLDOWN = 500      // 两次触发最小间隔(ms)，防止一甩连触发（自然摇频 3~4Hz 可达）
+const SHAKE_COOLDOWN = 350      // 两次触发最小间隔(ms)：自然摇频 3~4Hz（250~330ms/记），
+                                // 卡太高会吞掉连摇的一半、拉开命中间距，间接误触停止判定
 
 // ====== 装钱→摇动→倒出流程 ======
-const SHAKE_QUIET = 800        // 摇动停止（末次命中后静默该时长）即倒出——用户不摇了就该出结果
+const SHAKE_QUIET = 1300        // 摇动停止（末次命中后静默该时长）即倒出——要盖过连摇中自然
+                                // 的换气间隙（常见 0.8~1s 顿），否则摇着摇着被判定为停了
 const LOAD_ANGLE = Math.PI / 6 // 装钱态：壳后仰 30°（微张口迎钱，原 86° 太翻）
 const POUR_ANGLE = -1.65       // 倒钱态：壳前倾（口转向桌面；原 -1.9 过水平面 19°，近沿上翘太夸张）
 const TILT_SPEED = 6           // 壳姿态角指数趋近系数（越大转得越快）
@@ -777,11 +779,11 @@ Page({
     } else {
       add(brushGeo(0, len, gap * 0.15), y0)
       if (line.dong) {                          // 老阳 ○：环平贴面、线从环心穿过（错层防闪面）
-        const r1 = gap * 0.20
+        const r1 = gap * 0.26
         const s = new THREE.Shape()
         s.absarc(0, 0, r1, 0, Math.PI * 2, false)
         const hole = new THREE.Path()
-        hole.absarc(0, 0, r1 - gap * 0.055, 0, Math.PI * 2, true)
+        hole.absarc(0, 0, r1 - gap * 0.06, 0, Math.PI * 2, true)
         s.holes.push(hole)
         const g = new THREE.ShapeGeometry(s)
         g.rotateX(bake)
