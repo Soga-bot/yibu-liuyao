@@ -793,13 +793,15 @@ Page({
     return bars
   },
 
-  // 卦成：上爻上方刻卦名（上卦象+下卦象+卦名，如「地雷复」）。
+  // 卦成：上爻上方刻卦名（上卦象+下卦象+卦名，如「地雷复」；八纯卦「乾为天」式）。
   // 画字必须走 CanvasTexture：小程序没有 wx.createCanvas（小游戏接口），
   // 用 init 里创建的真离屏画布（wx.createOffscreenCanvas，不进节点树）
   carveGuaName() {
     const g = GUA_DATA[this.data.lines.map((l) => l.yin ? '0' : '1').join('')]
     if (!g) return []
-    const label = (g.waiXiang || '') + (g.neiXiang || '') + g.name
+    // 与典籍库列表同规则：八纯卦作「乾为天」式，余卦「上象+下象+名」（如地雷复）
+    const pure = g.waiXiang === g.neiXiang
+    const label = pure ? g.name + '为' + g.waiXiang : (g.waiXiang || '') + (g.neiXiang || '') + g.name
     const cv = this._inkNode
     if (!cv) return []                   // 画布节点未就绪：跳过卦名，不崩刻录流程
     cv.width = 512                       // 2 的幂（WebGL1 NPOT 贴图不能建 mipmap）
