@@ -38,7 +38,7 @@
     hover-class="btn-hover"
     hover-stay-time="80"
     bindtap="onShakeTap"
-  >{{shaking ? '摇动中…' : (done ? '重新起卦' : (lines.length ? '摇第' + (lines.length + 1) + '爻' : '摇卦起卦'))}}</view>
+  >{{phase === 'loading' ? '铜钱 ' + loadCount + ' / 3' : (shaking ? '摇动中…' : (done ? '重新起卦' : (lines.length ? '摇第' + (lines.length + 1) + '爻' : '摇卦起卦'))))}}</view>
 
   <!-- 问事签：起卦前默祷所求（可不填），为后续解读提供上下文；签条风浮入 -->
   <view wx:if="{{asking}}" class="ask-mask">

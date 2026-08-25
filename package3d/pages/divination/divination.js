@@ -59,13 +59,15 @@ const ACC_INTERVAL = 'game'     // ~20ms，最流畅
 const SHAKE_DELTA = 12          // 相邻两次读数 |Δx|+|Δy|+|Δz| 超过此值算一次有效摇晃
 const SHAKE_COOLDOWN = 1200     // 两次触发最小间隔(ms)，防止一甩连触发
 
-// ====== 摇动→倒出流程 ======
+// ====== 装钱→摇动→倒出流程 ======
 const SHAKE_HITS = 4           // 有效晃动达此次数 = 摇够
 const SHAKE_QUIET = 800        // 摇够后静默该时长(ms)判定摇动停止，自动倒出
-const POUR_ANGLE = -1.9        // 倒钱前倾角：壳口转向桌面
-const POUR_DUR = 0.55          // 前倾/回正时长(s)
-const POUR_RELEASE = 0.55      // 前倾进度到该比例时松钱
-const HOP_DUR = 0.35           // 铜钱跃入壳内时长(s)
+const LOAD_ANGLE = 1.5         // 装钱态：壳后仰成碗（口朝上）
+const POUR_ANGLE = -1.9        // 倒钱态：壳前倾（口转向桌面）
+const TILT_SPEED = 6           // 壳姿态角指数趋近系数（越大转得越快）
+const POUR_RELEASE = 0.55      // 前倾角走过该比例时松钱
+const LOAD_RADIUS = 1.05       // 拖钱入壳判定：落点距壳心该半径内算入
+const HOP_DUR = 0.35           // 铜钱落入壳内动画时长(s)
 
 const POS_SHORT = ['初', '二', '三', '四', '五', '上']
 
@@ -80,7 +82,9 @@ Page({
     done: false,     // 6 爻已满，已跳转/待重摇
     tip: '',         // 最近一爻结果 / 引导文案
     asking: false,   // 问事签弹卡中
-    qiu: ''          // 所问之事（输入框值）
+    qiu: '',         // 所问之事（输入框值）
+    phase: 'idle',   // 流程阶段（按钮文案用）
+    loadCount: 0     // 已入壳铜钱数
   },
 
   onLoad() {
@@ -110,6 +114,9 @@ Page({
     renderer.setClearColor(0xEDE4CF, 1) // 宣纸浅底（与页面 css 背景一致），深底衬不出龟壳铜钱
     this._canvas = canvas
     this._renderer = renderer
+    this._winW = info.windowWidth    // 触摸坐标 → 射线 NDC 换算用
+    this._winH = info.windowHeight
+    this._tablePlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -(FLOOR_Y + 0.3)) // 拖钱平面（提起高度）
 
     // 复用一个 GLTFLoader
     this._gltfLoader = new THREE.GLTFLoader()
@@ -161,8 +168,12 @@ Page({
       this._homing = false      // 松手后弹簧回位中
       this._homeYaw = 0         // 回位目标 = 最近整圈（≡正面朝镜头）
       this._dragging = false
-      this._phase = 'idle'     // idle 观赏/待起卦｜shaking 摇动中｜pouring 前倾倒钱｜settling 落定中｜returning 回正
-      this._pourT = 0
+      this._phase = 'idle'     // idle 观赏｜loading 装钱｜righting 立正｜shaking 摇动｜pouring 前倾倒钱｜settling 落定｜returning 回正
+      this._tilt = 0           // 仪式姿态角（0=立正，>0 后仰成碗，<0 前倾倒钱）
+      this._tiltTarget = 0
+      this._tiltCb = null      // 姿态到位后的回调（一次性）
+      this._loadCount = 0
+      this._dragCoin = null
       this._released = false
       this._hits = 0
       this._shellBaseRotZ = shell.rotation.z   // 摇晃晃动以此为基准
@@ -217,26 +228,26 @@ Page({
     })
   },
 
-  // ====== 摇动→倒出流程 ======
-  // 进入摇动阶段：三钱依次跃入壳内（藏进拱面后），提示摇手机
-  enterShake() {
-    const c0 = this._shellPivot.position
-    this._coins.forEach((c, i) => {
-      c.anim = {                                        // 跃入动画：当前位置 → 壳内
-        from: c.mesh.position.clone(),
-        to: new THREE.Vector3(c0.x + rand(-0.25, 0.25), c0.y - 0.05, c0.z + rand(-0.2, 0.2)),
-        t: -i * 0.08                                    // 依次起跳，间隔 80ms
-      }
-      c.settled = true
-    })
+  // ====== 装钱→摇动→倒出流程 ======
+  // 装钱态：壳后仰成碗，等用户把三枚铜钱拖入壳口
+  beginLoad() {
+    this._phase = 'loading'
+    this._loadCount = 0
+    this._tiltTarget = LOAD_ANGLE
+    this._tiltCb = null
+    this._coins.forEach((c) => { c.loaded = false; c.anim = null })
+    this.setData({ phase: 'loading', loadCount: 0, tip: '拖动铜钱放入壳中（0/3）' })
+  },
+
+  // 三钱入壳后：壳立正 → 进入摇动阶段
+  startShakePhase() {
     this._phase = 'shaking'
     this._hits = 0
     this._lastHitAt = 0
-    this._pourT = 0
     this._released = false
     this._shaking = true
     this._shakeAmp = 1
-    this.setData({ shaking: true, tip: '摇动手机，或连点下方按钮' })
+    this.setData({ phase: 'shaking', shaking: true, tip: '摇动手机，或连点下方按钮' })
   },
 
   // 一次有效晃动：壳摆一下，壳内铜钱翻个身
@@ -253,9 +264,10 @@ Page({
   // 摇够且静止 → 前倾倒钱
   beginPour() {
     this._phase = 'pouring'
-    this._pourT = 0
+    this._tiltTarget = POUR_ANGLE
+    this._tiltCb = null
     this._released = false
-    this.setData({ tip: '' })
+    this.setData({ phase: 'pouring', tip: '' })
   },
 
   // 松钱：从壳口沿口朝向抛出（附向前初速让钱落在壳前桌面），交给自由落体物理
@@ -316,20 +328,21 @@ Page({
           this._homing = false
         }
       }
-      // 倒钱前倾/回正：进度 0→1 前倾、1→0 回正，smoothstep 叠加在姿态 pitch 上
-      if (this._phase === 'pouring') {
-        this._pourT = Math.min(this._pourT + dt / POUR_DUR, 1)
-        if (!this._released && this._pourT >= POUR_RELEASE) {
+      // 仪式姿态：tilt 向目标角指数趋近；前倾过门槛即松钱，到位后回调一次
+      const diff = this._tiltTarget - this._tilt
+      if (Math.abs(diff) > 0.01) {
+        this._tilt += diff * Math.min(1, dt * TILT_SPEED)
+        if (this._phase === 'pouring' && !this._released && this._tilt <= POUR_ANGLE * POUR_RELEASE) {
           this._released = true
           this.releaseCoins()
         }
-      } else if (this._phase === 'returning') {
-        this._pourT = Math.max(this._pourT - dt / POUR_DUR, 0)
-        if (this._pourT <= 0) this._phase = 'idle'
+      } else if (this._tiltCb) {
+        const cb = this._tiltCb
+        this._tiltCb = null
+        cb()
       }
-      const e = this._pourT * this._pourT * (3 - 2 * this._pourT)
       this._shellPivot.rotation.y = this._shellYaw
-      this._shellPivot.rotation.x = this._shellPitch + e * POUR_ANGLE
+      this._shellPivot.rotation.x = this._shellPitch + this._tilt
     }
 
     // 铜钱自由落体物理：仅 settling 阶段（倒出后到落定）
@@ -363,8 +376,10 @@ Page({
     }
     if (allSettled) {
       this._shaking = false
-      this.setData({ shaking: false })
-      this._phase = 'returning'   // 壳回正，回观赏态
+      this._phase = 'returning'   // 壳回正
+      this._tiltTarget = 0
+      this._tiltCb = () => { this._phase = 'idle'; this.setData({ phase: 'idle' }) }
+      this.setData({ shaking: false, phase: 'returning' })
       this.onCoinsSettled()       // 读面成爻
     }
   },
@@ -411,12 +426,15 @@ Page({
     this._asked = false          // 重摇=新卦，下次起卦重新问所求
     this._qiu = ''
     this._phase = 'idle'
-    this._pourT = 0
+    this._tilt = 0
+    this._tiltTarget = 0
+    this._tiltCb = null
+    this._dragCoin = null
     this._shaking = false
-    if (this._coins) this._coins.forEach((c) => { c.anim = null })
+    if (this._coins) this._coins.forEach((c) => { c.anim = null; c.loaded = false })
     if (this._shell) this._shell.rotation.z = this._shellBaseRotZ
     this.placeCoinsIdle()
-    this.setData({ lines: [], done: false, qiu: '', shaking: false, tip: '已重置，摇一摇或点按钮起卦' })
+    this.setData({ lines: [], done: false, qiu: '', phase: 'idle', loadCount: 0, shaking: false, tip: '已重置，摇一摇或点按钮起卦' })
   },
 
   // 渲染循环
@@ -465,13 +483,14 @@ Page({
   // 摇卦统一入口：按钮 / 摇一摇都走这里
   triggerShake() {
     if (this.data.loading || this.data.shaking || this.data.asking) return
+    if (this._phase !== 'idle') return   // 仪式进行中不重复触发
     // 新起一卦（首次或卦成重开）先弹「问事签」记录所求；同卦续爻不再问
     if ((this.data.done || !this.data.lines.length) && !this._asked) {
       this.setData({ asking: true })
       return
     }
     if (this.data.done) this.onReset()   // 卦成后再摇 = 重新起卦
-    this.enterShake()
+    this.beginLoad()
   },
 
   // ====== 问事签：起卦前默祷所求（可不填），为后续解读提供上下文 =====
@@ -481,20 +500,22 @@ Page({
     this._asked = true
     this.setData({ asking: false })
     if (this.data.done) this.onReset()
-    this.startDrop()
+    this.beginLoad()
   },
   onQiuSkip() {
     this._qiu = ''
     this._asked = true
     this.setData({ asking: false, qiu: '' })
     if (this.data.done) this.onReset()
-    this.startDrop()
+    this.beginLoad()
   },
 
   // 横竖屏切换：画布与相机跟着新窗口尺寸走
   onResize() {
     if (!this._renderer || !this._camera) return
     const info = wx.getWindowInfo()
+    this._winW = info.windowWidth
+    this._winH = info.windowHeight
     this._renderer.setSize(info.windowWidth, info.windowHeight, false)
     this._camera.aspect = info.windowWidth / info.windowHeight
     this._camera.updateProjectionMatrix()
@@ -511,8 +532,19 @@ Page({
 
   // ====== 手势拨动龟壳：横拖=绕竖直轴 360°，纵拖=俯仰(±85°限位)；松手弹簧回位 =====
   onShellTouchStart(e) {
-    if (!this._shellPivot || this._phase !== 'idle') return   // 仪式各阶段壳由流程接管，禁拖动
+    if (!this._shellPivot) return
     const t = e.changedTouches[0]
+    // 装钱态：拾起一枚未入壳的铜钱（提起 0.3），拖动只移钱不转壳
+    if (this._phase === 'loading') {
+      const coin = this.pickCoin(t.clientX, t.clientY)
+      if (coin) {
+        this._dragCoin = coin
+        this._touchId = t.identifier
+        coin.mesh.position.y = FLOOR_Y + 0.3
+      }
+      return
+    }
+    if (this._phase !== 'idle') return   // 其余仪式阶段壳由流程接管
     this._touchId = t.identifier
     this._touchLastX = t.clientX
     this._touchLastY = t.clientY
@@ -523,6 +555,11 @@ Page({
     this._dragging = true
   },
   onShellTouchMove(e) {
+    if (this._dragCoin) {                 // 拖钱：沿桌面平面平移
+      const t = (e.touches || []).filter((x) => x.identifier === this._touchId)[0]
+      if (t) this.moveCoinOnTable(this._dragCoin, t.clientX, t.clientY)
+      return
+    }
     if (!this._dragging || !this._shellPivot) return
     const t = (e.touches || []).filter((x) => x.identifier === this._touchId)[0]
     if (!t) return
@@ -539,6 +576,14 @@ Page({
     this._touchLastT = e.timeStamp
   },
   onShellTouchEnd(e) {
+    if (this._dragCoin) {                 // 松钱：判定是否落入壳口
+      const still = (e.touches || []).some((x) => x.identifier === this._touchId)
+      if (!still) {
+        this.dropCoin(this._dragCoin)
+        this._dragCoin = null
+      }
+      return
+    }
     if (!this._dragging) return
     const still = (e.touches || []).some((x) => x.identifier === this._touchId)
     if (!still) {
@@ -546,6 +591,63 @@ Page({
       // 回位目标取最近整圈：不管转过多少圈，都走最短路径回到正面朝镜头
       this._homeYaw = Math.round(this._shellYaw / (Math.PI * 2)) * Math.PI * 2
       this._homing = true
+    }
+  },
+
+  // ====== 装钱：射线拾取 / 桌面拖动 / 入壳判定 ======
+  pickCoin(cx, cy) {
+    this._ray = this._ray || new THREE.Raycaster()
+    this._ray.setFromCamera({
+      x: (cx / this._winW) * 2 - 1,
+      y: -(cy / this._winH) * 2 + 1
+    }, this._camera)
+    const hits = this._ray.intersectObjects(this._coins.map((c) => c.mesh), true)
+    if (!hits.length) return null
+    // 命中的是子网格：沿父链找到所属铜钱（已入壳的不可再拖）
+    let o = hits[0].object
+    while (o) {
+      const c = this._coins.find((x) => x.mesh === o && !x.loaded)
+      if (c) return c
+      o = o.parent
+    }
+    return null
+  },
+
+  moveCoinOnTable(coin, cx, cy) {
+    this._ray.setFromCamera({
+      x: (cx / this._winW) * 2 - 1,
+      y: -(cy / this._winH) * 2 + 1
+    }, this._camera)
+    const p = new THREE.Vector3()
+    if (!this._ray.ray.intersectPlane(this._tablePlane, p)) return
+    coin.mesh.position.x = clamp(p.x, -1.3, 1.3)
+    coin.mesh.position.z = clamp(p.z, -0.3, 1.5)
+  },
+
+  dropCoin(coin) {
+    coin.mesh.position.y = FLOOR_Y
+    if (this._phase !== 'loading' || coin.loaded) return
+    const c0 = this._shellPivot.position
+    const dx = coin.mesh.position.x - c0.x
+    const dz = coin.mesh.position.z - c0.z
+    if (Math.sqrt(dx * dx + dz * dz) > LOAD_RADIUS) return   // 没入壳：留在原地可再拖
+    // 入壳：跳进碗里
+    coin.loaded = true
+    coin.anim = {
+      from: coin.mesh.position.clone(),
+      to: new THREE.Vector3(c0.x + rand(-0.2, 0.2), c0.y - 0.35, c0.z + rand(-0.2, 0.2)),
+      t: 0
+    }
+    this._loadCount += 1
+    this.setData({ loadCount: this._loadCount })
+    if (this._loadCount >= 3) {
+      // 三钱齐：壳立正 → 摇动阶段
+      this._phase = 'righting'
+      this._tiltTarget = 0
+      this._tiltCb = () => this.startShakePhase()
+      this.setData({ phase: 'righting', tip: '' })
+    } else {
+      this.setData({ tip: '拖动铜钱放入壳中（' + this._loadCount + '/3）' })
     }
   },
 
