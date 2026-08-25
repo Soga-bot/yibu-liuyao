@@ -42,11 +42,11 @@ const SPRING_K = 5          // 松手回位弹簧刚度：越大回得越快（�
 const SPRING_C = 4.2        // 弹簧阻尼（略欠阻尼：几乎不过冲）
 const PITCH_LIMIT = 1.48    // 俯仰限位 ±85°：能看壳口/壳底又不整个翻转
 
-// ====== 摇卦判定参数 ======
-// 铜钱落定后 rotation.x=kπ、rotation.z=mπ（已 snap 躺平），盘面法向是否翻转取决于
-// (k+m) 奇偶。「背面朝上」对应哪个奇偶由模型默认贴图朝向决定，需真机标定一次：
-// 待机时三枚铜钱顶面若是「字面」(如通宝钱文)，则背面奇偶=1；反之改 0。
-const BACK_PARITY = 1
+// ====== 摇卦判面 ======
+// glb 实证（tools 解析几何）：钱体圆盘法线沿 local Z（最薄轴 Z=0.033），
+// 默认姿态是「立着」的；「乾隆通宝」汉字贴 +Z 面、满文贴 −Z 面 ⇒ 字面 = local +Z。
+// 判面直接读盘面法线的世界方向：n.y < 0 即字面朝下 = 背面朝上（无需奇偶标定）。
+// 平躺姿态 = 绕 X 转 ±90°（Euler(∓π/2,0,γ)，γ 为绕法线自转）。
 
 // 三钱 → 爻（金钱卦标准：背为阳）
 // 3背=老阳(动)｜0背=老阴(动)｜1背=少阳｜2背=少阴
@@ -83,7 +83,7 @@ const HOP_FWD = 0.5            // 跳入路线：控制点2在碗心前方偏移
 const HOP_SCALE = 0.18         // 跳入途中微放大（提起感）
 const FLAT_DUR = 0.28          // 落定压平+滑位动画时长(s)：摊开在桌面，杜绝立着收场
 const SETTLE_FORCE = 2500      // 倒出后该时长(ms)仍未落定的钱强制压平（乱滚/漂远保险丝）
-const POUR_SLOTS = [[-0.85, 1.15], [0, 1.4], [0.85, 1.15]]  // 三钱落位(x,z)：桌面下前方扇形摊开
+const POUR_SLOTS = [[-0.5, 1.05], [0.5, 1.05], [0, 1.35]]   // 三钱落位(x,z)：桌面下前方摊开（收紧版）
 const POUR_T = 0.35            // 出壳抛射飞行时长(s)：初速按落位抛体反解
 
 const POS_SHORT = ['初', '二', '三', '四', '五', '上']
@@ -251,12 +251,12 @@ Page({
     }
   },
 
-  // 静态态：三枚铜钱停在立壳前方的桌面（x, z 均为壳前）
+  // 静态态：三枚铜钱平躺停在立壳前方的桌面（模型默认立姿，−90° 放平、字面朝上）
   placeCoinsIdle() {
     const slots = [[-0.5, 0.45], [0.5, 0.45], [0, 0.8]]
     this._coins.forEach((c, i) => {
       c.mesh.position.set(slots[i][0], FLOOR_Y, slots[i][1])
-      c.mesh.rotation.set(0, i * 0.6, 0) // 若铜钱默认是立着的，按需改 0,0,0
+      c.mesh.rotation.set(-Math.PI / 2, 0, i * 0.6) // 平躺：法线(local Z)→竖直向上
       c.vel.set(0, 0, 0)
       c.angVel.set(0, 0, 0)
       c.anim = null
@@ -331,14 +331,20 @@ Page({
     this._pourAt = Date.now()
   },
 
-  // 落定：停物理，交给压平动画（update 里的 c.flat 段）平滑转到最近平躺朝向并滑到落位
+  // 落定：停物理，交给压平动画——四元数 slerp 到「就近翻倒」的平躺姿态
+  //（翻倒方向由法线 y 符号定，保留翻滚物理得出的正反面），同时滑到落位
   settleCoin(c) {
     c.vel.set(0, 0, 0)
     c.angVel.set(0, 0, 0)
     c.settled = true
+    const n = new THREE.Vector3(0, 0, 1).applyQuaternion(c.mesh.quaternion)
+    const qFlat = new THREE.Quaternion().setFromEuler(
+      new THREE.Euler(n.y < 0 ? Math.PI / 2 : -Math.PI / 2, 0, rand(-0.6, 0.6))
+    )
     c.flat = {
       t: 0,
-      x0: c.mesh.rotation.x, z0: c.mesh.rotation.z,
+      q0: c.mesh.quaternion.clone(),
+      q1: qFlat,
       px: c.mesh.position.x, pz: c.mesh.position.z,
       tx: c.slot ? c.slot.x : c.mesh.position.x,
       tz: c.slot ? c.slot.z : c.mesh.position.z
@@ -382,18 +388,16 @@ Page({
           c.anim = null
         }
       }
-      // 落定压平+滑位：转到最近平躺朝向（与待机摆钱同族），并滑到各自落位摊开
+      // 落定压平+滑位：slerp 到就近翻倒的平躺姿态（字/背面由物理翻滚决定），滑到落位摊开
       for (const c of this._coins) {
         if (!c.flat) continue
         c.flat.t += dt / FLAT_DUR
         const k = Math.min(c.flat.t, 1)
-        c.mesh.rotation.x = c.flat.x0 + (snap(c.flat.x0) - c.flat.x0) * k
-        c.mesh.rotation.z = c.flat.z0 + (snap(c.flat.z0) - c.flat.z0) * k
+        c.mesh.quaternion.copy(c.flat.q0).slerp(c.flat.q1, k)
         c.mesh.position.x = c.flat.px + (c.flat.tx - c.flat.px) * k
         c.mesh.position.z = c.flat.pz + (c.flat.tz - c.flat.pz) * k
         if (k >= 1) {
-          c.mesh.rotation.x = snap(c.flat.x0)
-          c.mesh.rotation.z = snap(c.flat.z0)
+          c.mesh.quaternion.copy(c.flat.q1)
           c.mesh.position.x = c.flat.tx
           c.mesh.position.z = c.flat.tz
           c.flat = null
@@ -454,7 +458,7 @@ Page({
     if (this._phase !== 'settling') return
     let allSettled = true
     for (const c of this._coins) {
-      if (c.settled) continue
+      if (c.settled && !c.flat) continue   // 压平动画没做完不算落定（读面要等法线稳定）
       allSettled = false
 
       // 保险丝：倒出太久还没落定的（乱滚/漂远速度一直降不下来）强制压平收场
@@ -868,11 +872,11 @@ function readGlbArrayBuffer(src) {
   })
 }
 
-// 落定后判断铜钱是否背面朝上（见顶部 BACK_PARITY 标定说明）
+// 落定后判面：盘面法线（local +Z = 字面「乾隆通宝」，glb 实证）世界方向 n.y < 0
+// ⇒ 字面朝下 = 背面朝上
 function isBackUp(c) {
-  const k = Math.round(c.mesh.rotation.x / Math.PI)
-  const m = Math.round(c.mesh.rotation.z / Math.PI)
-  return (((k + m) % 2) + 2) % 2 === BACK_PARITY
+  const n = new THREE.Vector3(0, 0, 1).applyQuaternion(c.mesh.quaternion)
+  return n.y < 0
 }
 
 // 把模型归一化到 size，并以几何中心对齐原点
@@ -890,5 +894,3 @@ function fitObject(obj, size) {
 
 function rand(a, b) { return a + Math.random() * (b - a) }
 function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)) }
-// 把任意角度吸附到 π 的整数倍（让铜钱落定时是平的）
-function snap(rad) { return Math.round(rad / Math.PI) * Math.PI }
