@@ -557,6 +557,7 @@ Page({
   onShellTouchStart(e) {
     if (!this._shellPivot) return
     const t = e.changedTouches[0]
+    console.log('[触摸]', this._phase, t.clientX, t.clientY)   // 【临时自检】调通后删
     // 装钱态：拾起一枚未入壳的铜钱（提起 0.3），拖动只移钱不转壳
     if (this._phase === 'loading') {
       const coin = this.pickCoin(t.clientX, t.clientY)
