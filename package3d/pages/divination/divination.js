@@ -62,11 +62,13 @@ const BACKS_TEXT = { 3: '三背', 2: '两背一字', 1: '一背两字', 0: '三�
 
 // ====== 摇一摇（加速度计）参数 ======
 const ACC_INTERVAL = 'game'     // ~20ms，最流畅
-const SHAKE_DELTA = 12          // 相邻两次读数 |Δx|+|Δy|+|Δz| 超过此值算一次有效摇晃
-const SHAKE_COOLDOWN = 1200     // 两次触发最小间隔(ms)，防止一甩连触发
+const SHAKE_DELTA = 6           // 相邻两次读数 |Δx|+|Δy|+|Δz| 超过此值算一次有效摇晃
+                                // （game 档 ~20ms 采样，真机常态甩动 Δ≈3~8；原值 12 要
+                                // 甩得极暴力才命中，真机形同虚设——工具里正常是因连点不走这）
+const SHAKE_COOLDOWN = 650      // 两次触发最小间隔(ms)，防止一甩连触发（自然摇频 3~4Hz 可达）
 
 // ====== 装钱→摇动→倒出流程 ======
-const SHAKE_HITS = 4           // 有效晃动达此次数 = 摇够
+const SHAKE_HITS = 3           // 有效晃动达此次数 = 摇够（约 2 秒自然摇晃；每次命中震动反馈）
 const SHAKE_QUIET = 800        // 摇够后静默该时长(ms)判定摇动停止，自动倒出
 const LOAD_ANGLE = Math.PI / 6 // 装钱态：壳后仰 30°（微张口迎钱，原 86° 太翻）
 const POUR_ANGLE = -1.65       // 倒钱态：壳前倾（口转向桌面；原 -1.9 过水平面 19°，近沿上翘太夸张）
@@ -113,12 +115,15 @@ Page({
     phase: 'idle',   // 流程阶段（按钮文案用）
     loadCount: 0,    // 已入壳铜钱数
     btnLabel: '摇卦起卦',  // 按钮文案（JS 集中算：wxml 深层三元编译不过）
-    btnHidden: false       // 仪式阶段（装钱/立正/倒钱/落定/回正）隐藏按钮
+    btnHidden: false,      // 仪式阶段（装钱/立正/倒钱/落定/回正）隐藏按钮
+    sbTop: 28              // 返回键兜底版 top（px，onLoad 按状态栏高度重算）
   },
 
   onLoad(options) {
     this._accLast = null
     this._lastShakeAt = 0
+    // cover-view 兜底返回键的 top：真机有状态栏，css 的 env() 在 cover-view 里不可靠
+    this.setData({ sbTop: (wx.getWindowInfo().statusBarHeight || 20) + 8 })
     // 所问之事由问事签独立页经 q 参数带入（直接进本页则视为未问，流程照常）
     this._qiu = options && options.q ? decodeURIComponent(options.q).slice(0, 30) : ''
     console.log('[流程] 3D 页进入，所问 =', this._qiu || '(未填)')

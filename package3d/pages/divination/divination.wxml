@@ -15,7 +15,7 @@
   <view class="back" hover-class="back-hover" bindtap="onBack">‹</view>
 
   <!-- 返回（原生层兜底版：仅在同层渲染失效、view 版隐没时可见） -->
-  <cover-view class="cback" bindtap="onBack">‹</cover-view>
+  <cover-view class="cback" style="top: {{sbTop}}px" bindtap="onBack">‹</cover-view>
 
   <!-- 提示文案（最近一爻结果 / 引导） -->
   <view wx:if="{{tip}}" class="tip">{{tip}}</view>

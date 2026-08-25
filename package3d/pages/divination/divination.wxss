@@ -53,10 +53,10 @@
   background: #F3E7CB;
 }
 
-/* 返回兜底（cover-view 原生层）：仅用其支持的 css 子集（无 border/box-shadow） */
+/* 返回兜底（cover-view 原生层）：仅用其支持的 css 子集（无 border/box-shadow）；
+   top 由 JS 按状态栏高度算好内联注入（cover-view 里 env() 不可靠，真机会顶进状态栏） */
 .cback {
   position: fixed;
-  top: 24rpx;
   left: 24rpx;
   width: 68rpx;
   height: 68rpx;
