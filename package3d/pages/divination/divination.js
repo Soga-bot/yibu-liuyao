@@ -81,8 +81,10 @@ const HOP_UP = 3.5             // 跳入路线：起点正上方提起高度（�
 const HOP_OVER = 3.4           // 跳入路线：壳口上方高度（控制点2，越过口沿）
 const HOP_FWD = 0.5            // 跳入路线：控制点2在碗心前方偏移（压住「从前面进」）
 const HOP_SCALE = 0.18         // 跳入途中微放大（提起感）
-const FLAT_DUR = 0.22          // 落定压平动画时长(s)：摊开在桌面，杜绝立着收场
+const FLAT_DUR = 0.28          // 落定压平+滑位动画时长(s)：摊开在桌面，杜绝立着收场
 const SETTLE_FORCE = 2500      // 倒出后该时长(ms)仍未落定的钱强制压平（乱滚/漂远保险丝）
+const POUR_SLOTS = [[-0.85, 1.15], [0, 1.4], [0.85, 1.15]]  // 三钱落位(x,z)：桌面下前方扇形摊开
+const POUR_T = 0.35            // 出壳抛射飞行时长(s)：初速按落位抛体反解
 
 const POS_SHORT = ['初', '二', '三', '四', '五', '上']
 
@@ -305,15 +307,23 @@ Page({
     this.updateBtn({ phase: 'pouring', tip: '' })
   },
 
-  // 松钱：从壳底前缘（世界系朝镜头偏移）抛出，初速朝观众——
-  // 钱落在壳前下方桌面（屏幕更靠下、不藏壳脚后面），交给自由落体物理
+  // 松钱：从壳底前缘把三钱扇形抛向 POUR_SLOTS 三个落位（初速按抛体反解，
+  // 飞行 POUR_T 秒途经落位），弹跳后由压平动画滑到各自落位——摊开、互不重叠、不压壳
   releaseCoins() {
     const p0 = this._shellPivot.position
     const mouth = new THREE.Vector3(p0.x, p0.y - 0.85, p0.z + 0.35)
-    this._coins.forEach((c) => {
+    const slots = POUR_SLOTS.slice().sort(() => Math.random() - 0.5)   // 钱与落位随机配对
+    this._coins.forEach((c, i) => {
       c.anim = null
-      c.mesh.position.set(mouth.x + rand(-0.15, 0.15), mouth.y + rand(0, 0.12), mouth.z + rand(-0.15, 0.15))
-      c.vel.set(rand(-0.5, 0.5), -1.4, 3.4 + rand(-0.5, 0.5))
+      c.mesh.position.set(mouth.x + rand(-0.1, 0.1), mouth.y + rand(0, 0.1), mouth.z + rand(-0.1, 0.1))
+      const tx = slots[i][0] + rand(-0.06, 0.06)
+      const tz = slots[i][1] + rand(-0.06, 0.06)
+      c.slot = { x: tx, z: tz }
+      c.vel.set(
+        (tx - c.mesh.position.x) / POUR_T,
+        (FLOOR_Y - c.mesh.position.y + 0.5 * GRAVITY * POUR_T * POUR_T) / POUR_T,
+        (tz - c.mesh.position.z) / POUR_T
+      )
       c.angVel.set(rand(-10, 10), rand(-10, 10), rand(-10, 10))
       c.settled = false
     })
@@ -321,12 +331,18 @@ Page({
     this._pourAt = Date.now()
   },
 
-  // 落定：停物理，交给压平动画（update 里的 c.flat 段）平滑转到最近平躺朝向
+  // 落定：停物理，交给压平动画（update 里的 c.flat 段）平滑转到最近平躺朝向并滑到落位
   settleCoin(c) {
     c.vel.set(0, 0, 0)
     c.angVel.set(0, 0, 0)
     c.settled = true
-    c.flat = { t: 0, x0: c.mesh.rotation.x, z0: c.mesh.rotation.z }
+    c.flat = {
+      t: 0,
+      x0: c.mesh.rotation.x, z0: c.mesh.rotation.z,
+      px: c.mesh.position.x, pz: c.mesh.position.z,
+      tx: c.slot ? c.slot.x : c.mesh.position.x,
+      tz: c.slot ? c.slot.z : c.mesh.position.z
+    }
   },
 
   // 每帧更新：壳晃动 / 跃入动画 / 拨动回位 / 倒钱流程 / 铜钱物理
@@ -366,16 +382,20 @@ Page({
           c.anim = null
         }
       }
-      // 落定压平：从当前姿态平滑转到最近平躺朝向（与待机摆钱同族），摊开在桌面
+      // 落定压平+滑位：转到最近平躺朝向（与待机摆钱同族），并滑到各自落位摊开
       for (const c of this._coins) {
         if (!c.flat) continue
         c.flat.t += dt / FLAT_DUR
         const k = Math.min(c.flat.t, 1)
         c.mesh.rotation.x = c.flat.x0 + (snap(c.flat.x0) - c.flat.x0) * k
         c.mesh.rotation.z = c.flat.z0 + (snap(c.flat.z0) - c.flat.z0) * k
+        c.mesh.position.x = c.flat.px + (c.flat.tx - c.flat.px) * k
+        c.mesh.position.z = c.flat.pz + (c.flat.tz - c.flat.pz) * k
         if (k >= 1) {
           c.mesh.rotation.x = snap(c.flat.x0)
           c.mesh.rotation.z = snap(c.flat.z0)
+          c.mesh.position.x = c.flat.tx
+          c.mesh.position.z = c.flat.tz
           c.flat = null
         }
       }
@@ -456,8 +476,8 @@ Page({
       if (c.mesh.position.y < FLOOR_Y) {
         c.mesh.position.y = FLOOR_Y
         c.vel.y = -c.vel.y * BOUNCE
-        c.vel.x *= 0.62
-        c.vel.z *= 0.62
+        c.vel.x *= 0.35   // 落地狠搓水平速度：弹跳别冲过落位太远（压平动画会滑回去）
+        c.vel.z *= 0.35
         c.angVel.multiplyScalar(0.5)
 
         if (Math.abs(c.vel.y) < 0.25 && c.vel.length() < SETTLE_VEL) this.settleCoin(c)
