@@ -179,8 +179,10 @@ Page({
     try {
       const shell = await this.loadModel(SHELL_SRC)
       fitObject(shell, SHELL_SIZE)
-      // 壳背刻爻定位基准：fitObject 后、姿态调整前的模型局部包围盒（腹甲面 = 局部 -Y）
-      this._shellBox = new THREE.Box3().setFromObject(shell)
+      // 壳背刻爻基准：刻线挂 shell 子节点，坐标必须是模型原生局部系（fitObject 的
+      // 缩放/平移只作用于 shell 自身矩阵，子节点不受其约束）。整体包围盒 min.Y 还会
+      // 被腿/裙边等凸出物拉低，故中央刻字带内逐顶点探测腹甲真实表面（见 measureShellBack）
+      this._shellLocal = this.measureShellBack(shell)
       this._marksGroup = new THREE.Group()   // 刻线挂壳上：随壳转/翻，天生贴背
       shell.add(this._marksGroup)
       this._inscribedCount = 0               // 已刻爻数（重摇清零）
@@ -616,20 +618,47 @@ Page({
     }
   },
 
+  // 壳局部系包围盒 + 腹甲面探测：返回 {min,size,backY}（模型原生坐标）。
+  // 世界包围盒先除缩放/平移换回局部系；backY 取「刻字中央带」内最低顶点——
+  // 腿/裙边/头尾在带外，拉不高刻字面，保证刻线贴的是腹甲真实表面
+  measureShellBack(shell) {
+    shell.updateMatrixWorld(true)
+    const wb = new THREE.Box3().setFromObject(shell)       // fit 后世界系（此刻未挂场景/未调姿）
+    const s = shell.scale.x
+    const min = wb.min.clone().sub(shell.position).divideScalar(s)
+    const size = wb.getSize(new THREE.Vector3()).divideScalar(s)
+    const bandX = size.x * 0.25
+    const bandZ = size.z * 0.45
+    const inv = new THREE.Matrix4().getInverse(shell.matrixWorld)
+    const m = new THREE.Matrix4()
+    const v = new THREE.Vector3()
+    let backY = Infinity
+    shell.traverse((o) => {
+      if (!o.isMesh || !o.geometry || !o.geometry.attributes.position) return
+      m.multiplyMatrices(inv, o.matrixWorld)               // 世界 → 壳局部
+      const pos = o.geometry.attributes.position
+      for (let i = 0; i < pos.count; i++) {
+        v.fromBufferAttribute(pos, i).applyMatrix4(m)
+        if (Math.abs(v.x) <= bandX && Math.abs(v.z) <= bandZ && v.y < backY) backY = v.y
+      }
+    })
+    if (!isFinite(backY)) backY = min.y                    // 带内无顶点（理论不至）：退回整体盒
+    return { min, size, backY }
+  },
+
   // 在壳背刻下第 i 爻（0=初）：阳=一整条，阴=两段中空；动爻朱红（与界面动爻色一致）。
-  // 局部轴向（glb 实证推导）：+Y=拱面朝镜头 ⇒ 腹甲面 = min.Y；+Z→世界竖直 ⇒ 初爻刻在 -Z 端
+  // 局部轴向（glb 实证推导）：+Y=拱面朝镜头 ⇒ 腹甲面 = backY；+Z→世界竖直 ⇒ 初爻刻在 -Z 端
   carveLine(i) {
-    const b = this._shellBox
-    const sz = b.getSize(new THREE.Vector3())
-    const len = clamp(sz.x * 0.34, 0.55, 1.0)             // 爻线长度：按壳背可刻区域自适应
-    const gap = clamp(sz.z * 0.5 / 5, 0.16, 0.3)          // 六爻行距
+    const L = this._shellLocal
+    const len = L.size.x * 0.34             // 爻线长度：按壳背可刻区域自适应
+    const gap = L.size.z * 0.1              // 六爻行距（六行共占半高）
     const line = this.data.lines[i]
     const mat = new THREE.MeshStandardMaterial({ color: line.dong ? 0xC62828 : 0x2E1A0C })
-    const y = b.min.y + 0.01                              // 半嵌壳背：像刻上去的浮雕
-    const z = b.min.z + sz.z / 2 + (i - 2.5) * gap
+    const y = L.backY + gap * 0.08          // 贴探测面微凸：像刻上去的浮雕
+    const z = L.min.z + L.size.z / 2 + (i - 2.5) * gap
     const bars = []
     const seg = (x, l) => {
-      const m = new THREE.Mesh(new THREE.BoxGeometry(l, 0.06, gap * 0.42), mat)
+      const m = new THREE.Mesh(new THREE.BoxGeometry(l, gap * 0.5, gap * 0.42), mat)
       m.position.set(x, y, z)
       m.scale.x = 0.02                                    // 从 0 长出（carve 段驱动）
       this._marksGroup.add(m)
