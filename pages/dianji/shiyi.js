@@ -1,5 +1,5 @@
-// pages/dianji/shiyi.js — 十翼通读页：系辞上/下、说卦传全篇
-import { getXici, SHUOGUA } from '../../data/shiyi.js'
+// pages/dianji/shiyi.js — 十翼通读页：系辞上/下、说卦传全篇（各章附章旨提要）
+import { getXici, SHUOGUA, getZhangzhi } from '../../data/shiyi.js'
 import { annotate } from '../../utils/pinyin.js'
 
 Page({
@@ -14,9 +14,9 @@ Page({
     const books = [
       ...getXici().map(b => ({
         name: b.book,
-        chapters: b.chapters.map(c => ({ h: c.h, t: annotate(c.t) }))
+        chapters: b.chapters.map(c => ({ h: c.h, t: annotate(c.t), zz: getZhangzhi(b.book, c.h) }))
       })),
-      { name: '说卦传', chapters: SHUOGUA.map(c => ({ h: c.h, t: annotate(c.t) })) }
+      { name: '说卦传', chapters: SHUOGUA.map(c => ({ h: c.h, t: annotate(c.t), zz: getZhangzhi('说卦传', c.h) })) }
     ]
     this.setData({ books })
   },

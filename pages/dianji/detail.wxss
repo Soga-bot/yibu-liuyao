@@ -177,6 +177,27 @@
   margin-top: 20rpx;
 }
 
+/* 说卦取象 */
+.sx-name {
+  font-size: 26rpx;
+  color: #8a5e15;
+  letter-spacing: 3rpx;
+  margin: 18rpx 0 6rpx;
+}
+.sx-name:first-of-type { margin-top: 4rpx; }
+.sx-line {
+  font-size: 27rpx;
+  color: #4a3f35;
+  line-height: 1.8;
+}
+.sx-guang {
+  font-size: 26rpx;
+  color: #6b5a48;
+  line-height: 1.8;
+  margin-top: 4rpx;
+  padding-bottom: 8rpx;
+}
+
 .src-note {
   margin-top: 30rpx;
   text-align: center;

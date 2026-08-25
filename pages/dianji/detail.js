@@ -3,8 +3,9 @@ import { getGua } from '../../data/gua.js'
 import { GONG_WUXING } from '../../utils/liuyao.js'
 import { getZhuan } from '../../data/zhuan.js'
 import { getBaihua } from '../../data/baihua.js'
+import { getZhuanBh } from '../../data/baihua-zhuan.js'
 import { getDiangu } from '../../data/diangu.js'
-import { getWenyan, getXugua, getZagua } from '../../data/shiyi.js'
+import { getWenyan, getXugua, getZagua, getTrigramXiang } from '../../data/shiyi.js'
 import { annotate, namePinyin } from '../../utils/pinyin.js'
 
 Page({
@@ -21,6 +22,7 @@ Page({
     const wx = GONG_WUXING[g.gong] || ''
     const zh = getZhuan(g.key) || {}
     const bh = getBaihua(g.key) || {}
+    const zhb = getZhuanBh(g.key) || {}
     // 传统全称：上象+下象+卦名（如火水未济）；八纯卦作「乾为天」式
     const full = g.waiXiang === g.neiXiang
       ? g.name + '为' + g.waiXiang
@@ -35,12 +37,15 @@ Page({
         guaciB: bh.guaci || '',
         dg: getDiangu(g.key, '卦辞'),
         tuan: zh.tuan ? annotate(zh.tuan) : '',
+        tuanB: zhb.tuan || '',
         tuanDg: getDiangu(g.key, '彖传'),
         daxiang: annotate(g.daxiang),
+        daxiangB: zhb.xiang || '',
         yaoci: g.yaoci.map((y, i) => ({
           ti: y.ti,
           ci: annotate(y.ci),
           xiao: zh.xiao ? annotate(zh.xiao[i] || '') : '',
+          xiaoB: zhb.xiao ? (zhb.xiao[i] || '') : '',
           ciB: bh.yaoci ? (bh.yaoci[i] || '') : '',
           dg: getDiangu(g.key, y.ti)
         })),
@@ -51,6 +56,15 @@ Page({
           yongB: bh.yong || ''
         } : null,
         wy: (getWenyan(g.key) || []).map(annotate),
+        sg: [g.wai, g.nei].map((name, i) => {
+          const x = getTrigramXiang(name)
+          return x && {
+            tag: i === 0 ? '上' : '下',
+            name,
+            xing: x.xing, shou: x.shou, shen: x.shen, qin: x.qin,
+            guang: annotate(x.guang)
+          }
+        }).filter(Boolean),
         xu: annotate(getXugua(g.key)),
         za: annotate(getZagua(g.key)),
         meta: [

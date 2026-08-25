@@ -43,6 +43,7 @@
     <view class="sec" wx:if="{{gua.tuan}}">
       <view class="sec-title font-kai">彖传</view>
       <view class="daxiang font-kai">{{gua.tuan}}</view>
+      <view wx:if="{{gua.tuanB}}" class="baihua">白话：{{gua.tuanB}}</view>
       <view wx:if="{{gua.tuanDg}}" class="diangu">
         <view class="dg-h font-kai">典故</view>
         <view class="dg-b">{{gua.tuanDg.gu}}</view>
@@ -56,8 +57,9 @@
       <view class="yao-row" wx:for="{{gua.yaoci}}" wx:key="ti">
         <text class="y-ti font-kai">{{item.ti}}</text>
         <view class="y-ci font-kai">{{item.ci}}
-          <view wx:if="{{item.xiao}}" class="y-sub">小象：{{item.xiao}}</view>
           <view wx:if="{{item.ciB}}" class="y-sub y-baihua">白话：{{item.ciB}}</view>
+          <view wx:if="{{item.xiao}}" class="y-sub">小象：{{item.xiao}}</view>
+          <view wx:if="{{item.xiaoB}}" class="y-sub y-baihua">白话：{{item.xiaoB}}</view>
           <view wx:if="{{item.dg}}" class="diangu">
             <view class="dg-h font-kai">典故</view>
             <view class="dg-b">{{item.dg.gu}}</view>
@@ -78,12 +80,23 @@
     <view class="sec">
       <view class="sec-title font-kai">象传 · 大象</view>
       <view class="daxiang font-kai">{{gua.daxiang}}</view>
+      <view wx:if="{{gua.daxiangB}}" class="baihua">白话：{{gua.daxiangB}}</view>
     </view>
 
     <!-- 文言传（仅乾坤） -->
     <view class="sec" wx:if="{{gua.wy.length}}">
       <view class="sec-title font-kai">文言传</view>
       <view class="daxiang font-kai wenyan-p" wx:for="{{gua.wy}}" wx:key="index">{{item}}</view>
+    </view>
+
+    <!-- 说卦传 · 取象（上下卦） -->
+    <view class="sec" wx:if="{{gua.sg.length}}">
+      <view class="sec-title font-kai">说卦传 · 取象</view>
+      <block wx:for="{{gua.sg}}" wx:for-item="t" wx:key="name">
+        <view class="sx-name font-kai">{{t.tag}}卦 · {{t.name}}</view>
+        <view class="sx-line font-kai">{{t.xing}}；{{t.shou}}；{{t.shen}}；{{t.qin}}。</view>
+        <view class="sx-guang font-kai">{{t.guang}}</view>
+      </block>
     </view>
 
     <!-- 序卦传（卦序由来） -->

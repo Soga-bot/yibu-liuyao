@@ -11,10 +11,11 @@
       <view class="book-name font-kai">{{book.name}}</view>
       <view class="sec" wx:for="{{book.chapters}}" wx:for-item="c" wx:key="h">
         <view class="sec-title font-kai">第{{c.h}}章</view>
+        <view wx:if="{{c.zz}}" class="zhangzhi">章旨：{{c.zz}}</view>
         <view class="daxiang font-kai">{{c.t}}</view>
       </view>
     </block>
 
-    <view class="src-note">原文出自《周易》十翼 · 生僻字随文括注拼音 · 已依通行本核校</view>
+    <view class="src-note">原文出自《周易》十翼 · 生僻字随文括注拼音 · 已依通行本核校 · 章旨为内容提要仅供阅读参考</view>
   </view>
 </view>
