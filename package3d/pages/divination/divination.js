@@ -96,6 +96,11 @@ Page({
   onLoad() {
     this._accLast = null
     this._lastShakeAt = 0
+    // 进页第一眼即弹问事签：点首页「摇卦起卦」→ 这里直接问所求 → 确认后进装钱仪式
+    if (!this.data.done && !this.data.lines.length) {
+      console.log('[问事签] onLoad 弹出')
+      this.setData({ asking: true })
+    }
     wx.createSelectorQuery()
       .select('#gl')
       .fields({ node: true })
@@ -214,10 +219,6 @@ Page({
     this.resumeLoop()
     this.startAcc()
     this.selfTestPick()   // 【临时自检】进页面即验证拾取链路，调通后删
-    // 进页即弹问事签：免按钮直达流程（点首页「摇卦起卦」→ 这里直接问所求）
-    if (!this._asked && !this.data.done && !this.data.lines.length) {
-      this.setData({ asking: true })
-    }
   },
 
   // 铜钱状态对象
@@ -742,9 +743,10 @@ Page({
     // 从排盘页返回：恢复渲染循环与摇一摇（onHide 已停）
     this.resumeLoop()
     if (!this.data.loading) this.startAcc()
-    // 问事签兜底：init 时若因热重载竞态没弹出来，这里补弹（条件同 triggerShake 问询闸）
+    // 问事签兜底：onLoad 那次若因热重载竞态没弹出来，这里补弹（条件同 triggerShake 问询闸）
     if (!this.data.loading && !this.data.asking && !this.data.done &&
         !this.data.lines.length && !this._asked && this._phase === 'idle') {
+      console.log('[问事签] onShow 兜底弹出')
       this.setData({ asking: true })
     }
   },
