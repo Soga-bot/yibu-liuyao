@@ -1,0 +1,72 @@
+<!-- package3d/pages/result/result.wxml — 摇卦结果（只读，与手动排盘独立） -->
+<view class="page">
+  <view class="status-bar" style="height: {{statusBarHeight}}px;"></view>
+
+  <view class="topbar">
+    <view class="back" bindtap="goBack">‹</view>
+    <text class="title">卦成</text>
+  </view>
+
+  <scroll-view scroll-y class="content">
+    <!-- 所问 + 日干支 -->
+    <view class="meta-card">
+      <view class="meta-row" wx:if="{{qiu}}"><text class="m-label">所问</text><text class="m-val font-kai">问：{{qiu}}</text></view>
+      <view class="meta-row"><text class="m-label">起卦</text><text class="m-val">三钱摇卦 · {{gz}}日</text></view>
+    </view>
+
+    <!-- 排盘结果（与手动排盘同观感，只读） -->
+    <view wx:if="{{result}}" class="result-card">
+      <view class="gua-head">
+        <view class="gua-name font-kai">{{result.name}}卦</view>
+        <view class="gua-meta">
+          <text>{{result.gong}}宫 · {{result.gongWuxing}}</text>
+          <text wx:if="{{result.bian}}" class="bian"> → {{result.bian.name}}</text>
+        </view>
+        <view wx:if="{{result.desc}}" class="gua-desc">{{result.desc}}</view>
+        <view wx:if="{{result.daxiang}}" class="gua-daxiang font-kai">象曰：{{result.daxiang}}</view>
+        <view wx:if="{{result.guaci}}" class="gua-guaci font-kai">卦辞：{{result.guaci}}</view>
+      </view>
+
+      <view class="biao">
+        <view class="biao-header">
+          <text class="c-ti">爻</text>
+          <text class="c-shen">六神</text>
+          <text class="c-qin">六亲</text>
+          <text class="c-gz">纳甲</text>
+          <text class="c-tag">位</text>
+          <text class="c-yao">爻象</text>
+        </view>
+        <block wx:for="{{rows}}" wx:key="posName">
+          <view class="biao-row {{item.dong?'is-dong':''}}" data-i="{{index}}" bindtap="toggleCi">
+            <text class="c-ti">{{item.ti}}</text>
+            <text class="c-shen">{{item.liushen}}</text>
+            <text class="c-qin">{{item.liuqin}}</text>
+            <text class="c-gz">{{item.gan}}{{item.zhi}}<text class="wx">{{item.wuxing}}</text><text wx:if="{{item.kong}}" class="kong">空</text></text>
+            <text class="c-tag tag">{{item.tag}}</text>
+            <view class="c-yao">
+              <view wx:if="{{!item.yin}}" class="bar yang"></view>
+              <view wx:else class="yin"><view class="seg"></view><view class="seg"></view></view>
+              <text wx:if="{{item.dong}}" class="ymark">{{item.yin ? '✕' : '○'}}</text>
+            </view>
+          </view>
+          <view wx:if="{{item.showCi && item.ci}}" class="row-ci font-kai">{{item.ti}}：{{item.ci}}</view>
+        </block>
+      </view>
+      <view class="biao-hint">点爻行可展开/收起爻辞原文</view>
+
+      <view class="kong-line" wx:if="{{result.kongWang.length}}">
+        空亡：<text>{{result.kongWang}}</text>
+      </view>
+      <view class="kong-line">世在第{{result.shi}}爻 · 应在第{{result.ying}}爻</view>
+    </view>
+
+    <view wx:if="{{!result}}" class="meta-card">
+      <view class="m-val">未取得卦象，请返回重摇</view>
+    </view>
+
+    <button class="cast-btn" bindtap="goAsk">重新起卦</button>
+
+    <view class="foot-note">本内容仅供传统文化学习参考</view>
+    <view class="bottom-pad"></view>
+  </scroll-view>
+</view>

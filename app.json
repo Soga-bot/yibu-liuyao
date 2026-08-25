@@ -11,7 +11,7 @@
     {
       "root": "package3d",
       "name": "divination3d",
-      "pages": ["pages/ask/ask", "pages/divination/divination"]
+      "pages": ["pages/ask/ask", "pages/divination/divination", "pages/result/result"]
     }
   ],
   "window": {
