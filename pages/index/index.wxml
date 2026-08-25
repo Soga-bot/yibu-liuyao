@@ -1,0 +1,75 @@
+<!-- pages/index/index.wxml — 主页面 -->
+<view class="page">
+  <!-- 状态栏占位 -->
+  <view class="status-bar" style="height: {{statusBarHeight}}px;"></view>
+
+  <!-- 顶部：标题 + 红色印章 -->
+  <view class="header">
+    <view class="title-wrap">
+      <text class="title font-kai">易卜六爻</text>
+      <view class="seal font-kai">
+        <text class="seal-text">卜</text>
+      </view>
+    </view>
+    <view class="title-en">YI · BU · LIU YAO</view>
+  </view>
+
+  <!-- 弹性间隔（占剩余空间 2/7，铜钱贴近标题） -->
+  <view class="gap-grow gap-title"></view>
+
+  <!-- 三枚铜钱（中正大、两侧小，呈品字叠放） -->
+  <view class="coins">
+    <!-- 左侧小钱 -->
+    <view class="coin coin-sm coin-left">
+      <view class="coin-hole"></view>
+    </view>
+    <!-- 右侧小钱 -->
+    <view class="coin coin-sm coin-right">
+      <view class="coin-hole"></view>
+    </view>
+    <!-- 中间大钱（带四字） -->
+    <view class="coin coin-lg coin-center">
+      <text class="coin-char char-top font-kai">乾</text>
+      <text class="coin-char char-bottom font-kai">坤</text>
+      <text class="coin-char char-left font-kai">通</text>
+      <text class="coin-char char-right font-kai">寳</text>
+      <view class="coin-hole"></view>
+    </view>
+  </view>
+
+  <!-- 标语 + 免责 -->
+  <view class="slogan font-kai">一事一问，心诚起卦</view>
+  <view class="disclaimer">本工具仅传传统文化参考，不做人生定论依据</view>
+
+  <!-- 今日干支 + 旬空 -->
+  <view class="day-strip">
+    <view class="day-rule day-rule-l"></view>
+    <text class="day-text font-kai">今日 {{dayGanZhi}}日 · 空亡 {{kongWang}}</text>
+    <view class="day-rule day-rule-r"></view>
+  </view>
+
+  <!-- 双按钮 -->
+  <view class="actions">
+    <view class="btn btn-shake" hover-class="btn-hover" hover-stay-time="80" bindtap="onShake">
+      <text class="btn-text">摇卦起卦</text>
+    </view>
+    <view class="btn btn-manual" hover-class="btn-hover" hover-stay-time="80" bindtap="onManual">
+      <text class="btn-text">手动排盘</text>
+    </view>
+  </view>
+
+  <!-- 弹性间隔（占剩余空间 5/7，承接上方让出的空白） -->
+  <view class="gap-grow gap-bottom"></view>
+
+  <!-- 二级入口导航 -->
+  <view class="sub-nav">
+    <view class="sub-item sub-active" bindtap="onDic">
+      <text>卦辞典籍</text>
+      <view class="sub-line"></view>
+    </view>
+    <view class="sub-item" bindtap="onWuxing">
+      <text>五行基础</text>
+      <text class="arrow">›</text>
+    </view>
+  </view>
+</view>

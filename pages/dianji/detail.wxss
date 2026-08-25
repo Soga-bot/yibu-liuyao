@@ -1,0 +1,143 @@
+/* pages/dianji/detail.wxss — 卦详情（古朴宣纸风，顶栏复用 paipan 范式） */
+.page {
+  min-height: 100vh;
+  background: #F8F3E9;
+  background-image: radial-gradient(circle at 20% 10%, rgba(139,105,20,0.05) 0, transparent 140rpx),
+                    radial-gradient(circle at 85% 85%, rgba(192,57,43,0.04) 0, transparent 160rpx);
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 24rpx 8rpx;
+}
+.back {
+  width: 64rpx; height: 64rpx;
+  border-radius: 50%;
+  background: rgba(62,39,35,0.06);
+  color: #5D4037; font-size: 48rpx; line-height: 60rpx; text-align: center;
+}
+.title {
+  flex: 1; text-align: center;
+  font-size: 38rpx; font-weight: bold; color: #3E2723;
+  letter-spacing: 8rpx; margin-right: 64rpx;
+}
+
+.content { flex: 1; padding: 16rpx 28rpx 60rpx; box-sizing: border-box; }
+
+/* ---------- 卦首 ---------- */
+.hero {
+  background: #fffaf0;
+  border: 1rpx solid rgba(139,105,20,0.25);
+  border-radius: 16rpx;
+  padding: 36rpx 28rpx 32rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4rpx 14rpx rgba(62,39,35,0.06);
+}
+.gx-lg { display: flex; flex-direction: column; align-items: center; }
+.gx-lg .l-yang { width: 180rpx; height: 14rpx; background: #3E2723; border-radius: 3rpx; }
+.gx-lg .l-yin { width: 180rpx; height: 14rpx; display: flex; justify-content: space-between; }
+.gx-lg .l-yin .s { width: 78rpx; height: 14rpx; background: #3E2723; border-radius: 3rpx; }
+.gx-lg .l-yang + .l-yang, .gx-lg .l-yang + .l-yin,
+.gx-lg .l-yin + .l-yang, .gx-lg .l-yin + .l-yin { margin-top: 14rpx; }
+
+.hero-name {
+  margin-top: 30rpx;
+  font-size: 56rpx;
+  font-weight: bold;
+  color: #3E2723;
+  letter-spacing: 8rpx;
+}
+.hero-desc {
+  margin-top: 10rpx;
+  font-size: 25rpx;
+  color: #8a7355;
+  letter-spacing: 2rpx;
+}
+
+/* ---------- 卦宫/上下卦 ---------- */
+.meta-card {
+  background: #fffaf0;
+  border: 1rpx solid rgba(139,105,20,0.22);
+  border-radius: 16rpx;
+  padding: 10rpx 28rpx;
+  margin-top: 24rpx;
+  box-shadow: 0 3rpx 12rpx rgba(62,39,35,0.05);
+}
+.m-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 0;
+  border-bottom: 1rpx dashed rgba(139,105,20,0.18);
+}
+.m-row:last-child { border-bottom: none; }
+.m-k { font-size: 26rpx; color: #8a7355; }
+.m-v { font-size: 28rpx; color: #8a5e15; font-weight: bold; }
+
+/* ---------- 经文区块 ---------- */
+.sec {
+  background: #fffaf0;
+  border: 1rpx solid rgba(139,105,20,0.22);
+  border-radius: 16rpx;
+  padding: 26rpx 28rpx 22rpx;
+  margin-top: 24rpx;
+  box-shadow: 0 3rpx 12rpx rgba(62,39,35,0.05);
+}
+.sec-title {
+  font-size: 28rpx;
+  color: #8a5e15;
+  font-weight: bold;
+  letter-spacing: 3rpx;
+  margin-bottom: 18rpx;
+}
+.guaci {
+  font-size: 32rpx;
+  color: #3E2723;
+  line-height: 1.8;
+  letter-spacing: 3rpx;
+}
+.yao-row {
+  display: flex;
+  padding: 14rpx 0;
+  border-bottom: 1rpx dashed rgba(139,105,20,0.18);
+}
+.yao-row:last-child { border-bottom: none; }
+.y-ti {
+  flex: 0 0 96rpx;
+  font-size: 27rpx;
+  color: #C62828;
+  font-weight: bold;
+}
+.y-ci {
+  flex: 1;
+  font-size: 27rpx;
+  color: #3E2723;
+  line-height: 1.7;
+}
+.daxiang {
+  font-size: 28rpx;
+  color: #6d3b0a;
+  line-height: 1.8;
+  letter-spacing: 2rpx;
+}
+.src-note {
+  margin-top: 30rpx;
+  text-align: center;
+  font-size: 22rpx;
+  color: #a8916e;
+}
+
+/* ---------- 空态兜底 ---------- */
+.empty {
+  margin-top: 200rpx;
+  text-align: center;
+  color: #a8916e;
+}
+.empty-glyph { display: block; font-size: 120rpx; color: #b07d22; }
+.empty-tip { display: block; margin-top: 30rpx; font-size: 32rpx; color: #5D4037; }
+.empty-sub { display: block; margin-top: 16rpx; font-size: 24rpx; }

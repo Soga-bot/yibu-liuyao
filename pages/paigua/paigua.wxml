@@ -1,0 +1,34 @@
+<!-- pages/paigua/paigua.wxml — 解卦：术语速查 + 起卦入口 -->
+<view class="status-bar" style="height: {{statusBarHeight}}px;"></view>
+<view class="page">
+  <view class="nav-title font-kai">解卦</view>
+
+  <view class="content">
+    <!-- 起卦入口（只跳转，排盘仍在首页两条链路） -->
+    <view class="quick-row">
+      <view class="quick-card qc-shake" hover-class="card-hover" bindtap="goShake">
+        <text class="qc-name font-kai">去摇卦</text>
+        <text class="qc-sub">三枚铜钱 · 六摇成卦</text>
+      </view>
+      <view class="quick-card qc-manual" hover-class="card-hover" bindtap="goManual">
+        <text class="qc-name font-kai">去手动排盘</text>
+        <text class="qc-sub">自定六爻 · 直出卦盘</text>
+      </view>
+    </view>
+
+    <!-- 术语速查卡 -->
+    <view class="card" wx:for="{{groups}}" wx:key="id" wx:for-index="gi">
+      <view class="card-head" data-i="{{gi}}" bindtap="toggleGroup">
+        <text class="card-title font-kai">{{item.title}}</text>
+        <text class="card-arrow {{item.open ? 'open' : ''}}">›</text>
+      </view>
+      <view wx:if="{{item.open}}">
+        <view class="k-row" wx:for="{{item.rows}}" wx:for-item="r" wx:key="k">
+          <text class="k-k font-kai">{{r.k}}</text>
+          <text class="k-v">{{r.v}}</text>
+        </view>
+        <view wx:if="{{item.note}}" class="k-note">{{item.note}}</view>
+      </view>
+    </view>
+  </view>
+</view>

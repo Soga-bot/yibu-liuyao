@@ -1,0 +1,337 @@
+/* pages/index/index.wxss — 主页面样式 */
+
+.page {
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding-bottom: 140rpx; /* 避开自定义 TabBar */
+  display: flex;
+  flex-direction: column; /* 纵向弹性布局：剩余高度由两根 gap-grow 均分 */
+  background-color: #F8F3E9;
+  /* 宣纸暗纹：极淡的同心圆点缀，营造古纸质感 */
+  background-image:
+    radial-gradient(circle at 20% 15%, rgba(139, 105, 20, 0.04) 0, transparent 120rpx),
+    radial-gradient(circle at 85% 80%, rgba(192, 57, 43, 0.04) 0, transparent 140rpx);
+}
+
+/* 间隔条改为固定间距（不参与弹性分配）：
+   标题→铜钱 140rpx、按钮→二级入口 56rpx，剩余高度自然沉到二级入口与 TabBar 之间 */
+.gap-grow { flex: 0 0 auto; }
+.gap-title { flex-basis: 140rpx; }  /* 调标题与铜钱的距离 */
+.gap-bottom { flex-basis: 56rpx; }  /* 调按钮与二级入口的距离 */
+
+/* ---------- 顶部标题区 ---------- */
+.header {
+  text-align: center;
+  padding-top: 152rpx;
+}
+
+.title-wrap {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.title {
+  font-size: 88rpx;
+  font-weight: bold;
+  color: #3E2723;
+  letter-spacing: 12rpx;
+  text-shadow: 0 2rpx 4rpx rgba(62, 39, 35, 0.12);
+  padding-left: 12rpx; /* 抵消字间距偏移，整体居中 */
+}
+
+/* 红色印章 → 钤印质感：白文「卜」，朱砂印泥厚薄不均、边缘斑驳、晕染渗墨 */
+.seal {
+  width: 60rpx;
+  height: 60rpx;
+  margin-left: 6rpx;
+  margin-bottom: 8rpx;
+  /* 印泥厚薄：暗斑（按压不足处）+ 亮斑（印泥堆叠处）叠在朱砂底色上 */
+  background:
+    radial-gradient(circle at 70% 76%, rgba(107, 18, 10, 0.32) 0%, transparent 40%),
+    radial-gradient(circle at 16% 28%, rgba(107, 18, 10, 0.26) 0%, transparent 36%),
+    radial-gradient(circle at 68% 14%, rgba(235, 104, 82, 0.28) 0%, transparent 32%),
+    radial-gradient(circle at 22% 82%, rgba(235, 104, 82, 0.20) 0%, transparent 28%),
+    linear-gradient(160deg, #C44534 0%, #B23124 52%, #9C2A1E 100%);
+  border-radius: 10rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(-8deg);
+  /* 晕染渗墨：贴纸的柔和红晕取代生硬投影；不设边框 */
+  box-shadow:
+    0 0 8rpx 2rpx rgba(178, 49, 36, 0.28),
+    0 0 20rpx 6rpx rgba(178, 49, 36, 0.14);
+  /* 斑驳毛边：四角（离圆心最远处）印泥不实渐透，边缘中段厚实——
+     天然形成不规则轮廓；不支持 mask 的环境自动退化为实心方印 */
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 0%, #000 86%, transparent 97%);
+}
+
+.seal-text {
+  font-size: 38rpx;
+  font-weight: bold;
+  color: #F6EFDF; /* 透出的宣纸色，非纯白 */
+  line-height: 1;
+  text-shadow: 0 0 3rpx rgba(246, 239, 223, 0.35); /* 字缘印泥微渗 */
+}
+
+.title-en {
+  margin-top: 6rpx;
+  font-size: 18rpx;
+  letter-spacing: 6rpx;
+  color: #a8916e;
+}
+
+/* ---------- 三枚铜钱 ---------- */
+/* 极淡摇摆微动效：整组 ±1.2°、7s 往返，GPU transform 合成，
+   单元素零布局开销（避免多元素/循环重绘的性能陷阱） */
+@keyframes coin-sway {
+  from { transform: rotate(-1.2deg); }
+  to   { transform: rotate(1.2deg); }
+}
+
+.coins {
+  position: relative;
+  width: 590rpx;
+  height: 250rpx;
+  margin: 0 auto 44rpx;
+  animation: coin-sway 7s ease-in-out infinite alternate;
+}
+
+.coin {
+  position: absolute;
+  border-radius: 50%;
+  background:
+    /* 包浆做旧：锈绿 + 深褐沁色 + 高光斑，错落分布避免"塑料均匀感" */
+    radial-gradient(circle at 70% 74%, rgba(96, 112, 60, 0.16) 0%, transparent 32%),
+    radial-gradient(circle at 20% 68%, rgba(118, 82, 38, 0.20) 0%, transparent 28%),
+    radial-gradient(circle at 80% 18%, rgba(255, 240, 190, 0.15) 0%, transparent 34%),
+    /* 金属本体：左上受光 → 高光 → 中间调 → 暗部 → 边缘最暗 */
+    radial-gradient(circle at 33% 27%,
+      #f7e39b 0%,
+      #e3b84f 26%,
+      #c68f2b 52%,
+      #9a6c1a 78%,
+      #6f4d10 100%);
+  box-shadow:
+    /* 币缘铸边：亮圈 + 内侧凹槽 */
+    inset 0 0 3rpx 4rpx rgba(255, 238, 175, 0.5),
+    inset 0 0 5rpx 9rpx rgba(107, 74, 26, 0.5),
+    /* 币面体积光：左上受光、右下背光 */
+    inset -10rpx -12rpx 26rpx rgba(66, 42, 8, 0.5),
+    inset 8rpx 10rpx 22rpx rgba(255, 243, 205, 0.42),
+    /* 桌面投影：贴地紧影 + 漫射软影 */
+    0 3rpx 6rpx rgba(62, 39, 35, 0.22),
+    0 12rpx 26rpx rgba(62, 39, 35, 0.32);
+}
+
+/* 中央方孔 */
+.coin-hole {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #F8F3E9;
+  box-shadow:
+    /* 孔内斜切：上侧暗、下侧亮，穿丄件的凹陷感 */
+    inset 0 3rpx 6rpx rgba(60, 38, 6, 0.5),
+    inset 0 -2rpx 4rpx rgba(255, 236, 170, 0.4),
+    /* 孔沿铸痕：暗圈 + 亮圈双描边 */
+    0 0 0 3rpx rgba(154, 108, 26, 0.85),
+    0 0 0 5rpx rgba(255, 236, 170, 0.22),
+    0 2rpx 5rpx rgba(62, 39, 35, 0.3);
+}
+
+/* 大钱 */
+.coin-lg {
+  width: 304rpx;
+  height: 304rpx;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+}
+.coin-lg .coin-hole {
+  width: 80rpx;
+  height: 80rpx;
+}
+
+/* 小钱 */
+.coin-sm {
+  width: 198rpx;
+  height: 198rpx;
+  top: 46rpx;
+  z-index: 2;
+}
+.coin-sm .coin-hole {
+  width: 53rpx;
+  height: 53rpx;
+}
+
+.coin-left {
+  left: 6rpx;
+  transform: rotate(-16deg);
+}
+.coin-right {
+  right: 6rpx;
+  transform: rotate(16deg);
+}
+
+/* 四个钱币文字 */
+.coin-char {
+  position: absolute;
+  color: #5f4212;
+  font-weight: bold;
+  z-index: 4;
+  /* 浮雕钱文：笔画上缘受光、下缘刻痕投影，凸出币面 */
+  text-shadow:
+    0 1rpx 0 rgba(255, 240, 190, 0.55),
+    0 -1rpx 1rpx rgba(60, 38, 6, 0.65),
+    0 2rpx 4rpx rgba(60, 38, 6, 0.35);
+}
+.coin-lg .coin-char {
+  font-size: 46rpx;
+}
+.char-top    { top: 13%;    left: 50%; transform: translateX(-50%); }
+.char-bottom { bottom: 13%; left: 50%; transform: translateX(-50%); }
+.char-left   { left: 13%;   top: 50%;  transform: translateY(-50%); }
+.char-right  { right: 13%;  top: 50%;  transform: translateY(-50%); }
+
+/* ---------- 标语 + 免责 ---------- */
+.slogan {
+  text-align: center;
+  font-size: 40rpx;
+  color: #5D4037;
+  letter-spacing: 6rpx;
+  margin-top: 20rpx;
+}
+
+.disclaimer {
+  text-align: center;
+  font-size: 22rpx;
+  color: #a8916e;
+  letter-spacing: 1rpx;
+  margin-top: 16rpx;
+  padding: 0 40rpx;
+}
+
+/* ---------- 今日干支 ---------- */
+.day-strip {
+  display: flex;
+  align-items: center;
+  margin-top: 44rpx;
+  padding: 0 60rpx;
+}
+.day-rule {
+  flex: 1;
+  height: 2rpx;
+}
+.day-rule-l {
+  background: linear-gradient(to right, transparent, rgba(138, 94, 21, 0.45));
+}
+.day-rule-r {
+  background: linear-gradient(to left, transparent, rgba(138, 94, 21, 0.45));
+}
+.day-text {
+  margin: 0 26rpx;
+  font-size: 26rpx;
+  color: #8a5e15;
+  letter-spacing: 3rpx;
+}
+
+/* ---------- 双按钮 ---------- */
+.actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 80rpx;
+  padding: 0 30rpx;
+}
+
+.btn {
+  flex: 1;
+  max-width: 320rpx;
+  height: 96rpx;
+  border-radius: 46rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6rpx 14rpx rgba(62, 39, 35, 0.2);
+  transition: transform 0.1s ease, opacity 0.1s ease;
+}
+
+.btn + .btn {
+  margin-left: 30rpx;
+}
+
+.btn-text {
+  font-size: 32rpx;
+  font-weight: bold;
+  letter-spacing: 4rpx;
+}
+
+.btn-hover {
+  transform: scale(0.96);
+  opacity: 0.9;
+}
+
+/* 摇卦起卦：朱红底 + 烫金字 + 金边 */
+.btn-shake {
+  background: linear-gradient(135deg, #D8413A 0%, #B11D1D 100%);
+  border: 2rpx solid #E6C158;
+}
+.btn-shake .btn-text {
+  color: #F6D77A;
+  text-shadow: 0 1rpx 2rpx rgba(0, 0, 0, 0.3);
+}
+
+/* 手动排盘：金黄底 + 深褐字 + 深褐边 */
+.btn-manual {
+  background: linear-gradient(135deg, #F2B73C 0%, #E0920E 100%);
+  border: 2rpx solid #8a5e15;
+}
+.btn-manual .btn-text {
+  color: #5D4037;
+}
+
+/* ---------- 二级入口 ---------- */
+.sub-nav {
+  display: flex;
+  justify-content: center;
+  padding: 0 40rpx 16rpx;
+}
+
+.sub-item {
+  position: relative;
+  font-size: 30rpx;
+  color: #5D4037;
+  letter-spacing: 2rpx;
+  padding-bottom: 10rpx;
+  display: flex;
+  align-items: center;
+}
+
+.sub-item + .sub-item {
+  margin-left: 90rpx;
+}
+
+.sub-active {
+  color: #3E2723;
+  font-weight: bold;
+}
+
+.sub-line {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 48rpx;
+  height: 4rpx;
+  margin-left: -24rpx;
+  background-color: #C62828;
+  border-radius: 2rpx;
+}
+
+.arrow {
+  margin-left: 8rpx;
+  color: #a8916e;
+  font-size: 34rpx;
+}

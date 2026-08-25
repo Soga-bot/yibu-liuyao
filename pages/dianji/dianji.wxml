@@ -1,0 +1,40 @@
+<!-- pages/dianji/dianji.wxml — 典籍库：64 卦列表 + 搜索 -->
+<view class="status-bar" style="height: {{statusBarHeight}}px;"></view>
+<view class="page">
+  <view class="nav-title font-kai">典籍库</view>
+
+  <view class="content">
+    <!-- 搜索框 -->
+    <view class="search-box">
+      <input class="search-input font-kai" placeholder="搜索卦名 / 卦宫 / 全名（如火水未济）" placeholder-class="search-ph"
+             value="{{keyword}}" bindinput="onSearch" confirm-type="search" />
+      <text class="search-count">{{list.length}}/{{total}}</text>
+    </view>
+
+    <!-- 64 卦列表（文王序） -->
+    <view class="gua-card" wx:for="{{list}}" wx:key="key"
+          data-key="{{item.key}}" bindtap="goDetail" hover-class="card-hover">
+      <view class="gx">
+        <block wx:for="{{item.xiang}}" wx:for-item="b" wx:key="*this">
+          <view wx:if="{{b}}" class="l-yang"></view>
+          <view wx:else class="l-yin"><view class="s"></view><view class="s"></view></view>
+        </block>
+      </view>
+      <view class="gua-info">
+        <view class="g-name-row">
+          <text class="g-name font-kai">{{item.name}}</text>
+          <text class="g-badge">{{item.gong}}宫 · {{item.wx}}</text>
+        </view>
+        <text class="g-desc">{{item.desc}}</text>
+      </view>
+      <text class="g-arrow">›</text>
+    </view>
+
+    <!-- 无结果 -->
+    <view wx:if="{{!list.length}}" class="empty font-kai">
+      <text class="empty-glyph">易</text>
+      <text class="empty-tip">未找到「{{keyword}}」相关卦</text>
+      <text class="empty-sub">试试：乾、水火、既济、离宫…</text>
+    </view>
+  </view>
+</view>

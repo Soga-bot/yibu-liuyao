@@ -1,0 +1,58 @@
+<!-- pages/mine/mine.wxml — 我的：摇卦历史 + 关于 -->
+<view class="status-bar" style="height: {{statusBarHeight}}px;"></view>
+<view class="page">
+  <view class="nav-title font-kai">我的</view>
+
+  <view class="content">
+    <!-- 统计卡 -->
+    <view class="stat-card">
+      <view class="stat-main">
+        <text class="stat-num font-kai">{{count}}</text>
+        <view class="stat-txt">
+          <text class="stat-label font-kai">累计起卦</text>
+          <text class="stat-sub">记录保存在本机，不上传</text>
+        </view>
+      </view>
+      <view wx:if="{{count}}" class="clear-btn" hover-class="clear-hover" bindtap="clearAll">清空</view>
+    </view>
+
+    <!-- 历史列表 -->
+    <block wx:if="{{items.length}}">
+      <view class="his-card" wx:for="{{items}}" wx:key="i"
+            data-yao="{{item.yao}}" data-dong="{{item.dong}}" data-gz="{{item.gz}}" data-i="{{index}}"
+            bindtap="openItem" bindlongpress="delItem">
+        <view class="gx">
+          <block wx:for="{{item.xiang}}" wx:for-item="b" wx:for-index="bi" wx:key="*this">
+            <view class="{{b ? 'l-yang' : 'l-yin'}} {{item.dongT[bi] ? 'l-dong' : ''}}">
+              <view wx:if="{{!b}}" class="s"></view>
+              <view wx:if="{{!b}}" class="s"></view>
+            </view>
+          </block>
+        </view>
+        <view class="his-info">
+          <view class="h-name-row">
+            <text class="h-name font-kai">{{item.name}}</text>
+            <text class="h-gz">{{item.gz}}日</text>
+          </view>
+          <text class="h-time">{{item.timeStr}}</text>
+        </view>
+        <text class="g-arrow">›</text>
+      </view>
+      <view class="hint">点开可回看完整卦盘 · 长按可删除</view>
+    </block>
+
+    <!-- 空态 -->
+    <view wx:else class="empty font-kai">
+      <text class="empty-glyph">卜</text>
+      <text class="empty-tip">还没有起卦记录</text>
+      <text class="empty-sub">首页摇卦或手动排盘后自动记录</text>
+    </view>
+
+    <!-- 关于 -->
+    <view class="about-card">
+      <view class="about-title font-kai">关于本工具</view>
+      <text class="about-text">「易卜六爻」以《周易》经文与传统纳甲筮法为底本，数字化演示传统起卦与排盘流程，仅供传统文化研究参考，不构成人生决策依据。重大决定请咨询专业人士。</text>
+      <text class="about-ver">版本 {{version}} · 数据保存在本机</text>
+    </view>
+  </view>
+</view>

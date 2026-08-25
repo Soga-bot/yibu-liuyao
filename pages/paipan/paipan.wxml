@@ -1,0 +1,94 @@
+<!-- pages/paipan/paipan.wxml — 手动排盘 -->
+<view class="page">
+  <view class="status-bar" style="height: {{statusBarHeight}}px;"></view>
+
+  <!-- 顶部 -->
+  <view class="topbar">
+    <view class="back" bindtap="goBack">‹</view>
+    <text class="title">手动排盘</text>
+  </view>
+
+  <scroll-view scroll-y class="content">
+    <!-- 阴阳爻输入（初→上） -->
+    <view class="card">
+      <view class="card-title">起卦 · 录入六爻（自下而上）</view>
+      <view class="yao-list">
+        <view class="yao-row" wx:for="{{yao}}" wx:for-index="i" wx:key="i">
+          <text class="pos">{{posNames[i]}}</text>
+
+          <view class="yao-sym {{item.dong?'dong':''}}" data-i="{{i}}" bindtap="toggleYin">
+            <view wx:if="{{!item.yin}}" class="bar yang"></view>
+            <view wx:else class="yin"><view class="seg"></view><view class="seg"></view></view>
+            <text wx:if="{{item.dong}}" class="dong-mark">{{item.yin ? '✕' : '○'}}</text>
+          </view>
+
+          <view class="dong-btn {{item.dong?'on':''}}" data-i="{{i}}" bindtap="toggleDong">
+            {{item.dong ? '动' : '静'}}
+          </view>
+        </view>
+      </view>
+      <view class="hint">点爻线切换阴阳，点「静/动」标记动爻（老阳○/老阴✕）</view>
+    </view>
+
+    <!-- 日干支 -->
+    <view class="card">
+      <view class="row">
+        <text class="label">日干支</text>
+        <picker mode="selector" range="{{jiazi}}" value="{{jiaziIndex}}" bindchange="onJiaziChange">
+          <view class="picker-val">{{jiazi[jiaziIndex]}} ›</view>
+        </picker>
+      </view>
+    </view>
+
+    <!-- 排盘按钮 -->
+    <button class="cast-btn" bindtap="onPaipan">排 盘</button>
+
+    <!-- 排盘结果 -->
+    <view wx:if="{{result}}" class="result-card">
+      <view class="gua-head">
+        <view class="gua-name font-kai">{{result.name}}卦</view>
+        <view class="gua-meta">
+          <text>{{result.gong}}宫 · {{result.gongWuxing}}</text>
+          <text wx:if="{{result.bian}}" class="bian"> → {{result.bian.name}}</text>
+        </view>
+        <view wx:if="{{result.desc}}" class="gua-desc">{{result.desc}}</view>
+        <view wx:if="{{result.daxiang}}" class="gua-daxiang font-kai">象曰：{{result.daxiang}}</view>
+        <view wx:if="{{result.guaci}}" class="gua-guaci font-kai">卦辞：{{result.guaci}}</view>
+      </view>
+
+      <view class="biao">
+        <view class="biao-header">
+          <text class="c-ti">爻</text>
+          <text class="c-shen">六神</text>
+          <text class="c-qin">六亲</text>
+          <text class="c-gz">纳甲</text>
+          <text class="c-tag">位</text>
+          <text class="c-yao">爻象</text>
+        </view>
+        <block wx:for="{{rows}}" wx:key="posName">
+          <view class="biao-row {{item.dong?'is-dong':''}}" data-i="{{index}}" bindtap="toggleCi">
+            <text class="c-ti">{{item.ti}}</text>
+            <text class="c-shen">{{item.liushen}}</text>
+            <text class="c-qin">{{item.liuqin}}</text>
+            <text class="c-gz">{{item.gan}}{{item.zhi}}<text class="wx">{{item.wuxing}}</text><text wx:if="{{item.kong}}" class="kong">空</text></text>
+            <text class="c-tag tag">{{item.tag}}</text>
+            <view class="c-yao">
+              <view wx:if="{{!item.yin}}" class="bar yang"></view>
+              <view wx:else class="yin"><view class="seg"></view><view class="seg"></view></view>
+              <text wx:if="{{item.dong}}" class="ymark">{{item.yin ? '✕' : '○'}}</text>
+            </view>
+          </view>
+          <view wx:if="{{item.showCi && item.ci}}" class="row-ci font-kai">{{item.ti}}：{{item.ci}}</view>
+        </block>
+      </view>
+      <view class="biao-hint">点爻行可展开/收起爻辞原文</view>
+
+      <view class="kong-line" wx:if="{{result.kongWang.length}}">
+        空亡：<text>{{result.kongWang}}</text>
+      </view>
+      <view class="kong-line">世在第{{result.shi}}爻 · 应在第{{result.ying}}爻</view>
+    </view>
+
+    <view class="bottom-pad"></view>
+  </scroll-view>
+</view>

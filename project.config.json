@@ -1,0 +1,53 @@
+{
+  "description": "易卜六爻微信小程序",
+  "miniprogramRoot": "./",
+  "compileType": "miniprogram",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "newFeature": true,
+    "compileWorklet": false,
+    "uglifyFileName": false,
+    "uploadWithSourceMap": true,
+    "packNpmManually": false,
+    "packNpmRelationList": [],
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "localPlugins": false,
+    "disableUseStrict": false,
+    "useCompilerPlugins": false,
+    "condition": false,
+    "swc": false,
+    "disableSWC": true,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    }
+  },
+  "appid": "wx7987b9ad6da9d286",
+  "projectname": "yibu-liuyao",
+  "libVersion": "3.15.2",
+  "simulatorPluginLibVersion": {},
+  "packOptions": {
+    "ignore": [
+      {
+        "value": "tools",
+        "type": "folder"
+      },
+      {
+        "value": ".md",
+        "type": "suffix"
+      },
+      {
+        "value": ".mypy_cache",
+        "type": "folder"
+      }
+    ],
+    "include": []
+  },
+  "editorSetting": {}
+}

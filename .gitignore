@@ -1,0 +1,12 @@
+# 编辑器/系统
+.vscode/
+Thumbs.db
+desktop.ini
+
+# 微信开发者工具的机器私有配置（appid 等在 project.config.json，照常入库）
+project.private.config.json
+
+# 临时/缓存
+.mypy_cache/
+node_modules/
+tools/_chk/

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>3D Turtle Shell – Three.js</title>
+  <style> 
+    body { margin: 0; overflow: hidden; background: #000; } 
+  </style>
+</head>
+<body>
+<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+<script src="https://unpkg.com/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+/* ---------- 参数 ---------- */
+const RING_COUNT = 3;                // 环数（1=1圈6片，2=2圈12片…）
+const TILE_R   = 0.4;                // 单片半径
+const HEIGHT   = 0.12;               // 拱起高度
+const GAP      = 0.05;               // 片间缝隙
+
+/* ---------- 场景 ---------- */
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+camera.position.set(0, 1.5, 2.5);
+
+/* ---------- 控制器 ---------- */
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.1;
+
+/* ---------- 光源 ---------- */
+scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+const dir = new THREE.DirectionalLight(0xffffff, 0.8);
+dir.position.set(5, 5, 5);
+scene.add(dir);
+
+/* ---------- 材质 ---------- */
+const mat = new THREE.MeshStandardMaterial({
+  color: 0x2d4c1e,
+  roughness: 0.7,
+  metalness: 0.1
+});
+
+/* ---------- 单片函数 ---------- */
+function hexTile(radius, height) {
+  const shape = new THREE.Shape();
+  for (let i = 0; i < 6; i++) {
+    const a = Math.PI / 3 * i;
+    const x = radius * Math.cos(a);
+    const y = radius * Math.sin(a);
+    if (i === 0) {
+      shape.moveTo(x, y);
+    } else {
+      shape.lineTo(x, y);
+    }
+  }
+  
+  const extrude = new THREE.ExtrudeGeometry(shape, {
+    depth: height,
+    bevelEnabled: true,
+    bevelSegments: 2,
+    bevelSize: 0.02,
+    bevelThickness: 0.02
+  });
+  
+  extrude.center();
+  return extrude;
+}
+
+/* ---------- 拼装 ---------- */
+const group = new THREE.Group();
+const tileGeo = hexTile(TILE_R, HEIGHT);
+
+/* 中心一片 */
+const center = new THREE.Mesh(tileGeo, mat);
+group.add(center);
+
+/* 同心环 */
+for (let ring = 1; ring <= RING_COUNT; ring++) {
+  const tiles = ring * 6;
+  const R = ring * (TILE_R * 2 + GAP);
+  
+  for (let i = 0; i < tiles; i++) {
+    const a = 2 * Math.PI / tiles * i;
+    const m = new THREE.Mesh(tileGeo, mat);
+    m.rotation.y = a + Math.PI / 2;
+    m.position.set(R * Math.cos(a), 0, R * Math.sin(a));
+    group.add(m);
+  }
+}
+
+/* ---------- 裙边（简单圆环） ---------- */
+const skirtGeo = new THREE.TorusGeometry(
+  (RING_COUNT + 0.5) * (TILE_R * 2 + GAP), 
+  0.08, 
+  8, 
+  60
+);
+
+const skirt = new THREE.Mesh(skirtGeo, mat);
+skirt.rotation.x = Math.PI / 2;
+skirt.position.y = -0.05;
+group.add(skirt);
+
+scene.add(group);
+
+/* ---------- 动画 ---------- */
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update(); // 更新控制器
+  group.rotation.y += 0.004;
+  renderer.render(scene, camera);
+}
+
+animate();
+
+/* ---------- 自适应 ---------- */
+window.addEventListener('resize', function() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+/* ---------- 错误处理 ---------- */
+window.addEventListener('error', function(e) {
+  console.error('Three.js 错误:', e.error);
+});
+
+console.log('3D龟壳模型加载完成');
+</script>
+</body>
+</html>

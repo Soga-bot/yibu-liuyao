@@ -1,0 +1,72 @@
+/* custom-tab-bar/index.wxss */
+
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100rpx;
+  display: flex;
+  background-color: #fffdf6;
+  border-top: 1rpx solid rgba(139, 105, 20, 0.18);
+  box-shadow: 0 -2rpx 12rpx rgba(62, 39, 35, 0.06);
+  z-index: 999;
+}
+
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.tab-icon {
+  width: 44rpx;
+  height: 44rpx;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 44rpx 44rpx;
+}
+
+.tab-text {
+  margin-top: 4rpx;
+  font-size: 20rpx;
+  color: #8a7355;
+}
+
+.tab-text.on {
+  color: #c0392b;
+}
+
+/* ---------- 首页：房子 ---------- */
+.tab-icon-0 {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a7355' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/%3E%3Cpath d='M9 22V12h6v10'/%3E%3C/svg%3E");
+}
+.tab-icon-0.on {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c0392b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/%3E%3Cpath d='M9 22V12h6v10'/%3E%3C/svg%3E");
+}
+
+/* ---------- 排卦解卦：六爻（六道爻线，阳爻实、阴爻断） ---------- */
+.tab-icon-1 {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a7355' stroke-width='1.8' stroke-linecap='round'%3E%3Cpath d='M4 3h16M4 7h5M15 7h5M4 11h16M4 15h16M4 19h5M15 19h5M4 23h16'/%3E%3C/svg%3E");
+}
+.tab-icon-1.on {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c0392b' stroke-width='1.8' stroke-linecap='round'%3E%3Cpath d='M4 3h16M4 7h5M15 7h5M4 11h16M4 15h16M4 19h5M15 19h5M4 23h16'/%3E%3C/svg%3E");
+}
+
+/* ---------- 典籍库：线装书 ---------- */
+.tab-icon-2 {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a7355' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z'/%3E%3Cpath d='M5 18a2 2 0 0 1 2-2h11'/%3E%3C/svg%3E");
+}
+.tab-icon-2.on {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c0392b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z'/%3E%3Cpath d='M5 18a2 2 0 0 1 2-2h11'/%3E%3C/svg%3E");
+}
+
+/* ---------- 我的：人物 ---------- */
+.tab-icon-3 {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a7355' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='4'/%3E%3Cpath d='M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1'/%3E%3C/svg%3E");
+}
+.tab-icon-3.on {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c0392b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='4'/%3E%3Cpath d='M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1'/%3E%3C/svg%3E");
+}

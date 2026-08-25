@@ -1,0 +1,42 @@
+<!-- pages/divination/divination.wxml — 3D 起卦页（全屏画布 + 视图浮层）-->
+<!-- canvas type="webgl" 为同层渲染，浮层用普通 view 即可盖在画布上；
+     勿用 cover-view（那是旧版原生组件专用，压同层画布在工具/部分真机上不显示） -->
+<view class="page">
+  <!-- 全屏 WebGL 画布；手势拨动：横向拖动龟壳绕中心 360° 旋转（跟手+惯性），位置不变 -->
+  <canvas type="webgl" id="gl" class="gl"
+          bindtouchstart="onShellTouchStart" bindtouchmove="onShellTouchMove"
+          bindtouchend="onShellTouchEnd" bindtouchcancel="onShellTouchEnd"></canvas>
+
+  <!-- 加载中提示 -->
+  <view wx:if="{{loading}}" class="status">{{status}}</view>
+
+  <!-- 返回 -->
+  <view class="back" hover-class="back-hover" bindtap="onBack">‹</view>
+
+  <!-- 提示文案（最近一爻结果 / 引导） -->
+  <view wx:if="{{tip}}" class="tip">{{tip}}</view>
+
+  <!-- 爻进度：左→右 = 初→上，摇一枚亮一格 -->
+  <view wx:if="{{lines.length}}" class="lines">
+    <view class="line-slot" wx:for="{{lines}}" wx:key="posName">
+      <view class="line-sym {{item.dong ? 'line-dong' : ''}}">{{item.yin ? '━ ━' : '━━━'}}</view>
+      <view class="line-name">{{item.posName}}·{{item.name}}</view>
+    </view>
+  </view>
+
+  <!-- 清零重摇 -->
+  <view
+    wx:if="{{lines.length && !shaking}}"
+    class="reset"
+    hover-class="reset-hover"
+    bindtap="onReset"
+  >重摇</view>
+
+  <!-- 摇卦按钮（浮于底部）：真机上也可直接摇一摇手机 -->
+  <view
+    class="btn {{shaking ? 'btn-disabled' : ''}}"
+    hover-class="btn-hover"
+    hover-stay-time="80"
+    bindtap="onShakeTap"
+  >{{shaking ? '起卦中…' : (done ? '重新起卦' : (lines.length ? '摇第' + (lines.length + 1) + '爻' : '摇卦起卦'))}}</view>
+</view>

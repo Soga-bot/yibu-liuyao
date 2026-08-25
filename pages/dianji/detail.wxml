@@ -1,0 +1,64 @@
+<!-- pages/dianji/detail.wxml — 卦详情 -->
+<view class="status-bar" style="height: {{statusBarHeight}}px;"></view>
+<view class="page">
+  <view class="topbar">
+    <view class="back font-kai" bindtap="goBack">‹</view>
+    <text class="title font-kai">{{gua ? gua.name + '卦' : '卦详情'}}</text>
+  </view>
+
+  <view class="content" wx:if="{{gua}}">
+    <!-- 卦首：大卦象 + 卦名 -->
+    <view class="hero">
+      <view class="gx-lg">
+        <block wx:for="{{gua.xiang}}" wx:for-item="b" wx:key="*this">
+          <view wx:if="{{b}}" class="l-yang"></view>
+          <view wx:else class="l-yin"><view class="s"></view><view class="s"></view></view>
+        </block>
+      </view>
+      <view class="hero-name font-kai">{{gua.name}}</view>
+      <view class="hero-desc">{{gua.desc}}</view>
+    </view>
+
+    <!-- 卦宫 / 上下卦 -->
+    <view class="meta-card">
+      <view class="m-row" wx:for="{{gua.meta}}" wx:key="k">
+        <text class="m-k">{{item.k}}</text>
+        <text class="m-v font-kai">{{item.v}}</text>
+      </view>
+    </view>
+
+    <!-- 卦辞 -->
+    <view class="sec">
+      <view class="sec-title font-kai">卦辞</view>
+      <view class="guaci font-kai">{{gua.guaci}}</view>
+    </view>
+
+    <!-- 爻辞（初→上）+ 用九用六 -->
+    <view class="sec">
+      <view class="sec-title font-kai">爻辞</view>
+      <view class="yao-row" wx:for="{{gua.yaoci}}" wx:key="ti">
+        <text class="y-ti font-kai">{{item.ti}}</text>
+        <text class="y-ci font-kai">{{item.ci}}</text>
+      </view>
+      <view class="yao-row" wx:if="{{gua.yong}}">
+        <text class="y-ti font-kai">{{gua.yong.ti}}</text>
+        <text class="y-ci font-kai">{{gua.yong.ci}}</text>
+      </view>
+    </view>
+
+    <!-- 大象传 -->
+    <view class="sec">
+      <view class="sec-title font-kai">象传 · 大象</view>
+      <view class="daxiang font-kai">{{gua.daxiang}}</view>
+    </view>
+
+    <view class="src-note">原文出自《周易》经文 · 十翼全文整理中</view>
+  </view>
+
+  <!-- 参数异常兜底 -->
+  <view wx:else class="empty font-kai">
+    <text class="empty-glyph">易</text>
+    <text class="empty-tip">未找到该卦</text>
+    <text class="empty-sub">请从典籍库列表重新进入</text>
+  </view>
+</view>

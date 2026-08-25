@@ -1,0 +1,41 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/paipan/paipan",
+    "pages/paigua/paigua",
+    "pages/dianji/dianji",
+    "pages/dianji/detail",
+    "pages/mine/mine"
+  ],
+  "subPackages": [
+    {
+      "root": "package3d",
+      "name": "divination3d",
+      "pages": ["pages/divination/divination"]
+    }
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#F8F3E9",
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "易卜六爻",
+    "navigationStyle": "custom",
+    "backgroundColor": "#F8F3E9",
+    "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#8a7355",
+    "selectedColor": "#c0392b",
+    "backgroundColor": "#fffdf6",
+    "borderStyle": "white",
+    "list": [
+      { "pagePath": "pages/index/index", "text": "首页" },
+      { "pagePath": "pages/paigua/paigua", "text": "解卦" },
+      { "pagePath": "pages/dianji/dianji", "text": "典籍库" },
+      { "pagePath": "pages/mine/mine", "text": "我的" }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

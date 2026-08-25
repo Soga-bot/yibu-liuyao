@@ -1,0 +1,12 @@
+/* app.wxss — 全局样式：传统中式米黄宣纸底，整体衬线字 */
+
+page {
+  background-color: #F8F3E9;
+  color: #3E2723;
+  font-family: "Songti SC", "STSong", "SimSun", "Source Han Serif SC", serif;
+}
+
+/* 复用：传统衬线/楷体 */
+.font-kai {
+  font-family: "Kaiti SC", "STKaiti", "KaiTi", "Source Han Serif SC", serif;
+}

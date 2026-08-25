@@ -1,0 +1,152 @@
+/* pages/paipan/paipan.wxss — 手动排盘页（古朴宣纸风） */
+.page {
+  min-height: 100vh;
+  background: #F8F3E9;
+  background-image: radial-gradient(circle at 20% 10%, rgba(139,105,20,0.05) 0, transparent 140rpx),
+                    radial-gradient(circle at 85% 85%, rgba(192,57,43,0.04) 0, transparent 160rpx);
+  display: flex;
+  flex-direction: column;
+}
+.status-bar { width: 100%; }
+
+.topbar {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 24rpx 8rpx;
+}
+.back {
+  width: 64rpx; height: 64rpx;
+  border-radius: 50%;
+  background: rgba(62,39,35,0.06);
+  color: #5D4037; font-size: 48rpx; line-height: 60rpx; text-align: center;
+}
+.title {
+  flex: 1; text-align: center;
+  font-size: 38rpx; font-weight: bold; color: #3E2723;
+  letter-spacing: 8rpx; margin-right: 64rpx;
+}
+
+.content { flex: 1; padding: 0 28rpx; box-sizing: border-box; }
+
+.card {
+  background: #fffaf0;
+  border: 1rpx solid rgba(139,105,20,0.25);
+  border-radius: 16rpx;
+  padding: 28rpx 28rpx 24rpx;
+  margin-top: 24rpx;
+  box-shadow: 0 4rpx 14rpx rgba(62,39,35,0.06);
+}
+.card-title {
+  font-size: 28rpx; color: #8a5e15; font-weight: bold;
+  letter-spacing: 2rpx; margin-bottom: 20rpx;
+}
+
+/* 爻录入 */
+.yao-list { display: flex; flex-direction: column; }
+.yao-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14rpx 0; border-bottom: 1rpx dashed rgba(139,105,20,0.18);
+}
+.yao-row:last-child { border-bottom: none; }
+.pos { width: 80rpx; color: #5D4037; font-size: 28rpx; }
+.yao-sym {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  position: relative; padding: 6rpx 0;
+}
+.bar.yang { width: 200rpx; height: 14rpx; background: #3E2723; border-radius: 2rpx; }
+.yin { width: 200rpx; height: 14rpx; display: flex; justify-content: space-between; }
+.yin .seg { width: 84rpx; height: 14rpx; background: #3E2723; border-radius: 2rpx; }
+.yao-sym.dong .bar.yang, .yao-sym.dong .yin .seg { background: #C62828; }
+.dong-mark {
+  position: absolute; right: 60rpx;
+  color: #C62828; font-size: 28rpx; font-weight: bold;
+}
+.dong-btn {
+  width: 84rpx; text-align: center;
+  border: 1rpx solid rgba(139,105,20,0.4);
+  border-radius: 30rpx; padding: 6rpx 0;
+  color: #8a7355; font-size: 24rpx;
+}
+.dong-btn.on { background: #C62828; color: #fff; border-color: #C62828; }
+.hint { margin-top: 14rpx; font-size: 22rpx; color: #a8916e; }
+
+/* 日干支 */
+.row { display: flex; align-items: center; justify-content: space-between; }
+.label { font-size: 28rpx; color: #5D4037; }
+.picker-val { font-size: 30rpx; color: #8a5e15; font-weight: bold; }
+
+/* 排盘按钮 */
+.cast-btn {
+  margin: 32rpx 0 8rpx;
+  background: linear-gradient(135deg, #C62828 0%, #9b1c1c 100%);
+  color: #F6D77A; font-size: 34rpx; letter-spacing: 12rpx;
+  border-radius: 48rpx; border: 2rpx solid #E6C158;
+  box-shadow: 0 6rpx 16rpx rgba(198,40,40,0.3);
+}
+.cast-btn::after { border: none; }
+
+/* 结果 */
+.result-card {
+  background: #fffaf0;
+  border: 1rpx solid rgba(139,105,20,0.3);
+  border-radius: 16rpx;
+  padding: 32rpx 28rpx;
+  margin-top: 28rpx;
+  box-shadow: 0 6rpx 18rpx rgba(62,39,35,0.08);
+}
+.gua-head { text-align: center; margin-bottom: 28rpx; }
+.gua-name { font-size: 60rpx; color: #3E2723; font-weight: bold; letter-spacing: 6rpx; }
+.gua-meta { font-size: 26rpx; color: #8a5e15; margin-top: 10rpx; letter-spacing: 2rpx; }
+.bian { color: #C62828; }
+.gua-desc { font-size: 24rpx; color: #5D4037; margin-top: 12rpx; letter-spacing: 1rpx; }
+.gua-daxiang { font-size: 26rpx; color: #6d3b0a; margin-top: 8rpx; letter-spacing: 2rpx; line-height: 1.5; }
+.gua-guaci { font-size: 26rpx; color: #3E2723; margin-top: 10rpx; letter-spacing: 2rpx; line-height: 1.6; text-align: center; }
+.c-ti { color: #8a5e15; font-size: 24rpx; }
+
+/* 排盘表 */
+.biao {
+  display: flex; flex-direction: column;
+  border-top: 2rpx solid #8a5e15;
+  border-bottom: 2rpx solid #8a5e15;
+}
+.biao-header, .biao-row {
+  display: grid;
+  grid-template-columns: 72rpx 84rpx 84rpx 180rpx 48rpx 1fr;
+  align-items: center;
+  padding: 14rpx 8rpx;
+}
+.biao-header {
+  border-bottom: 1rpx solid rgba(139,105,20,0.4);
+  font-size: 24rpx; color: #8a5e15; font-weight: bold;
+}
+.biao-row {
+  border-bottom: 1rpx dashed rgba(139,105,20,0.2);
+  font-size: 28rpx; color: #3E2723;
+}
+.biao-row:active { background: rgba(139,105,20,0.08); }
+.biao-row:last-child { border-bottom: none; }
+.biao-row.is-dong { background: rgba(198,40,40,0.05); }
+/* 展开的爻辞原文行 */
+.row-ci {
+  padding: 14rpx 16rpx 18rpx;
+  border-bottom: 1rpx dashed rgba(139,105,20,0.2);
+  background: rgba(139,105,20,0.04);
+  font-size: 26rpx; color: #6d3b0a; line-height: 1.7;
+}
+.biao-hint { margin-top: 10rpx; font-size: 22rpx; color: #a8916e; text-align: center; }
+.c-shen { color: #6d3b0a; }
+.c-qin { color: #5D4037; font-weight: bold; }
+.c-gz { color: #3E2723; }
+.c-gz .wx { font-size: 22rpx; color: #a8916e; margin-left: 4rpx; }
+.c-gz .kong { font-size: 20rpx; color: #C62828; margin-left: 6rpx; border: 1rpx solid #C62828; padding: 0 6rpx; border-radius: 4rpx; }
+.c-tag .tag { color: #C62828; font-weight: bold; font-size: 30rpx; }
+.c-yao { display: flex; align-items: center; justify-content: center; }
+.c-yao .bar.yang { width: 110rpx; height: 12rpx; }
+.c-yao .yin { width: 110rpx; height: 12rpx; }
+.c-yao .yin .seg { width: 44rpx; height: 12rpx; }
+.c-yao .ymark { margin-left: 8rpx; color: #C62828; font-size: 24rpx; font-weight: bold; }
+
+.kong-line { margin-top: 18rpx; font-size: 24rpx; color: #8a7355; letter-spacing: 1rpx; }
+.kong-line text { color: #C62828; }
+
+.bottom-pad { height: 60rpx; }
