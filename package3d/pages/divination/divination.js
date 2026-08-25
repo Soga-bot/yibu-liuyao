@@ -99,6 +99,7 @@ Page({
     // 进页第一眼即弹问事签：点首页「摇卦起卦」→ 这里直接问所求 → 确认后进装钱仪式
     if (!this.data.done && !this.data.lines.length) {
       console.log('[问事签] onLoad 弹出')
+      this._askShownAt = Date.now()
       this.setData({ asking: true })
     }
   },
@@ -536,7 +537,19 @@ Page({
 
   // ====== 问事签：起卦前默祷所求（可不填），为后续解读提供上下文 =====
   onQiuInput(e) { this.setData({ qiu: e.detail.value }) },
+  // 防幽灵确认：弹卡须展示满 500ms 才接受确认/跳过（拦截 input 失焦误触 bindconfirm、
+  // 页面切换残留 tap 等），过快触发直接忽略并留痕
+  askGateOk() {
+    if (!this._askShownAt || Date.now() - this._askShownAt < 500) {
+      console.log('[问事签] 忽略过快确认（疑似误触）')
+      return false
+    }
+    this._askShownAt = 0
+    return true
+  },
   onQiuConfirm() {
+    if (!this.askGateOk()) return
+    console.log('[问事签] 确认')
     this._qiu = (this.data.qiu || '').trim()
     this._asked = true
     this.setData({ asking: false })
@@ -544,6 +557,8 @@ Page({
     this.beginLoad()
   },
   onQiuSkip() {
+    if (!this.askGateOk()) return
+    console.log('[问事签] 跳过')
     this._qiu = ''
     this._asked = true
     this.setData({ asking: false, qiu: '' })
@@ -751,6 +766,7 @@ Page({
     if (!this.data.loading && !this.data.asking && !this.data.done &&
         !this.data.lines.length && !this._asked && this._phase === 'idle') {
       console.log('[问事签] onShow 兜底弹出')
+      this._askShownAt = Date.now()
       this.setData({ asking: true })
     }
   },

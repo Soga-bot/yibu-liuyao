@@ -50,7 +50,7 @@
         <text class="ask-label font-kai">问：</text>
         <input class="ask-input font-kai" value="{{qiu}}" maxlength="30"
                placeholder="如：事业、访友、出行" placeholder-class="ask-ph"
-               bindinput="onQiuInput" confirm-type="done" bindconfirm="onQiuConfirm" />
+               bindinput="onQiuInput" confirm-type="done" />
       </view>
       <view class="ask-btn font-kai" hover-class="ask-btn-hover" bindtap="onQiuConfirm">凝神起卦</view>
       <view class="ask-skip" hover-class="ask-skip-hover" bindtap="onQiuSkip">直接起卦 ›</view>
