@@ -132,3 +132,86 @@
 .btn-disabled {
   opacity: 0.6;
 }
+
+/* 问事签：起卦前默祷所求的弹卡（签条风，底部浮入） */
+.ask-mask {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(43, 28, 15, 0.35);
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ask-card {
+  width: 560rpx;
+  padding: 48rpx 44rpx 36rpx;
+  background: rgba(255, 252, 242, 0.96);
+  border: 2rpx solid #E6C158;
+  border-radius: 20rpx;
+  box-shadow: 0 16rpx 48rpx rgba(43, 28, 15, 0.18);
+  animation: ask-up 0.3s ease-out;
+}
+@keyframes ask-up {
+  from { transform: translateY(48rpx); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.ask-title {
+  text-align: center;
+  font-size: 38rpx;
+  color: #3E2723;
+  letter-spacing: 6rpx;
+}
+.ask-sub {
+  text-align: center;
+  margin-top: 12rpx;
+  font-size: 22rpx;
+  color: #a8916e;
+  letter-spacing: 2rpx;
+}
+.ask-row {
+  display: flex;
+  align-items: center;
+  margin: 44rpx 8rpx 8rpx;
+  padding-bottom: 12rpx;
+  border-bottom: 2rpx solid #E6C158;
+}
+.ask-label {
+  font-size: 30rpx;
+  color: #6B4A2B;
+}
+.ask-input {
+  flex: 1;
+  height: 48rpx;
+  font-size: 30rpx;
+  color: #3E2723;
+}
+.ask-ph {
+  color: #c9b28a;
+}
+.ask-btn {
+  margin-top: 40rpx;
+  height: 84rpx;
+  line-height: 84rpx;
+  text-align: center;
+  border-radius: 42rpx;
+  background: #C62828;
+  color: #F6D77A;
+  font-size: 30rpx;
+  font-weight: bold;
+  letter-spacing: 4rpx;
+  border: 2rpx solid #E6C158;
+}
+.ask-btn-hover {
+  background: #B11D1D;
+}
+.ask-skip {
+  margin-top: 22rpx;
+  text-align: center;
+  font-size: 24rpx;
+  color: #a8916e;
+  letter-spacing: 2rpx;
+}
+.ask-skip-hover {
+  color: #C62828;
+}

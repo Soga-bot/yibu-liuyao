@@ -14,9 +14,10 @@ const HISTORY_MAX = 100
 
 function saveHistory(entry) {
   let list = wx.getStorageSync(HISTORY_KEY) || []
-  // 与最近一条完全相同的卦不重复入列（手动反复点「排盘」只刷新时间）
+  // 与最近一条完全相同的卦不重复入列（手动反复点「排盘」只刷新时间）；所求不同视为两条
   const top = list[0]
-  if (top && top.yao === entry.yao && top.dong === entry.dong && top.gz === entry.gz) {
+  if (top && top.yao === entry.yao && top.dong === entry.dong && top.gz === entry.gz &&
+      (top.qiu || '') === (entry.qiu || '')) {
     top.t = entry.t
   } else {
     list.unshift(entry)
@@ -45,6 +46,8 @@ Page({
     const app = getApp()
     this.setData({ statusBarHeight: (app && app.globalData.statusBarHeight) || 20 })
     this._from = (options && options.from) || '' // history=历史回看，不写记录
+    // 所问之事（3D 问事签带入），随历史落库；手动排盘为空
+    this._qiu = options && options.q ? decodeURIComponent(options.q).slice(0, 30) : ''
     const today = dateToGanZhi(new Date())
     const idx = JIAZI.indexOf(today.gan + today.zhi)
     this.setData({ jiaziIndex: idx >= 0 ? idx : 0 })
@@ -116,7 +119,8 @@ Page({
         yao: key,
         dong: this.data.yao.map(y => y.dong ? '1' : '0').join(''),
         gz: jz,
-        name: r.name
+        name: r.name,
+        qiu: this._qiu || ''
       })
     }
   },

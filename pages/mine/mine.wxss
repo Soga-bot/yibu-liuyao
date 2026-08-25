@@ -131,3 +131,12 @@
   font-size: 22rpx;
   color: #b7a483;
 }
+
+/* 历史条目：所问之事（问事签带入，未填不显示） */
+.h-qiu {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #8a6b3f;
+  letter-spacing: 1rpx;
+}

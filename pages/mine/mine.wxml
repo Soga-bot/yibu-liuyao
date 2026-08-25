@@ -34,6 +34,7 @@
             <text class="h-name font-kai">{{item.name}}</text>
             <text class="h-gz">{{item.gz}}日</text>
           </view>
+          <text wx:if="{{item.qiu}}" class="h-qiu font-kai">问：{{item.qiu}}</text>
           <text class="h-time">{{item.timeStr}}</text>
         </view>
         <text class="g-arrow">›</text>

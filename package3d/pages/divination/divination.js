@@ -70,7 +70,9 @@ Page({
     shaking: false,
     lines: [],       // 已得爻（摇出顺序 = 初→上）：{yin, dong, name, mark, pos}
     done: false,     // 6 爻已满，已跳转/待重摇
-    tip: ''          // 最近一爻结果 / 引导文案
+    tip: '',         // 最近一爻结果 / 引导文案
+    asking: false,   // 问事签弹卡中
+    qiu: ''          // 所问之事（输入框值）
   },
 
   onLoad() {
@@ -303,7 +305,8 @@ Page({
       const dongKey = lines.map(l => l.dong ? '1' : '0').join('')
       this._navTimer = setTimeout(() => {
         wx.navigateTo({
-          url: '/pages/paipan/paipan?yao=' + yaoKey + '&dong=' + dongKey + '&from=3d',
+          url: '/pages/paipan/paipan?yao=' + yaoKey + '&dong=' + dongKey +
+               '&q=' + encodeURIComponent(this._qiu || '') + '&from=3d',
           fail: () => this.setData({ tip: '跳转失败，请手动打开排盘页' })
         })
       }, 900)
@@ -316,9 +319,11 @@ Page({
   onReset() {
     if (this._navTimer) { clearTimeout(this._navTimer); this._navTimer = null }
     this._shakeAmp = 0
+    this._asked = false          // 重摇=新卦，下次起卦重新问所求
+    this._qiu = ''
     if (this._shell) this._shell.rotation.z = this._shellBaseRotZ
     this.placeCoinsIdle()
-    this.setData({ lines: [], done: false, tip: '已重置，摇一摇或点按钮起卦' })
+    this.setData({ lines: [], done: false, qiu: '', tip: '已重置，摇一摇或点按钮起卦' })
   },
 
   // 渲染循环
@@ -364,8 +369,30 @@ Page({
 
   // 摇卦统一入口：按钮 / 摇一摇都走这里
   triggerShake() {
-    if (this.data.loading || this.data.shaking) return
+    if (this.data.loading || this.data.shaking || this.data.asking) return
+    // 新起一卦（首次或卦成重开）先弹「问事签」记录所求；同卦续爻不再问
+    if ((this.data.done || !this.data.lines.length) && !this._asked) {
+      this.setData({ asking: true })
+      return
+    }
     if (this.data.done) this.onReset()   // 卦成后再摇 = 重新起卦
+    this.startDrop()
+  },
+
+  // ====== 问事签：起卦前默祷所求（可不填），为后续解读提供上下文 =====
+  onQiuInput(e) { this.setData({ qiu: e.detail.value }) },
+  onQiuConfirm() {
+    this._qiu = (this.data.qiu || '').trim()
+    this._asked = true
+    this.setData({ asking: false })
+    if (this.data.done) this.onReset()
+    this.startDrop()
+  },
+  onQiuSkip() {
+    this._qiu = ''
+    this._asked = true
+    this.setData({ asking: false, qiu: '' })
+    if (this.data.done) this.onReset()
     this.startDrop()
   },
 

@@ -39,6 +39,7 @@ Page({
         dong: h.dong,
         gz: h.gz,
         name: h.name,
+        qiu: h.qiu || '',
         xiang: h.yao.split('').reverse().map(b => +b),          // 卦象 上→下
         dongT: h.dong.split('').reverse().map(b => +b)          // 动爻标记 上→下
       }))
