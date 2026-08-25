@@ -67,6 +67,7 @@ const POUR_ANGLE = -1.9        // 倒钱态：壳前倾（口转向桌面）
 const TILT_SPEED = 6           // 壳姿态角指数趋近系数（越大转得越快）
 const POUR_RELEASE = 0.55      // 前倾角走过该比例时松钱
 const LOAD_RADIUS = 1.15       // 拖钱入壳判定：距壳心该半径内自动聚拢入壳
+const PICK_PX = 55             // 铜钱拾取热区半径(px)：屏幕空间拾取，手指友好
 const HOP_DUR = 0.35           // 铜钱落入壳内动画时长(s)
 
 const POS_SHORT = ['初', '二', '三', '四', '五', '上']
@@ -118,9 +119,8 @@ Page({
     renderer.setClearColor(0xEDE4CF, 1) // 宣纸浅底（与页面 css 背景一致），深底衬不出龟壳铜钱
     this._canvas = canvas
     this._renderer = renderer
-    this._winW = info.windowWidth    // 触摸坐标 → 射线 NDC 换算用
+    this._winW = info.windowWidth    // 触摸坐标 ↔ 屏幕投影换算用
     this._winH = info.windowHeight
-    this._tablePlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -(FLOOR_Y + 0.3)) // 拖钱平面（提起高度）
 
     // 复用一个 GLTFLoader
     this._gltfLoader = new THREE.GLTFLoader()
@@ -581,6 +581,9 @@ Page({
       if (coin) {
         this._dragCoin = coin
         this._touchId = t.identifier
+        this._dragLX = t.clientX   // 像素增量拖动的基准
+        this._dragLY = t.clientY
+        this._dragDist = this._camera.position.distanceTo(coin.mesh.position)
         coin.mesh.position.y = FLOOR_Y + 0.3
       }
       return
@@ -635,71 +638,50 @@ Page({
     }
   },
 
-  // ====== 装钱：射线拾取 / 桌面拖动 / 入壳判定 ======
-  // 【临时自检】射线直射 1 号铜钱中心，倒出 raycast 内部状态定位 0/3 问题（调通后整段删除）
-  selfTestPick() {
-    try {
-      const c = this._coins[0]
-      this._scene.updateMatrixWorld()   // 自检也得用新鲜矩阵，否则重演「首帧前旧 matrixWorld」假阴性
-      const ndc = c.mesh.position.clone().project(this._camera)
-      this._ray = this._ray || new THREE.Raycaster()
-      this._ray.setFromCamera({ x: ndc.x, y: ndc.y }, this._camera)
-      const coinHits = this._ray.intersectObjects(this._coins.map((x) => x.mesh), true)
-      const shellHits = this._shell ? this._ray.intersectObject(this._shell, true) : []
-      const first = coinHits[0]
-      console.log('[自检2-拾取] 钱hits=' + coinHits.length +
-        ' 首命中=' + (first ? first.object.type + '/' + (first.object.name || '?') + '/d=' + first.distance.toFixed(2) : '无') +
-        ' 壳hits=' + shellHits.length +
-        ' 相机=' + this._camera.position.x.toFixed(1) + ',' + this._camera.position.y.toFixed(1) + ',' + this._camera.position.z.toFixed(1) +
-        ' 射线向=' + this._ray.ray.direction.x.toFixed(2) + ',' + this._ray.ray.direction.y.toFixed(2) + ',' + this._ray.ray.direction.z.toFixed(2))
-      // 铜钱子树逐网格：世界坐标 / 世界缩放 / 几何包围球半径（原始局部值）
-      const parts = []
-      c.mesh.traverse((o) => {
-        if (!o.isMesh || parts.length >= 4) return
-        if (!o.geometry.boundingSphere) o.geometry.computeBoundingSphere()
-        const wp = o.getWorldPosition(new THREE.Vector3())
-        const ws = o.getWorldScale(new THREE.Vector3())
-        parts.push(o.type + '(' + (o.name || '?') + ') wp=' + wp.x.toFixed(2) + ',' + wp.y.toFixed(2) + ',' + wp.z.toFixed(2) +
-          ' 缩放=' + ws.x.toFixed(3) + ',' + ws.y.toFixed(3) + ',' + ws.z.toFixed(3) +
-          ' 球r=' + o.geometry.boundingSphere.radius.toFixed(2))
-      })
-      console.log('[自检2-网格] 根pos=' + c.mesh.position.x.toFixed(2) + ',' + c.mesh.position.y.toFixed(2) + ',' + c.mesh.position.z.toFixed(2), parts)
-      this.setData({ tip: '自检2 钱=' + coinHits.length + ' 壳=' + shellHits.length + '，日志见console' })
-    } catch (err) {
-      console.error('[自检2] 异常', err)
-      this.setData({ tip: '自检2异常：' + ((err && err.message) || err) })
+  // ====== 装钱：屏幕空间拾取 / 像素增量拖动 / 入壳判定 ======
+  // 教训：本环境 Raycaster.intersectObjects 对模型 mesh 全 miss（矩阵已刷新仍 0 命中，
+  // 壳同样 miss，疑为 threejs-miniprogram 构建裁剪），弃用几何求交改纯数学：
+  // 拾取 = 投影铜钱中心到屏幕算距离；拖动 = 像素增量 × 该深度处世界/像素比。
+  pickCoin(cx, cy) {
+    this._camera.updateMatrixWorld()
+    const v = new THREE.Vector3()
+    let best = null
+    let bestD = PICK_PX
+    for (const c of this._coins) {
+      if (c.loaded) continue
+      v.copy(c.mesh.position).project(this._camera)
+      const sx = (v.x + 1) / 2 * this._winW
+      const sy = (1 - v.y) / 2 * this._winH
+      const d = Math.sqrt((sx - cx) * (sx - cx) + (sy - cy) * (sy - cy))
+      if (d < bestD) { bestD = d; best = c }
     }
+    return best
   },
 
-  pickCoin(cx, cy) {
-    // 关键：raycast 用的是 matrixWorld，首帧渲染前它是旧值（克隆自原型）——先强制刷新
-    this._scene.updateMatrixWorld()
-    this._ray = this._ray || new THREE.Raycaster()
-    this._ray.setFromCamera({
-      x: (cx / this._winW) * 2 - 1,
-      y: -(cy / this._winH) * 2 + 1
-    }, this._camera)
-    const hits = this._ray.intersectObjects(this._coins.map((c) => c.mesh), true)
-    if (!hits.length) return null
-    // 命中的是子网格：沿父链找到所属铜钱（已入壳的不可再拖）
-    let o = hits[0].object
-    while (o) {
-      const c = this._coins.find((x) => x.mesh === o && !x.loaded)
-      if (c) return c
-      o = o.parent
+  // 【临时自检】验证屏幕空间拾取链路（调通后整段删除）
+  selfTestPick() {
+    try {
+      const v = new THREE.Vector3()
+      let ok = 0
+      this._coins.forEach((c) => {
+        v.copy(c.mesh.position).project(this._camera)
+        const hit = this.pickCoin((v.x + 1) / 2 * this._winW, (1 - v.y) / 2 * this._winH) === c
+        if (hit) ok++
+      })
+      console.log('[自检] 屏幕拾取', ok + '/3')
+      this.setData({ tip: '自检 拾取' + ok + '/3' })
+    } catch (err) {
+      console.error('[自检] 异常', err)
     }
-    return null
   },
 
   moveCoinOnTable(coin, cx, cy) {
-    this._ray.setFromCamera({
-      x: (cx / this._winW) * 2 - 1,
-      y: -(cy / this._winH) * 2 + 1
-    }, this._camera)
-    const p = new THREE.Vector3()
-    if (!this._ray.ray.intersectPlane(this._tablePlane, p)) return
-    coin.mesh.position.x = clamp(p.x, -1.3, 1.3)
-    coin.mesh.position.z = clamp(p.z, -0.3, 1.5)
+    // 该深度处 1px 对应的世界距离（竖直 FOV 换算，横竖同因子）
+    const k = 2 * Math.tan(this._camera.fov * Math.PI / 360) * this._dragDist / this._winH
+    coin.mesh.position.x = clamp(coin.mesh.position.x + (cx - this._dragLX) * k, -1.3, 1.3)
+    coin.mesh.position.z = clamp(coin.mesh.position.z + (cy - this._dragLY) * k, -0.3, 1.5)
+    this._dragLX = cx
+    this._dragLY = cy
     // 靠近壳口自动聚拢入壳：拖到壳口附近即被吸入，不必精确松手
     const c0 = this._shellPivot.position
     const dx = coin.mesh.position.x - c0.x
