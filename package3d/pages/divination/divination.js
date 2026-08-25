@@ -84,7 +84,8 @@ Page({
     asking: false,   // 问事签弹卡中
     qiu: '',         // 所问之事（输入框值）
     phase: 'idle',   // 流程阶段（按钮文案用）
-    loadCount: 0     // 已入壳铜钱数
+    loadCount: 0,    // 已入壳铜钱数
+    btnLabel: '摇卦起卦'  // 按钮文案（JS 集中算：wxml 深层三元编译不过）
   },
 
   onLoad() {
@@ -236,7 +237,7 @@ Page({
     this._tiltTarget = LOAD_ANGLE
     this._tiltCb = null
     this._coins.forEach((c) => { c.loaded = false; c.anim = null })
-    this.setData({ phase: 'loading', loadCount: 0, tip: '拖动铜钱放入壳中（0/3）' })
+    this.updateBtn({ phase: 'loading', loadCount: 0, tip: '拖动铜钱放入壳中（0/3）' })
   },
 
   // 三钱入壳后：壳立正 → 进入摇动阶段
@@ -247,7 +248,7 @@ Page({
     this._released = false
     this._shaking = true
     this._shakeAmp = 1
-    this.setData({ phase: 'shaking', shaking: true, tip: '摇动手机，或连点下方按钮' })
+    this.updateBtn({ phase: 'shaking', shaking: true, tip: '摇动手机，或连点下方按钮' })
   },
 
   // 一次有效晃动：壳摆一下，壳内铜钱翻个身
@@ -267,7 +268,7 @@ Page({
     this._tiltTarget = POUR_ANGLE
     this._tiltCb = null
     this._released = false
-    this.setData({ phase: 'pouring', tip: '' })
+    this.updateBtn({ phase: 'pouring', tip: '' })
   },
 
   // 松钱：从壳口沿口朝向抛出（附向前初速让钱落在壳前桌面），交给自由落体物理
@@ -379,7 +380,7 @@ Page({
       this._phase = 'returning'   // 壳回正
       this._tiltTarget = 0
       this._tiltCb = () => { this._phase = 'idle'; this.setData({ phase: 'idle' }) }
-      this.setData({ shaking: false, phase: 'returning' })
+      this.updateBtn({ shaking: false, phase: 'returning' })
       this.onCoinsSettled()       // 读面成爻
     }
   },
@@ -404,7 +405,7 @@ Page({
       // 卦成：重震一下，稍候跳排盘；下次起卦视为新卦，重新问所求
       this._asked = false
       wx.vibrateShort({ type: 'heavy', fail: () => {} })
-      this.setData({ lines, done: true, tip: backs + '背 → ' + y.name + '，卦成！' })
+      this.updateBtn({ lines, done: true, tip: backs + '背 → ' + y.name + '，卦成！' })
       const yaoKey = lines.map(l => l.yin ? '0' : '1').join('')
       const dongKey = lines.map(l => l.dong ? '1' : '0').join('')
       this._navTimer = setTimeout(() => {
@@ -415,7 +416,7 @@ Page({
         })
       }, 900)
     } else {
-      this.setData({ lines, tip: '第' + (pos + 1) + '爻：' + backs + '背 → ' + y.name + (y.dong ? '（动）' : '') })
+      this.updateBtn({ lines, tip: '第' + (pos + 1) + '爻：' + backs + '背 → ' + y.name + (y.dong ? '（动）' : '') })
     }
   },
 
@@ -434,7 +435,7 @@ Page({
     if (this._coins) this._coins.forEach((c) => { c.anim = null; c.loaded = false })
     if (this._shell) this._shell.rotation.z = this._shellBaseRotZ
     this.placeCoinsIdle()
-    this.setData({ lines: [], done: false, qiu: '', phase: 'idle', loadCount: 0, shaking: false, tip: '已重置，摇一摇或点按钮起卦' })
+    this.updateBtn({ lines: [], done: false, qiu: '', phase: 'idle', loadCount: 0, shaking: false, tip: '已重置，摇一摇或点按钮起卦' })
   },
 
   // 渲染循环
@@ -491,6 +492,24 @@ Page({
     }
     if (this.data.done) this.onReset()   // 卦成后再摇 = 重新起卦
     this.beginLoad()
+  },
+
+  // 按钮文案集中计算（patch 为本次要一并 setData 的字段，优先取新值）
+  updateBtn(patch) {
+    const d = this.data
+    const p = patch || {}
+    const phase = 'phase' in p ? p.phase : this._phase
+    const shaking = 'shaking' in p ? p.shaking : d.shaking
+    const done = 'done' in p ? p.done : d.done
+    const linesLen = p.lines ? p.lines.length : d.lines.length
+    const loaded = 'loadCount' in p ? p.loadCount : this._loadCount
+    let label
+    if (phase === 'loading') label = '铜钱 ' + loaded + ' / 3'
+    else if (shaking) label = '摇动中…'
+    else if (done) label = '重新起卦'
+    else if (linesLen) label = '摇第' + (linesLen + 1) + '爻'
+    else label = '摇卦起卦'
+    this.setData(Object.assign({ btnLabel: label }, p))
   },
 
   // ====== 问事签：起卦前默祷所求（可不填），为后续解读提供上下文 =====
@@ -639,13 +658,13 @@ Page({
       t: 0
     }
     this._loadCount += 1
-    this.setData({ loadCount: this._loadCount })
+    this.updateBtn()
     if (this._loadCount >= 3) {
       // 三钱齐：壳立正 → 摇动阶段
       this._phase = 'righting'
       this._tiltTarget = 0
       this._tiltCb = () => this.startShakePhase()
-      this.setData({ phase: 'righting', tip: '' })
+      this.updateBtn({ phase: 'righting', tip: '' })
     } else {
       this.setData({ tip: '拖动铜钱放入壳中（' + this._loadCount + '/3）' })
     }
