@@ -101,6 +101,10 @@ Page({
       console.log('[问事签] onLoad 弹出')
       this.setData({ asking: true })
     }
+  },
+  // 画布在 onReady 创建（首次布局完成后）：onLoad 过早创建画布会让同层渲染
+  // 挂接失败，原生画布层浮到所有浮层之上（首进看不到按钮/弹窗，刷新才恢复）
+  onReady() {
     wx.createSelectorQuery()
       .select('#gl')
       .fields({ node: true })

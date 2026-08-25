@@ -7,13 +7,14 @@
   overflow: hidden;
 }
 
-/* 全屏 WebGL 画布 */
+/* 全屏 WebGL 画布（显式 z-index：浮层 5/8 压在画布上，防原生层浮动时序问题） */
 .gl {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
+  z-index: 0;
 }
 
 /* 加载中提示 */
