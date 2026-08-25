@@ -66,7 +66,7 @@ const SHAKE_COOLDOWN = 1200     // 两次触发最小间隔(ms)，防止一甩�
 const SHAKE_HITS = 4           // 有效晃动达此次数 = 摇够
 const SHAKE_QUIET = 800        // 摇够后静默该时长(ms)判定摇动停止，自动倒出
 const LOAD_ANGLE = Math.PI / 6 // 装钱态：壳后仰 30°（微张口迎钱，原 86° 太翻）
-const POUR_ANGLE = -1.9        // 倒钱态：壳前倾（口转向桌面）
+const POUR_ANGLE = -1.65       // 倒钱态：壳前倾（口转向桌面；原 -1.9 过水平面 19°，近沿上翘太夸张）
 const TILT_SPEED = 6           // 壳姿态角指数趋近系数（越大转得越快）
 const POUR_RELEASE = 0.55      // 前倾角走过该比例时松钱
 const PICK_PX = 55             // 铜钱拾取热区半径(px)：屏幕空间拾取，手指友好
