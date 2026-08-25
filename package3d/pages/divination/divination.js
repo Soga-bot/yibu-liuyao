@@ -648,23 +648,24 @@ Page({
 
   // 在壳背刻下第 i 爻（0=初）：阳=一整条，阴=两段中空；动爻朱红（与界面动爻色一致）。
   // 局部轴向（glb 实证推导）：+Y=拱面朝镜头 ⇒ 腹甲面 = backY；+Z→世界竖直 ⇒ 初爻刻在 -Z 端
+  // 刻痕感三要素：细（笔画/厚度均为行距的小比例）、长（过半壳宽）、近贴面（微凸不入眼）
   carveLine(i) {
     const L = this._shellLocal
-    const len = L.size.x * 0.34             // 爻线长度：按壳背可刻区域自适应
+    const len = L.size.x * 0.46             // 爻线长度：过半壳宽（原 0.34 偏短）
     const gap = L.size.z * 0.1              // 六爻行距（六行共占半高）
     const line = this.data.lines[i]
     const mat = new THREE.MeshStandardMaterial({ color: line.dong ? 0xC62828 : 0x2E1A0C })
-    const y = L.backY + gap * 0.08          // 贴探测面微凸：像刻上去的浮雕
+    const y = L.backY + gap * 0.02          // 近贴面：细线刻痕，不做浮雕棍
     const z = L.min.z + L.size.z / 2 + (i - 2.5) * gap
     const bars = []
     const seg = (x, l) => {
-      const m = new THREE.Mesh(new THREE.BoxGeometry(l, gap * 0.5, gap * 0.42), mat)
+      const m = new THREE.Mesh(new THREE.BoxGeometry(l, gap * 0.22, gap * 0.26), mat)
       m.position.set(x, y, z)
       m.scale.x = 0.02                                    // 从 0 长出（carve 段驱动）
       this._marksGroup.add(m)
       bars.push(m)
     }
-    if (line.yin) { seg(-len * 0.29, len * 0.42); seg(len * 0.29, len * 0.42) }
+    if (line.yin) { seg(-len * 0.30, len * 0.44); seg(len * 0.30, len * 0.44) }
     else seg(0, len)
     return bars
   },
