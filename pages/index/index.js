@@ -43,11 +43,14 @@ Page({
     wx.navigateTo({ url: '/pages/paipan/paipan' })
   },
 
-  onDic() {
-    wx.switchTab({ url: '/pages/dianji/dianji' })
-  },
-
   onWuxing() {
-    wx.showToast({ title: '五行基础', icon: 'none' })
+    // 典籍库入口已由底部 TabBar 承载（首页不再重复）；五行基础为独立学习页
+    wx.navigateTo({
+      url: '/pages/wuxing/wuxing',
+      fail: (e) => {
+        console.error('[首页] 进五行基础失败', e)
+        wx.showToast({ title: '进入失败：' + (e.errMsg || '未知'), icon: 'none' })
+      }
+    })
   }
 })

@@ -1,0 +1,92 @@
+<!-- pages/wuxing/wuxing.wxml — 五行基础（通识学习页） -->
+<view class="status-bar" style="height: {{statusBarHeight}}px;"></view>
+<view class="page">
+  <view class="topbar">
+    <view class="back font-kai" bindtap="goBack">‹</view>
+    <text class="title font-kai">五行基础</text>
+  </view>
+
+  <scroll-view scroll-y class="content">
+    <!-- 生克图 -->
+    <view class="sec">
+      <view class="sec-title font-kai">五行生克</view>
+      <view class="wx-map">
+        <!-- 连线（相生实线 / 相克虚线），节点圆盖住线端 -->
+        <view wx:for="{{shengLines}}" wx:key="index" class="lk lk-sheng"
+              style="left: {{item.l}}rpx; top: {{item.t}}rpx; width: {{item.w}}rpx; transform: rotate({{item.r}}deg);"></view>
+        <view wx:for="{{keLines}}" wx:key="index" class="lk lk-ke"
+              style="left: {{item.l}}rpx; top: {{item.t}}rpx; width: {{item.w}}rpx; transform: rotate({{item.r}}deg);"></view>
+        <!-- 五行节点（顶点起顺时针：木火土金水） -->
+        <view wx:for="{{nodes}}" wx:key="w" class="wx-node n-{{item.w}}"
+              style="left: {{item.x}}rpx; top: {{item.y}}rpx;">{{item.w}}</view>
+      </view>
+      <view class="map-legend">实线相生 · 虚线相克</view>
+      <view class="sec-note">相生：木生火，火生土，土生金，金生水，水生木，循环不绝；<br/>相克：木克土，土克水，水克火，火克金，金克木，相互制约。</view>
+    </view>
+
+    <!-- 相生 -->
+    <view class="sec">
+      <view class="sec-title font-kai">五行相生</view>
+      <view class="m-row" wx:for="{{shengRows}}" wx:key="k">
+        <text class="m-k font-kai">{{item.k}}</text>
+        <text class="m-v">{{item.v}}</text>
+      </view>
+      <view class="sec-note">传统以「生我者」为源、「我生者」为流，六亲中的父母爻、子孙爻即由此推。</view>
+    </view>
+
+    <!-- 相克 -->
+    <view class="sec">
+      <view class="sec-title font-kai">五行相克</view>
+      <view class="m-row" wx:for="{{keRows}}" wx:key="k">
+        <text class="m-k font-kai">{{item.k}}</text>
+        <text class="m-v">{{item.v}}</text>
+      </view>
+      <view class="sec-note">相克并非只言损害，亦是制约与平衡——传统解卦中「克制」多作「管束」解。</view>
+    </view>
+
+    <!-- 五行归类 -->
+    <view class="sec">
+      <view class="sec-title font-kai">五行归类</view>
+      <view class="grid-head">
+        <text wx:for="{{guileiHead}}" wx:key="*this" class="gh">{{item}}</text>
+      </view>
+      <view class="grid-row" wx:for="{{guileiRows}}" wx:for-item="row" wx:for-index="i" wx:key="i">
+        <text wx:for="{{row}}" wx:for-item="cell" wx:for-index="j" wx:key="j"
+              class="gc {{j === 0 ? 'gc-x' : ''}}">{{cell}}</text>
+      </view>
+      <view class="sec-note">五脏配属：木肝、火心、土脾、金肺、水肾（传统配说，非医学论断）。</view>
+    </view>
+
+    <!-- 天干五行 -->
+    <view class="sec">
+      <view class="sec-title font-kai">天干五行</view>
+      <view class="m-row" wx:for="{{ganRows}}" wx:key="k">
+        <text class="m-k font-kai">{{item.k}}</text>
+        <text class="m-v">{{item.v}}</text>
+      </view>
+      <view class="sec-note">排盘中的「纳甲」装干支，即按此归属定各爻五行。</view>
+    </view>
+
+    <!-- 地支五行 -->
+    <view class="sec">
+      <view class="sec-title font-kai">地支五行</view>
+      <view class="m-row" wx:for="{{zhiRows}}" wx:key="k">
+        <text class="m-k font-kai">{{item.k}}</text>
+        <text class="m-v">{{item.v}}</text>
+      </view>
+    </view>
+
+    <!-- 六十甲子与旬空 -->
+    <view class="sec">
+      <view class="sec-title font-kai">六十甲子与旬空</view>
+      <view class="sec-note">十天干配十二地支，阳配阳、阴配阴，六十种组合一周，称「六十甲子」。每旬十日，旬内排不到的两支即为「空亡（旬空）」——首页与排盘页所标空亡即由此来。</view>
+      <view class="m-row" wx:for="{{xunRows}}" wx:key="k">
+        <text class="m-k font-kai">{{item.k}}</text>
+        <text class="m-v">{{item.v}}</text>
+      </view>
+    </view>
+
+    <view class="foot-note">本页为传统文化通识整理 · 仅供学习参考</view>
+    <view class="bottom-pad"></view>
+  </scroll-view>
+</view>

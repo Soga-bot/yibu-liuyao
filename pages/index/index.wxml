@@ -61,13 +61,9 @@
   <!-- 弹性间隔（占剩余空间 5/7，承接上方让出的空白） -->
   <view class="gap-grow gap-bottom"></view>
 
-  <!-- 二级入口导航 -->
+  <!-- 二级入口导航（典籍库已由底部 TabBar 承载，不再重复设入口） -->
   <view class="sub-nav">
-    <view class="sub-item sub-active" bindtap="onDic">
-      <text>卦辞典籍</text>
-      <view class="sub-line"></view>
-    </view>
-    <view class="sub-item" bindtap="onWuxing">
+    <view class="sub-item" hover-class="sub-hover" hover-stay-time="80" bindtap="onWuxing">
       <text>五行基础</text>
       <text class="arrow">›</text>
     </view>

@@ -45,28 +45,34 @@
         </view>
 
         <view class="ex-block">
-          <view class="ex-title font-kai">本卦 · {{result.name}}</view>
+          <view class="ex-title font-kai">本卦 · {{result.nameP}}</view>
           <view wx:if="{{result.desc}}" class="gua-desc">{{result.desc}}</view>
-          <view wx:if="{{result.daxiang}}" class="gua-daxiang font-kai">象曰：{{result.daxiang}}</view>
           <view wx:if="{{result.guaci}}" class="gua-guaci font-kai">卦辞：{{result.guaci}}</view>
+          <view wx:if="{{result.guaciB}}" class="gua-desc gua-baihua">白话：{{result.guaciB}}</view>
+          <view wx:if="{{result.tuan}}" class="gua-daxiang font-kai">彖曰：{{result.tuan}}</view>
+          <view wx:if="{{result.daxiang}}" class="gua-daxiang font-kai">象曰：{{result.daxiang}}</view>
         </view>
         <view class="ex-block">
-          <view class="ex-title font-kai">变卦 · {{bian.name}}</view>
+          <view class="ex-title font-kai">变卦 · {{bian.nameP}}</view>
           <view wx:if="{{bian.desc}}" class="gua-desc">{{bian.desc}}</view>
-          <view wx:if="{{bian.daxiang}}" class="gua-daxiang font-kai">象曰：{{bian.daxiang}}</view>
           <view wx:if="{{bian.guaci}}" class="gua-guaci font-kai">卦辞：{{bian.guaci}}</view>
+          <view wx:if="{{bian.guaciB}}" class="gua-desc gua-baihua">白话：{{bian.guaciB}}</view>
+          <view wx:if="{{bian.tuan}}" class="gua-daxiang font-kai">彖曰：{{bian.tuan}}</view>
+          <view wx:if="{{bian.daxiang}}" class="gua-daxiang font-kai">象曰：{{bian.daxiang}}</view>
         </view>
       </block>
 
       <!-- 无动爻：单卦头 -->
       <view wx:else class="gua-head">
-        <view class="gua-name font-kai">{{result.name}}卦</view>
+        <view class="gua-name font-kai">{{result.nameP}}卦</view>
         <view class="gua-meta">
           <text>{{result.gong}}宫 · {{result.gongWuxing}}</text>
         </view>
         <view wx:if="{{result.desc}}" class="gua-desc">{{result.desc}}</view>
-        <view wx:if="{{result.daxiang}}" class="gua-daxiang font-kai">象曰：{{result.daxiang}}</view>
         <view wx:if="{{result.guaci}}" class="gua-guaci font-kai">卦辞：{{result.guaci}}</view>
+        <view wx:if="{{result.guaciB}}" class="gua-desc gua-baihua">白话：{{result.guaciB}}</view>
+        <view wx:if="{{result.tuan}}" class="gua-daxiang font-kai">彖曰：{{result.tuan}}</view>
+        <view wx:if="{{result.daxiang}}" class="gua-daxiang font-kai">象曰：{{result.daxiang}}</view>
       </view>
 
       <view class="biao">
@@ -91,7 +97,10 @@
               <text wx:if="{{item.dong}}" class="ymark">{{item.yin ? '✕' : '○'}}</text>
             </view>
           </view>
-          <view wx:if="{{item.showCi && item.ci}}" class="row-ci font-kai">{{item.ti}}：{{item.ci}}</view>
+          <view wx:if="{{item.showCi && (item.ci || item.xiao || item.ciB)}}" class="row-ci font-kai">{{item.ti}}：{{item.ci}}
+            <view wx:if="{{item.xiao}}" class="ci-sub">小象：{{item.xiao}}</view>
+            <view wx:if="{{item.ciB}}" class="ci-sub ci-baihua">白话：{{item.ciB}}</view>
+          </view>
         </block>
       </view>
       <view class="biao-hint">点爻行可展开/收起爻辞原文</view>

@@ -202,3 +202,18 @@
   color: #3E2723;
   margin: 10rpx 0 8rpx;
 }
+
+/* 白话译句（非楷体，与原文楷体区分） */
+.gua-baihua { color: #8a7355; }
+
+/* 爻行展开区内的小象/白话 */
+.ci-sub {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #8a5e15;
+  letter-spacing: 1rpx;
+}
+.ci-baihua {
+  color: #5D4037;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+}

@@ -4,6 +4,9 @@
 // 入参：yao/dong（6 位 0|1，初→上）、q（所问，随历史落库）；缺参显示空态。
 import { paipan, dateToGanZhi, TIAN_GAN, DI_ZHI } from '../../../utils/liuyao.js'
 import { GUA_DATA } from '../../../data/gua.js'
+import { getZhuan } from '../../../data/zhuan.js'
+import { getBaihua } from '../../../data/baihua.js'
+import { annotate, namePinyin } from '../../../utils/pinyin.js'
 
 const POS_NAMES = ['初爻', '二爻', '三爻', '四爻', '五爻', '上爻'] // index0=初
 
@@ -56,11 +59,15 @@ Page({
 
     const r = paipan({ yao, dayGan: jz[0], dayZhi: jz[1] })
     const kb = GUA_DATA[yaoStr] || {}
-    // 显示行：上→初（倒序）；爻题/爻辞查知识库
+    const zh = getZhuan(yaoStr) || {}
+    const bh = getBaihua(yaoStr) || {}
+    // 显示行：上→初（倒序）；爻题/爻辞查知识库；小象逐爻、白话试点卦才有
     const rows = r.lines.slice().reverse().map((l) => ({
       posName: POS_NAMES[l.pos - 1],
       ti: kb.yaoci ? kb.yaoci[l.pos - 1].ti : '',
-      ci: kb.yaoci ? (kb.yaoci[l.pos - 1].ci || '') : '',
+      ci: kb.yaoci ? annotate(kb.yaoci[l.pos - 1].ci || '') : '',
+      xiao: zh.xiao ? annotate(zh.xiao[l.pos - 1] || '') : '',
+      ciB: bh.yaoci ? (bh.yaoci[l.pos - 1] || '') : '',
       showCi: false,
       yin: l.yin,
       dong: l.dong,
@@ -77,17 +84,22 @@ Page({
     if (yao.some((l) => l.dong)) {
       const bianKey = yao.map((l) => (l.dong ? (l.yin ? '1' : '0') : (l.yin ? '0' : '1'))).join('')
       const kb2 = GUA_DATA[bianKey] || {}
+      const zh2 = getZhuan(bianKey) || {}
+      const bh2 = getBaihua(bianKey) || {}
       const r2 = paipan({
         yao: bianKey.split('').map((b) => ({ yin: b === '0', dong: false })),
         dayGan: jz[0], dayZhi: jz[1]
       })
       bian = {
         name: r2.name,
+        nameP: namePinyin(r2.name),
         gong: r2.gong,
         gongWuxing: r2.gongWuxing,
         desc: kb2.desc || '',
-        daxiang: kb2.daxiang || '',
-        guaci: kb2.guaci || '',
+        daxiang: annotate(kb2.daxiang || ''),
+        guaci: annotate(kb2.guaci || ''),
+        guaciB: bh2.guaci || '',
+        tuan: zh2.tuan ? annotate(zh2.tuan) : '',
         yao: bianKey.split('').map((b) => ({ yin: b === '0' })).reverse()   // 上→初
       }
     }
@@ -96,8 +108,11 @@ Page({
       gz: jz,
       result: Object.assign(r, {
         desc: kb.desc || '',
-        daxiang: kb.daxiang || '',
-        guaci: kb.guaci || ''
+        daxiang: annotate(kb.daxiang || ''),
+        guaci: annotate(kb.guaci || ''),
+        guaciB: bh.guaci || '',
+        tuan: zh.tuan ? annotate(zh.tuan) : '',
+        nameP: namePinyin(r.name)
       }),
       ben: { yao: rows.map((w) => ({ yin: w.yin, dong: w.dong })) },   // 上→初
       bian,

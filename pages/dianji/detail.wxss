@@ -125,6 +125,27 @@
   line-height: 1.8;
   letter-spacing: 2rpx;
 }
+
+/* 白话译句（非楷体，与原文楷体区分） */
+.baihua {
+  margin-top: 12rpx;
+  font-size: 25rpx;
+  color: #8a7355;
+  line-height: 1.7;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+}
+
+/* 爻辞下方的小象/白话 */
+.y-sub {
+  margin-top: 6rpx;
+  font-size: 24rpx;
+  color: #8a5e15;
+  letter-spacing: 1rpx;
+}
+.y-baihua {
+  color: #5D4037;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+}
 .src-note {
   margin-top: 30rpx;
   text-align: center;

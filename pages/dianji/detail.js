@@ -1,6 +1,9 @@
-// pages/dianji/detail.js — 卦详情：卦辞 / 六爻爻辞 / 用九用六 / 大象传
+// pages/dianji/detail.js — 卦详情：卦辞/白话、彖传、六爻爻辞/小象、用九用六、大象传
 import { getGua } from '../../data/gua.js'
 import { GONG_WUXING } from '../../utils/liuyao.js'
+import { getZhuan } from '../../data/zhuan.js'
+import { getBaihua } from '../../data/baihua.js'
+import { annotate, namePinyin } from '../../utils/pinyin.js'
 
 Page({
   data: {
@@ -14,6 +17,8 @@ Page({
     const g = getGua((options && options.key) || '')
     if (!g) return
     const wx = GONG_WUXING[g.gong] || ''
+    const zh = getZhuan(g.key) || {}
+    const bh = getBaihua(g.key) || {}
     // 传统全称：上象+下象+卦名（如火水未济）；八纯卦作「乾为天」式
     const full = g.waiXiang === g.neiXiang
       ? g.name + '为' + g.waiXiang
@@ -21,12 +26,25 @@ Page({
     this.setData({
       gua: {
         name: g.name,
+        nameP: namePinyin(g.name),
         full,
         desc: g.desc,
-        guaci: g.guaci,
-        daxiang: g.daxiang,
-        yaoci: g.yaoci,
-        yong: g.yong || null,
+        guaci: annotate(g.guaci),
+        guaciB: bh.guaci || '',
+        tuan: zh.tuan ? annotate(zh.tuan) : '',
+        daxiang: annotate(g.daxiang),
+        yaoci: g.yaoci.map((y, i) => ({
+          ti: y.ti,
+          ci: annotate(y.ci),
+          xiao: zh.xiao ? annotate(zh.xiao[i] || '') : '',
+          ciB: bh.yaoci ? (bh.yaoci[i] || '') : ''
+        })),
+        yong: g.yong ? {
+          ti: g.yong.ti,
+          ci: annotate(g.yong.ci),
+          xyong: zh.xyong ? annotate(zh.xyong) : '',
+          yongB: bh.yong || ''
+        } : null,
         meta: [
           { k: '全称', v: full },
           { k: '卦宫', v: g.gong + '宫 · ' + wx },
