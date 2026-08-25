@@ -28,8 +28,8 @@ Page({
   },
 
   onShake() {
-    // 进入 3D 起卦页：龟壳 + 三枚铜钱抛入动画
-    wx.navigateTo({ url: '/package3d/pages/divination/divination' })
+    // 先进问事签（独立页），确认所求后 redirect 进 3D 起卦页
+    wx.navigateTo({ url: '/package3d/pages/ask/ask' })
   },
 
   onManual() {

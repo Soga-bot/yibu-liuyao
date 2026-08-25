@@ -32,7 +32,7 @@
     bindtap="onReset"
   >重摇</view>
 
-  <!-- 摇卦按钮：仅待机/摇动/卦成态显示（装钱等仪式阶段隐藏，入口由问事签自动弹出承担） -->
+  <!-- 摇卦按钮：仅待机/摇动/卦成态显示（装钱等仪式阶段隐藏；所求已在问事签独立页问过） -->
   <view
     wx:if="{{!btnHidden}}"
     class="btn {{shaking ? 'btn-disabled' : ''}}"
@@ -40,20 +40,4 @@
     hover-stay-time="80"
     bindtap="onShakeTap"
   >{{btnLabel}}</view>
-
-  <!-- 问事签：起卦前默祷所求（可不填），为后续解读提供上下文；签条风浮入 -->
-  <view wx:if="{{asking}}" class="ask-mask">
-    <view class="ask-card">
-      <view class="ask-title font-kai">所问何事</view>
-      <view class="ask-sub">静心凝神，默祷所求（可不填）</view>
-      <view class="ask-row">
-        <text class="ask-label font-kai">问：</text>
-        <input class="ask-input font-kai" value="{{qiu}}" maxlength="30"
-               placeholder="如：事业、访友、出行" placeholder-class="ask-ph"
-               bindinput="onQiuInput" confirm-type="done" />
-      </view>
-      <view class="ask-btn font-kai" hover-class="ask-btn-hover" bindtap="onQiuConfirm">凝神起卦</view>
-      <view class="ask-skip" hover-class="ask-skip-hover" bindtap="onQiuSkip">直接起卦 ›</view>
-    </view>
-  </view>
 </view>

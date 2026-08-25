@@ -69,7 +69,7 @@ Page({
   },
 
   goShake() {
-    wx.navigateTo({ url: '/package3d/pages/divination/divination' })
+    wx.navigateTo({ url: '/package3d/pages/ask/ask' })
   },
   goManual() {
     wx.navigateTo({ url: '/pages/paipan/paipan' })

@@ -1,6 +1,9 @@
 // package3d/pages/divination/divination.js
-// 3D 起卦页：龟壳 + 三枚铜钱「抛起 → 翻滚 → 落入龟壳 → 弹跳落定」
+// 3D 起卦页：龟壳 + 三枚铜钱「拖钱入壳 → 摇动 → 倒出落定 → 读面成爻」
 // 闭环：每摇一次读正反面成爻，摇满 6 爻自动带参跳转 pages/paipan 出完整盘。
+// 入口：问事签独立页（package3d/pages/ask）确认所求后 redirect 进本页（q 参数），
+// 场景就绪即自动进入装钱；弹卡式问事签已废弃——首进时原生画布层会压住 WebView
+// 浮层（同层渲染偶发失效），弹卡与画布同页无解，拆独立页彻底避开。
 // 真机增强：摇一摇手机=摇卦（加速度计）＋震动反馈；支持横竖屏（pageOrientation: auto）。
 //
 // 依赖（已放进分包 package3d/libs/three/）：
@@ -84,8 +87,6 @@ Page({
     lines: [],       // 已得爻（摇出顺序 = 初→上）：{yin, dong, name, mark, pos}
     done: false,     // 6 爻已满，已跳转/待重摇
     tip: '',         // 最近一爻结果 / 引导文案
-    asking: false,   // 问事签弹卡中
-    qiu: '',         // 所问之事（输入框值）
     failed: false,   // 3D 初始化失败（画布/模型）：按钮变「重新加载」
     phase: 'idle',   // 流程阶段（按钮文案用）
     loadCount: 0,    // 已入壳铜钱数
@@ -93,11 +94,12 @@ Page({
     btnHidden: false       // 仪式阶段（装钱/立正/倒钱/落定/回正）隐藏按钮
   },
 
-  onLoad() {
+  onLoad(options) {
     this._accLast = null
     this._lastShakeAt = 0
-    // 问事签改到「场景就绪后」弹（见 init 末尾）：onLoad 立弹会接住首页导航
-    // 进来的残留点击，曾造成闪现即被幽灵确认关掉
+    // 所问之事由问事签独立页经 q 参数带入（直接进本页则视为未问，流程照常）
+    this._qiu = options && options.q ? decodeURIComponent(options.q).slice(0, 30) : ''
+    console.log('[流程] 3D 页进入，所问 =', this._qiu || '(未填)')
   },
   // 画布在 onReady 创建（首次布局完成后）：onLoad 过早创建画布会让同层渲染
   // 挂接失败，原生画布层浮到所有浮层之上（首进看不到按钮/弹窗，刷新才恢复）
@@ -215,28 +217,13 @@ Page({
     if (this._destroyed) return   // 加载期间已退出页面：不再拉起
     if (livePage && livePage !== this) livePage.stopLoopHard()
     livePage = this
-    this.setData({ loading: false, tip: '摇一摇手机，或点下方按钮起卦' })
+    this.setData({ loading: false })
     this._clock = new THREE.Clock()
     this.resumeLoop()
     this.startAcc()
-    this.selfTestPick()   // 【临时自检】进页面即验证拾取链路，调通后删
-    // 问事签：场景就绪 +300ms 再弹——避开首页导航残留点击的误触窗口
-    setTimeout(() => {
-      if (this._destroyed || this.data.asking || this.data.done ||
-          this.data.lines.length || this._asked) return
-      console.log('[问事签] 场景就绪弹出')
-      this._askShownAt = Date.now()
-      this.setData({ asking: true })
-    }, 300)
-    // 【临时自检】头5秒逐秒输出状态：问事签若被幽灵关闭，asking 翻转会在这里现形
-    let n = 0
-    const tick = () => {
-      if (this._destroyed || n >= 5) return
-      console.log('[状态]', n, 'asking=' + this.data.asking, 'phase=' + this._phase)
-      n += 1
-      setTimeout(tick, 1000)
-    }
-    setTimeout(tick, 1000)
+    // 所求已在问事签页确认：场景就绪直接开始装钱仪式
+    console.log('[流程] 场景就绪，自动装钱')
+    this.beginLoad()
   },
 
   // 铜钱状态对象
@@ -268,7 +255,7 @@ Page({
     this._phase = 'loading'
     this._loadCount = 0
     this._tiltTarget = LOAD_ANGLE
-    this._tiltCb = () => this.selfTestPick()   // 【临时自检】调通后改回 null
+    this._tiltCb = null
     this._coins.forEach((c) => { c.loaded = false; c.anim = null })
     this.updateBtn({ phase: 'loading', loadCount: 0, tip: '拖动铜钱放入壳中（0/3）' })
   },
@@ -436,8 +423,7 @@ Page({
     wx.vibrateShort({ type: 'light', fail: () => {} })
 
     if (lines.length >= 6) {
-      // 卦成：重震一下，稍候跳排盘；下次起卦视为新卦，重新问所求
-      this._asked = false
+      // 卦成：重震一下，稍候跳排盘（重新起卦走问事签独立页）
       wx.vibrateShort({ type: 'heavy', fail: () => {} })
       this.updateBtn({ lines, done: true, tip: backs + '背 → ' + y.name + '，卦成！' })
       const yaoKey = lines.map(l => l.yin ? '0' : '1').join('')
@@ -454,12 +440,10 @@ Page({
     }
   },
 
-  // 清零重摇
+  // 清零重摇（同一所问之内重摇，_qiu 保留）
   onReset() {
     if (this._navTimer) { clearTimeout(this._navTimer); this._navTimer = null }
     this._shakeAmp = 0
-    this._asked = false          // 重摇=新卦，下次起卦重新问所求
-    this._qiu = ''
     this._phase = 'idle'
     this._tilt = 0
     this._tiltTarget = 0
@@ -469,7 +453,7 @@ Page({
     if (this._coins) this._coins.forEach((c) => { c.anim = null; c.loaded = false })
     if (this._shell) this._shell.rotation.z = this._shellBaseRotZ
     this.placeCoinsIdle()
-    this.updateBtn({ lines: [], done: false, qiu: '', phase: 'idle', loadCount: 0, shaking: false, tip: '已重置，摇一摇或点按钮起卦' })
+    this.updateBtn({ lines: [], done: false, phase: 'idle', loadCount: 0, shaking: false, tip: '已重置，摇一摇或点按钮起卦' })
   },
 
   // 渲染循环
@@ -515,17 +499,17 @@ Page({
     if (this._accHandler) wx.offAccelerometerChange(this._accHandler)
   },
 
-  // 摇卦统一入口：按钮 / 摇一摇都走这里
+  // 摇卦统一入口：按钮 / 摇一摇 / 待机点铜钱都走这里（所求已在问事签页问过）
   triggerShake() {
-    if (this.data.loading || this.data.shaking || this.data.asking) return
+    if (this.data.loading || this.data.shaking) return
     if (this._phase !== 'idle') return   // 仪式进行中不重复触发
-    // 新起一卦（首次或卦成重开）先弹「问事签」记录所求；同卦续爻不再问
-    if ((this.data.done || !this.data.lines.length) && !this._asked) {
-      this.setData({ asking: true })
+    if (this.data.done) {
+      // 卦成后再摇 = 新的一卦：回问事签重新默祷（清掉待跳排盘的定时器防双跳）
+      if (this._navTimer) { clearTimeout(this._navTimer); this._navTimer = null }
+      wx.redirectTo({ url: '/package3d/pages/ask/ask', fail: () => {} })
       return
     }
-    if (this.data.done) this.onReset()   // 卦成后再摇 = 重新起卦
-    this.beginLoad()
+    this.beginLoad()   // 首次起卦 / 同卦续爻：直接装钱
   },
 
   // 按钮文案集中计算（patch 为本次要一并 setData 的字段，优先取新值）
@@ -546,37 +530,6 @@ Page({
     // 装钱/立正/倒钱/落定/回正阶段藏按钮（摇动保留：连点=补晃动兜底）
     const hidden = ['loading', 'righting', 'pouring', 'settling', 'returning'].indexOf(phase) >= 0
     this.setData(Object.assign({ btnLabel: label, btnHidden: hidden }, p))
-  },
-
-  // ====== 问事签：起卦前默祷所求（可不填），为后续解读提供上下文 =====
-  onQiuInput(e) { this.setData({ qiu: e.detail.value }) },
-  // 防幽灵确认：弹卡须展示满 500ms 才接受确认/跳过（拦截 input 失焦误触 bindconfirm、
-  // 页面切换残留 tap 等），过快触发直接忽略并留痕
-  askGateOk() {
-    if (!this._askShownAt || Date.now() - this._askShownAt < 500) {
-      console.log('[问事签] 忽略过快确认（疑似误触）')
-      return false
-    }
-    this._askShownAt = 0
-    return true
-  },
-  onQiuConfirm() {
-    if (!this.askGateOk()) return
-    console.log('[问事签] 确认')
-    this._qiu = (this.data.qiu || '').trim()
-    this._asked = true
-    this.setData({ asking: false })
-    if (this.data.done) this.onReset()
-    this.beginLoad()
-  },
-  onQiuSkip() {
-    if (!this.askGateOk()) return
-    console.log('[问事签] 跳过')
-    this._qiu = ''
-    this._asked = true
-    this.setData({ asking: false, qiu: '' })
-    if (this.data.done) this.onReset()
-    this.beginLoad()
   },
 
   // 横竖屏切换：画布与相机跟着新窗口尺寸走
@@ -603,10 +556,9 @@ Page({
   onShellTouchStart(e) {
     if (!this._shellPivot) return
     const t = e.changedTouches[0]
-    console.log('[触摸]', this._phase, t.clientX, t.clientY)   // 【临时自检】调通后删
     // 摇动阶段：点画布任意处 = 补一次有效晃动（工具模拟不了加速度计的兜底）
     if (this._phase === 'shaking') { this.addShakeHit(); return }
-    // 待机时点/拖到铜钱 = 想起卦：等价点「摇卦起卦」按钮（先弹问事签，续爻则直接装钱）
+    // 待机时点/拖到铜钱 = 想起卦：等价点「摇卦起卦」按钮
     if (this._phase === 'idle' && this.pickCoin(t.clientX, t.clientY)) {
       this.triggerShake()
       return
@@ -614,8 +566,8 @@ Page({
     // 装钱态：拾起一枚未入壳的铜钱（提起 0.3），拖动只移钱不转壳
     if (this._phase === 'loading') {
       const coin = this.pickCoin(t.clientX, t.clientY)
-      console.log('[装钱] 触摸', t.clientX, t.clientY, coin ? '拾取成功' : '未命中')
       if (coin) {
+        console.log('[装钱] 拾取', t.clientX, t.clientY)   // 【临时自检】拖钱手感稳定后删
         this._dragCoin = coin
         this._touchId = t.identifier
         this._dragLX = t.clientX   // 像素增量拖动的基准
@@ -695,23 +647,6 @@ Page({
     return best
   },
 
-  // 【临时自检】验证屏幕空间拾取链路（调通后整段删除）
-  selfTestPick() {
-    try {
-      const v = new THREE.Vector3()
-      let ok = 0
-      this._coins.forEach((c) => {
-        v.copy(c.mesh.position).project(this._camera)
-        const hit = this.pickCoin((v.x + 1) / 2 * this._winW, (1 - v.y) / 2 * this._winH) === c
-        if (hit) ok++
-      })
-      console.log('[自检] 屏幕拾取', ok + '/3')
-      this.setData({ tip: '自检 拾取' + ok + '/3' })
-    } catch (err) {
-      console.error('[自检] 异常', err)
-    }
-  },
-
   moveCoinOnTable(coin, cx, cy) {
     // 该深度处 1px 对应的世界距离（竖直 FOV 换算，横竖同因子）
     const k = 2 * Math.tan(this._camera.fov * Math.PI / 360) * this._dragDist / this._winH
@@ -775,13 +710,6 @@ Page({
     // 从排盘页返回：恢复渲染循环与摇一摇（onHide 已停）
     this.resumeLoop()
     if (!this.data.loading) this.startAcc()
-    // 问事签兜底：onLoad 那次若因热重载竞态没弹出来，这里补弹（条件同 triggerShake 问询闸）
-    if (!this.data.loading && !this.data.asking && !this.data.done &&
-        !this.data.lines.length && !this._asked && this._phase === 'idle') {
-      console.log('[问事签] onShow 兜底弹出')
-      this._askShownAt = Date.now()
-      this.setData({ asking: true })
-    }
   },
   onHide() {
     this._running = false
