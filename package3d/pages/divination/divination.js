@@ -630,6 +630,7 @@ Page({
   selfTestPick() {
     try {
       const c = this._coins[0]
+      this._scene.updateMatrixWorld()   // 自检也得用新鲜矩阵，否则重演「首帧前旧 matrixWorld」假阴性
       const ndc = c.mesh.position.clone().project(this._camera)
       this._ray = this._ray || new THREE.Raycaster()
       this._ray.setFromCamera({ x: ndc.x, y: ndc.y }, this._camera)
@@ -661,6 +662,8 @@ Page({
   },
 
   pickCoin(cx, cy) {
+    // 关键：raycast 用的是 matrixWorld，首帧渲染前它是旧值（克隆自原型）——先强制刷新
+    this._scene.updateMatrixWorld()
     this._ray = this._ray || new THREE.Raycaster()
     this._ray.setFromCamera({
       x: (cx / this._winW) * 2 - 1,
