@@ -96,12 +96,8 @@ Page({
   onLoad() {
     this._accLast = null
     this._lastShakeAt = 0
-    // 进页第一眼即弹问事签：点首页「摇卦起卦」→ 这里直接问所求 → 确认后进装钱仪式
-    if (!this.data.done && !this.data.lines.length) {
-      console.log('[问事签] onLoad 弹出')
-      this._askShownAt = Date.now()
-      this.setData({ asking: true })
-    }
+    // 问事签改到「场景就绪后」弹（见 init 末尾）：onLoad 立弹会接住首页导航
+    // 进来的残留点击，曾造成闪现即被幽灵确认关掉
   },
   // 画布在 onReady 创建（首次布局完成后）：onLoad 过早创建画布会让同层渲染
   // 挂接失败，原生画布层浮到所有浮层之上（首进看不到按钮/弹窗，刷新才恢复）
@@ -224,6 +220,23 @@ Page({
     this.resumeLoop()
     this.startAcc()
     this.selfTestPick()   // 【临时自检】进页面即验证拾取链路，调通后删
+    // 问事签：场景就绪 +300ms 再弹——避开首页导航残留点击的误触窗口
+    setTimeout(() => {
+      if (this._destroyed || this.data.asking || this.data.done ||
+          this.data.lines.length || this._asked) return
+      console.log('[问事签] 场景就绪弹出')
+      this._askShownAt = Date.now()
+      this.setData({ asking: true })
+    }, 300)
+    // 【临时自检】头5秒逐秒输出状态：问事签若被幽灵关闭，asking 翻转会在这里现形
+    let n = 0
+    const tick = () => {
+      if (this._destroyed || n >= 5) return
+      console.log('[状态]', n, 'asking=' + this.data.asking, 'phase=' + this._phase)
+      n += 1
+      setTimeout(tick, 1000)
+    }
+    setTimeout(tick, 1000)
   },
 
   // 铜钱状态对象
