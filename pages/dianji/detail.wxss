@@ -146,6 +146,32 @@
   color: #5D4037;
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
 }
+
+/* 典故注释卡（阅读辅助，不用于断卦） */
+.diangu {
+  margin-top: 14rpx;
+  padding: 14rpx 18rpx;
+  background: #faf6ee;
+  border-left: 6rpx solid #c9a86a;
+  border-radius: 8rpx;
+}
+.dg-h {
+  font-size: 22rpx;
+  color: #8a5e15;
+  letter-spacing: 4rpx;
+  margin-bottom: 6rpx;
+}
+.dg-b {
+  font-size: 25rpx;
+  color: #4a3f35;
+  line-height: 1.7;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+}
+.dg-s {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #a8916e;
+}
 .src-note {
   margin-top: 30rpx;
   text-align: center;

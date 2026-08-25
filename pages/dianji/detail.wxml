@@ -27,11 +27,16 @@
       </view>
     </view>
 
-    <!-- 卦辞 + 白话 -->
+    <!-- 卦辞 + 白话 + 典故 -->
     <view class="sec">
       <view class="sec-title font-kai">卦辞</view>
       <view class="guaci font-kai">{{gua.guaci}}</view>
       <view wx:if="{{gua.guaciB}}" class="baihua">白话：{{gua.guaciB}}</view>
+      <view wx:if="{{gua.dg}}" class="diangu">
+        <view class="dg-h font-kai">典故</view>
+        <view class="dg-b">{{gua.dg.gu}}</view>
+        <view class="dg-s">来源：{{gua.dg.lai}}</view>
+      </view>
     </view>
 
     <!-- 彖传（释卦辞） -->
@@ -48,6 +53,11 @@
         <view class="y-ci font-kai">{{item.ci}}
           <view wx:if="{{item.xiao}}" class="y-sub">小象：{{item.xiao}}</view>
           <view wx:if="{{item.ciB}}" class="y-sub y-baihua">白话：{{item.ciB}}</view>
+          <view wx:if="{{item.dg}}" class="diangu">
+            <view class="dg-h font-kai">典故</view>
+            <view class="dg-b">{{item.dg.gu}}</view>
+            <view class="dg-s">来源：{{item.dg.lai}}</view>
+          </view>
         </view>
       </view>
       <view class="yao-row" wx:if="{{gua.yong}}">
@@ -65,7 +75,7 @@
       <view class="daxiang font-kai">{{gua.daxiang}}</view>
     </view>
 
-    <view class="src-note">原文出自《周易》经传 · 生僻字随文括注拼音 · 白话译文陆续补全</view>
+    <view class="src-note">原文出自《周易》经传 · 生僻字随文括注拼音 · 白话与典故仅供阅读参考</view>
   </view>
 
   <!-- 参数异常兜底 -->

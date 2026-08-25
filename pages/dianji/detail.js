@@ -1,8 +1,9 @@
-// pages/dianji/detail.js — 卦详情：卦辞/白话、彖传、六爻爻辞/小象、用九用六、大象传
+// pages/dianji/detail.js — 卦详情：卦辞/白话、彖传、六爻爻辞/小象、用九用六、大象传、典故
 import { getGua } from '../../data/gua.js'
 import { GONG_WUXING } from '../../utils/liuyao.js'
 import { getZhuan } from '../../data/zhuan.js'
 import { getBaihua } from '../../data/baihua.js'
+import { getDiangu } from '../../data/diangu.js'
 import { annotate, namePinyin } from '../../utils/pinyin.js'
 
 Page({
@@ -31,13 +32,15 @@ Page({
         desc: g.desc,
         guaci: annotate(g.guaci),
         guaciB: bh.guaci || '',
+        dg: getDiangu(g.key, '卦辞'),
         tuan: zh.tuan ? annotate(zh.tuan) : '',
         daxiang: annotate(g.daxiang),
         yaoci: g.yaoci.map((y, i) => ({
           ti: y.ti,
           ci: annotate(y.ci),
           xiao: zh.xiao ? annotate(zh.xiao[i] || '') : '',
-          ciB: bh.yaoci ? (bh.yaoci[i] || '') : ''
+          ciB: bh.yaoci ? (bh.yaoci[i] || '') : '',
+          dg: getDiangu(g.key, y.ti)
         })),
         yong: g.yong ? {
           ti: g.yong.ti,
