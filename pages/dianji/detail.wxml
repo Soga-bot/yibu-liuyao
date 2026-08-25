@@ -112,6 +112,7 @@
     </view>
 
     <view class="src-note">原文出自《周易》经传 · 生僻字随文括注拼音 · 白话与典故仅供阅读参考</view>
+    <view class="src-note" style="margin-top: 8rpx;">白话术语译例：贞——利贞译「守正」、名词译「正固」、动词译「固守」；咎译「咎害」</view>
   </view>
 
   <!-- 参数异常兜底 -->
