@@ -650,65 +650,76 @@ Page({
     return { min, size, backY }
   },
 
-  // 在壳背刻下第 i 爻（0=初）：阳=一整道，阴=两道中空。
-  // 裂痕感两件事：①一道爻线拆成数小段，各带微小随机偏移/歪斜/粗细，首尾相叠成毛边折线；
-  // ②微嵌入 + 无光照墨色材质（无受光面就没有「立体贴条」的读感，像渗进壳里的刻痕）。
-  // 动爻用传统刻记：老阳=线中央刻圈 ○（线穿圈而过），老阴=两道中缝刻 ✕，不改色。
-  // 局部轴向（glb 实证推导）：+Y=拱面朝镜头 ⇒ 腹甲面 = backY；+Z→世界竖直 ⇒ 初爻刻在 -Z 端
+  // 在壳背刻下第 i 爻（0=初）——CanvasTexture 裂痕画法：
+  // 几何方块只能堆「粗块」，裂痕的细腻（抗锯齿细线、笔宽变化、随机分叉）是 2D 画布的原生能力。
+  // 整行画到离屏画布（抖动折线主笔 + 细笔补描 + 随机小分叉），一张透明贴图平贴腹甲。
+  // 老阳=线中央画○（线穿环）、老阴=中缝画✕。局部轴向：腹甲面=backY，+Z→世界竖直。
   carveLine(i) {
     const L = this._shellLocal
     const len = L.size.x * 0.46             // 爻线长度：过半壳宽
-    const gap = L.size.z * 0.1              // 六爻行距（六行共占半高）
+    const gap = L.size.z * 0.1              // 六爻行距
     const line = this.data.lines[i]
-    const mat = this.inkMat()
-    const y = L.backY - gap * 0.05          // 微嵌入：顶面只露一丝墨线，无浮起感
-    const z0 = L.min.z + L.size.z / 2 + (i - 2.5) * gap
-    const bars = []
-    const crack = (xc, l) => {              // 一道线拆 n 段毛边折线（裂痕感核心）
-      const n = Math.max(2, Math.round(l / (gap * 0.9)))
-      for (let k = 0; k < n; k++) {
-        const m = new THREE.Mesh(
-          new THREE.BoxGeometry((l / n) * rand(1.1, 1.4), gap * 0.16, gap * rand(0.12, 0.2)), mat)
-        m.position.set(
-          xc - l / 2 + (k + 0.5) * (l / n) + rand(-0.05, 0.05) * gap,
-          y + rand(-0.02, 0.02) * gap,
-          z0 + rand(-0.06, 0.06) * gap)
-        m.rotation.y = rand(-0.05, 0.05)
-        m.scale.x = 0.02                                  // 从 0 长出（carve 段驱动）
-        this._marksGroup.add(m)
-        bars.push(m)
+    const W = 512
+    const H = 128                           // 画布取 2 的幂（WebGL1 NPOT 贴图不能建 mipmap）
+    const cv = wx.createCanvas()
+    cv.width = W
+    cv.height = H
+    const ctx = cv.getContext('2d')
+    ctx.strokeStyle = '#1D1208'
+    ctx.lineCap = 'round'
+    // 一道裂纹 = 抖动折线两遍描（主笔 + 细笔略偏）+ 1~3 条随机小分叉
+    const crackStroke = (x0, x1, cy, w) => {
+      const n = Math.max(6, Math.round((x1 - x0) / 24))
+      const pts = []
+      for (let k = 0; k <= n; k++) {
+        pts.push([x0 + (x1 - x0) * k / n + rand(-4, 4), cy + rand(-3, 3)])
+      }
+      for (let pass = 0; pass < 2; pass++) {
+        ctx.lineWidth = pass ? w * 0.5 : w
+        ctx.beginPath()
+        pts.forEach((p, k) => (k ? ctx.lineTo(p[0] + pass * 2, p[1] - pass) : ctx.moveTo(p[0], p[1])))
+        ctx.stroke()
+      }
+      for (let b = 0, br = 1 + Math.floor(Math.random() * 3); b < br; b++) {
+        const p = pts[1 + Math.floor(Math.random() * (pts.length - 2))]
+        ctx.lineWidth = w * 0.45
+        ctx.beginPath()
+        ctx.moveTo(p[0], p[1])
+        ctx.lineTo(p[0] + rand(5, 14), p[1] + (Math.random() < 0.5 ? -1 : 1) * rand(7, 16))
+        ctx.stroke()
       }
     }
-    if (line.yin) { crack(-len * 0.30, len * 0.44); crack(len * 0.30, len * 0.44) }
-    else crack(0, len)
-    if (line.dong) {
-      if (line.yin) {                                     // 老阴 ✕：中缝两臂斜刻
-        const l = gap * 0.5
-        ;[Math.PI / 4, -Math.PI / 4].forEach((a) => {
-          const m = new THREE.Mesh(new THREE.BoxGeometry(l, gap * 0.14, gap * 0.14), mat)
-          m.position.set(0, y, z0)
-          m.rotation.y = a
-          m.scale.x = 0.02
-          this._marksGroup.add(m)
-          bars.push(m)
+    const cy = H / 2
+    const w = 12
+    if (line.yin) {
+      crackStroke(W * 0.08, W * 0.52, cy, w)
+      crackStroke(W * 0.48, W * 0.92, cy, w)
+      if (line.dong) {                                      // 老阴 ✕：中缝
+        ctx.lineWidth = w * 0.7
+        ;[[1, 1], [1, -1]].forEach(([dx, dy]) => {
+          ctx.beginPath()
+          ctx.moveTo(W / 2 - 20 * dx, cy - 20 * dy)
+          ctx.lineTo(W / 2 + 20 * dx, cy + 20 * dy)
+          ctx.stroke()
         })
-      } else {                                            // 老阳 ○：环平贴面、线从环心穿过
-        const m = new THREE.Mesh(new THREE.TorusGeometry(gap * 0.34, gap * 0.05, 8, 24), mat)
-        m.rotation.x = Math.PI / 2
-        m.position.set(0, y, z0)
-        m.scale.setScalar(0.02)
-        m.userData.growAll = true                         // carve 段整体缩放（环只缩 x 会变椭圆）
-        this._marksGroup.add(m)
-        bars.push(m)
+      }
+    } else {
+      crackStroke(W * 0.04, W * 0.96, cy, w)
+      if (line.dong) {                                      // 老阳 ○：线中央穿环
+        ctx.lineWidth = w * 0.7
+        ctx.beginPath()
+        ctx.arc(W / 2, cy, 26, 0, Math.PI * 2)
+        ctx.stroke()
       }
     }
-    return bars
-  },
-
-  // 墨色材质（MeshBasic 无光照：不受灯，平面墨色，才像刻痕；受光材质会有明暗面暴露厚度）
-  inkMat() {
-    if (!this._ink) this._ink = new THREE.MeshBasicMaterial({ color: 0x1D1208 })
-    return this._ink
+    const m = new THREE.Mesh(
+      new THREE.PlaneGeometry(len, gap * 1.1),
+      new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cv), transparent: true }))
+    m.rotation.x = Math.PI / 2   // 平躺贴背（与卦名贴片同法）
+    m.position.set(0, L.backY + gap * 0.02, L.min.z + L.size.z / 2 + (i - 2.5) * gap)
+    m.scale.x = 0.02                            // 从中点向两侧「刻出」（carve 段驱动）
+    this._marksGroup.add(m)
+    return [m]
   },
 
   // 卦成：上爻上方刻卦名（上卦象+下卦象+卦名，如「地雷复」）。CanvasTexture 画字贴面平躺
@@ -717,20 +728,19 @@ Page({
     if (!g) return []
     const label = (g.waiXiang || '') + (g.neiXiang || '') + g.name
     const cv = wx.createCanvas()
-    cv.width = 512
-    cv.height = 160
+    cv.width = 512                       // 2 的幂（WebGL1 NPOT 贴图不能建 mipmap）
+    cv.height = 128
     const ctx = cv.getContext('2d')
-    ctx.clearRect(0, 0, 512, 160)
     ctx.fillStyle = '#1D1208'
-    ctx.font = 'bold 120px sans-serif'
+    ctx.font = 'bold 96px sans-serif'
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
-    ctx.fillText(label, 256, 84)
+    ctx.fillText(label, 256, 68)
     const L = this._shellLocal
     const gap = L.size.z * 0.1
     const w = gap * 4.2
     const m = new THREE.Mesh(
-      new THREE.PlaneGeometry(w, w * 160 / 512),
+      new THREE.PlaneGeometry(w, w * 128 / 512),
       new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cv), transparent: true }))
     m.rotation.x = Math.PI / 2   // 平躺贴背：法线从 +Z 转到 -Y（朝壳外），字头朝局部 +Z（世界竖直）
     m.position.set(0, L.backY + gap * 0.02, L.min.z + L.size.z / 2 + 3.6 * gap)   // 上爻再上 1.1 行
@@ -756,12 +766,12 @@ Page({
   onReset() {
     this._inscribe = null          // 刻录仪式进行中重摇：取消时间线
     this._inscribedCount = 0
-    if (this._marksGroup) {        // 壳背刻线全清（几何/贴图释放；共享墨色材质保留复用）
+    if (this._marksGroup) {        // 壳背刻线全清（几何/贴图/材质逐一释放；每爻各持贴图）
       this._marksGroup.children.slice().forEach((m) => {
         this._marksGroup.remove(m)
         if (m.geometry) m.geometry.dispose()
-        if (m.material && m.material.map) m.material.map.dispose()   // 卦名 CanvasTexture
-        if (m.material && m.material !== this._ink) m.material.dispose()
+        if (m.material && m.material.map) m.material.map.dispose()   // 裂痕/卦名 CanvasTexture
+        if (m.material) m.material.dispose()
       })
     }
     this._shakeAmp = 0
