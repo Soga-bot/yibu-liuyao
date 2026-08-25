@@ -68,8 +68,7 @@ const SHAKE_DELTA_START = 6     // 待机起摇门槛：稍高，防走路/颠�
 const SHAKE_COOLDOWN = 500      // 两次触发最小间隔(ms)，防止一甩连触发（自然摇频 3~4Hz 可达）
 
 // ====== 装钱→摇动→倒出流程 ======
-const SHAKE_HITS = 3           // 有效晃动达此次数 = 摇够（约 2 秒自然摇晃；每次命中震动反馈）
-const SHAKE_QUIET = 800        // 摇够后静默该时长(ms)判定摇动停止，自动倒出
+const SHAKE_QUIET = 800        // 摇动停止（末次命中后静默该时长）即倒出——用户不摇了就该出结果
 const LOAD_ANGLE = Math.PI / 6 // 装钱态：壳后仰 30°（微张口迎钱，原 86° 太翻）
 const POUR_ANGLE = -1.65       // 倒钱态：壳前倾（口转向桌面；原 -1.9 过水平面 19°，近沿上翘太夸张）
 const TILT_SPEED = 6           // 壳姿态角指数趋近系数（越大转得越快）
@@ -116,18 +115,14 @@ Page({
     loadCount: 0,    // 已入壳铜钱数
     btnLabel: '摇卦起卦',  // 按钮文案（JS 集中算：wxml 深层三元编译不过）
     btnHidden: false,      // 仪式阶段（装钱/立正/倒钱/落定/回正）隐藏按钮
-    sbTop: 28,             // 返回键兜底版 top（px，onLoad 按状态栏高度重算）
-    isDevtools: false      // 兜底返回键仅在开发者工具渲染（真机会与 view 版叠出双按钮）
+    sbTop: 28              // 返回键 top（px，onLoad 按状态栏高度重算）
   },
 
   onLoad(options) {
     this._accLast = null
     this._lastShakeAt = 0
-    this.setData({
-      // cover-view 兜底返回键的 top：真机有状态栏，css 的 env() 在 cover-view 里不可靠
-      sbTop: (wx.getWindowInfo().statusBarHeight || 20) + 8,
-      isDevtools: (wx.getDeviceInfo().platform || '') === 'devtools'
-    })
+    // cover-view 返回键的 top：真机有状态栏，且部分机型 env() 失效必须 JS 算
+    this.setData({ sbTop: (wx.getWindowInfo().statusBarHeight || 20) + 8 })
     // 所问之事由问事签独立页经 q 参数带入（直接进本页则视为未问，流程照常）
     this._qiu = options && options.q ? decodeURIComponent(options.q).slice(0, 30) : ''
     console.log('[流程] 3D 页进入，所问 =', this._qiu || '(未填)')
@@ -331,6 +326,7 @@ Page({
     this._lastHitAt = Date.now()
     this._shakeAmp = 1
     this.buzz('medium')   // 每次有效晃动一记中震：手腕发力的触觉回响
+    this.playLoop()       // 停顿时过程音已止，再晃随手动重新起
     this._coins.forEach((c) => {
       c.mesh.rotation.x += rand(-0.6, 0.6)
       c.mesh.rotation.y += rand(-0.6, 0.6)
@@ -395,11 +391,11 @@ Page({
 
   // 每帧更新：壳晃动 / 跃入动画 / 拨动回位 / 倒钱流程 / 铜钱物理
   update(dt) {
-    // 龟壳晃动（每次有效晃动衰减摆动，模拟手摇）
+    // 龟壳晃动（每次有效晃动衰减摆动，模拟手摇）：幅度要肉眼明确，衰减慢一点余韵更长
     if (this._shakeAmp > 0.01 && this._shell) {
       this._shakeT += dt
-      this._shell.rotation.z = this._shellBaseRotZ + Math.sin(this._shakeT * 28) * 0.06 * this._shakeAmp
-      this._shakeAmp *= 0.96
+      this._shell.rotation.z = this._shellBaseRotZ + Math.sin(this._shakeT * 28) * 0.12 * this._shakeAmp
+      this._shakeAmp *= 0.975
     }
 
     // 铜钱跳入壳内动画（t<0 = 排队起跳）：三次贝塞尔
@@ -456,10 +452,16 @@ Page({
       }
     }
 
-    // 摇够了且静默 SHAKE_QUIET ms → 自动前倾倒钱（判定「摇动停止」）
-    if (this._phase === 'shaking' && this._hits >= SHAKE_HITS &&
+    // 摇动停止判定：只要晃过（≥1 次命中）且静默 SHAKE_QUIET ms 即倒出——
+    // 摇几下由用户定，不摇了就出结果；命中不足 1 次（光点按钮没晃）不自动倒
+    if (this._phase === 'shaking' && this._hits >= 1 &&
         this._lastHitAt && Date.now() - this._lastHitAt > SHAKE_QUIET) {
       this.beginPour()
+    }
+    // 手一停过程音先止（比倒出判定早），再晃再起——声音跟着手动
+    if (this._phase === 'shaking' && this._loopOn && this._lastHitAt &&
+        Date.now() - this._lastHitAt > 450) {
+      this.stopLoop()
     }
 
     if (this._shellPivot) {
@@ -494,9 +496,9 @@ Page({
         this._tiltCb = null
         cb()
       }
-      this._shellPivot.rotation.y = this._shellYaw + Math.sin(this._shakeT * 10) * 0.3 * this._shakeAmp
+      this._shellPivot.rotation.y = this._shellYaw + Math.sin(this._shakeT * 10) * 0.34 * this._shakeAmp
       this._shellPivot.rotation.x = this._shellPitch + this._tilt +
-        Math.sin(this._shakeT * 10 + 1.5) * 0.08 * this._shakeAmp
+        Math.sin(this._shakeT * 10 + 1.5) * 0.15 * this._shakeAmp
     }
 
     // 铜钱自由落体物理：仅 settling 阶段（倒出后到落定）
@@ -919,10 +921,12 @@ Page({
     } catch (e) { /* 音效失败不影响流程 */ }
   },
   playLoop() {
-    if (!this._loopSfx || this._destroyed) return
+    if (!this._loopSfx || this._destroyed || this._loopOn) return
+    this._loopOn = true
     try { this._loopSfx.play() } catch (e) { /* 同上 */ }
   },
   stopLoop() {
+    this._loopOn = false
     if (!this._loopSfx) return
     try { this._loopSfx.stop() } catch (e) { /* 同上 */ }
   },

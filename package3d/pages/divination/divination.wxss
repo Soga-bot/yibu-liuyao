@@ -31,30 +31,8 @@
   z-index: 5;
 }
 
-/* 返回 */
-.back {
-  position: absolute;
-  top: calc(env(safe-area-inset-top) + 16rpx);
-  left: 24rpx;
-  width: 68rpx;
-  height: 68rpx;
-  border-radius: 50%;
-  background: rgba(255, 250, 235, 0.92);
-  border: 2rpx solid #B99B6B;
-  color: #5A3E22;
-  font-size: 48rpx;
-  font-weight: bold;
-  line-height: 64rpx;
-  text-align: center;
-  box-shadow: 0 4rpx 12rpx rgba(62, 39, 35, 0.25);
-  z-index: 5;
-}
-.back-hover {
-  background: #F3E7CB;
-}
-
-/* 返回兜底（cover-view 原生层）：仅用其支持的 css 子集（无 border/box-shadow）；
-   top 由 JS 按状态栏高度算好内联注入（cover-view 里 env() 不可靠，真机会顶进状态栏） */
+/* 返回（cover-view 原生层，页面唯一返回键）：仅用其支持的 css 子集（无 border/box-shadow）；
+   top 由 JS 按状态栏高度算好内联注入——view 版曾因部分真机 env() 失效顶进状态栏且点击被吞 */
 .cback {
   position: fixed;
   left: 24rpx;

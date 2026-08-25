@@ -11,12 +11,9 @@
   <!-- 加载中提示 -->
   <view wx:if="{{loading}}" class="status">{{status}}</view>
 
-  <!-- 返回（视图层版） -->
-  <view class="back" hover-class="back-hover" bindtap="onBack">‹</view>
-
-  <!-- 返回（原生层兜底版）：仅开发者工具渲染——工具里同层渲染失效时 view 全隐没，
-       真机上 view 层正常且部分机型 cover-view 会叠在 view 版之上出现双按钮，故屏蔽 -->
-  <cover-view wx:if="{{isDevtools}}" class="cback" style="top: {{sbTop}}px" bindtap="onBack">‹</cover-view>
+  <!-- 返回：唯一用 cover-view（原生层）——view 版在部分真机 env() 失效会顶进
+       状态栏且点击被系统吞掉；原生层位置由 JS 算好内联注入，工具/真机表现一致 -->
+  <cover-view class="cback" style="top: {{sbTop}}px" bindtap="onBack">‹</cover-view>
 
   <!-- 提示文案（最近一爻结果 / 引导） -->
   <view wx:if="{{tip}}" class="tip">{{tip}}</view>
