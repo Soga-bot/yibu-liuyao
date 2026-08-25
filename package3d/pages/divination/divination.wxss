@@ -36,18 +36,21 @@
   position: absolute;
   top: calc(env(safe-area-inset-top) + 16rpx);
   left: 24rpx;
-  width: 64rpx;
-  height: 64rpx;
+  width: 68rpx;
+  height: 68rpx;
   border-radius: 50%;
-  background: rgba(62, 39, 35, 0.08);
-  color: #6B4A2B;
+  background: rgba(255, 250, 235, 0.92);
+  border: 2rpx solid #B99B6B;
+  color: #5A3E22;
   font-size: 48rpx;
+  font-weight: bold;
   line-height: 64rpx;
   text-align: center;
+  box-shadow: 0 4rpx 12rpx rgba(62, 39, 35, 0.25);
   z-index: 5;
 }
 .back-hover {
-  background: rgba(62, 39, 35, 0.18);
+  background: #F3E7CB;
 }
 
 /* 提示文案（最近一爻结果/引导） */

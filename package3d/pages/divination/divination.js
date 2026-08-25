@@ -743,11 +743,13 @@ Page({
       bars.push(m)
     }
     if (line.yin) {
-      add(brushGeo(-len * 0.30, len * 0.44, gap * 0.15), y0)
-      add(brushGeo(len * 0.30, len * 0.44, gap * 0.15), y0)
+      // 两段外移、留宽中缝：✕ 尺寸按行距（局部 Z 长边）取值，缝宽按线长（局部 X 窄边），
+      // 龟壳前后长左右窄，比例错位会把 ✕ 顶到线头上——缝放宽到 0.24·len 隔开
+      add(brushGeo(-len * 0.32, len * 0.40, gap * 0.15), y0)
+      add(brushGeo(len * 0.32, len * 0.40, gap * 0.15), y0)
       if (line.dong) {                          // 老阴 ✕：中缝两臂（更外侧错层防相交闪面）
-        add(brushGeo(0, gap * 0.34, gap * 0.09), y0 - gap * 0.01, { ry: Math.PI / 4 })
-        add(brushGeo(0, gap * 0.34, gap * 0.09), y0 - gap * 0.02, { ry: -Math.PI / 4 })
+        add(brushGeo(0, gap * 0.26, gap * 0.08), y0 - gap * 0.01, { ry: Math.PI / 4 })
+        add(brushGeo(0, gap * 0.26, gap * 0.08), y0 - gap * 0.02, { ry: -Math.PI / 4 })
       }
     } else {
       add(brushGeo(0, len, gap * 0.15), y0)
