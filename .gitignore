@@ -10,3 +10,5 @@ project.private.config.json
 .mypy_cache/
 node_modules/
 tools/_chk/
+
+.claude/

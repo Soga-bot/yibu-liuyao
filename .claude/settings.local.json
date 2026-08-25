@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(git add *)",
-      "Bash(git commit -m 'fix: 按钮文案改 JS 集中计算，修 WXML 深嵌套三元编译错误 *)",
-      "Bash(node --check tools/_chk/x.mjs)"
-    ]
-  }
-}
