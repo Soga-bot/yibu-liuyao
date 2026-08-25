@@ -172,6 +172,11 @@
   font-size: 22rpx;
   color: #a8916e;
 }
+/* 文言传多段落间距 */
+.wenyan-p + .wenyan-p {
+  margin-top: 20rpx;
+}
+
 .src-note {
   margin-top: 30rpx;
   text-align: center;

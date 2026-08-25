@@ -1,9 +1,10 @@
-// pages/dianji/detail.js — 卦详情：卦辞/白话、彖传、六爻爻辞/小象、用九用六、大象传、典故
+// pages/dianji/detail.js — 卦详情：卦辞/白话、彖传、六爻爻辞/小象、用九用六、大象传、文言(乾坤)、序卦、杂卦、典故
 import { getGua } from '../../data/gua.js'
 import { GONG_WUXING } from '../../utils/liuyao.js'
 import { getZhuan } from '../../data/zhuan.js'
 import { getBaihua } from '../../data/baihua.js'
 import { getDiangu } from '../../data/diangu.js'
+import { getWenyan, getXugua, getZagua } from '../../data/shiyi.js'
 import { annotate, namePinyin } from '../../utils/pinyin.js'
 
 Page({
@@ -49,6 +50,9 @@ Page({
           xyong: zh.xyong ? annotate(zh.xyong) : '',
           yongB: bh.yong || ''
         } : null,
+        wy: (getWenyan(g.key) || []).map(annotate),
+        xu: annotate(getXugua(g.key)),
+        za: annotate(getZagua(g.key)),
         meta: [
           { k: '全称', v: full },
           { k: '卦宫', v: g.gong + '宫 · ' + wx },

@@ -80,6 +80,24 @@
       <view class="daxiang font-kai">{{gua.daxiang}}</view>
     </view>
 
+    <!-- 文言传（仅乾坤） -->
+    <view class="sec" wx:if="{{gua.wy.length}}">
+      <view class="sec-title font-kai">文言传</view>
+      <view class="daxiang font-kai wenyan-p" wx:for="{{gua.wy}}" wx:key="index">{{item}}</view>
+    </view>
+
+    <!-- 序卦传（卦序由来） -->
+    <view class="sec" wx:if="{{gua.xu}}">
+      <view class="sec-title font-kai">序卦传</view>
+      <view class="daxiang font-kai">{{gua.xu}}</view>
+    </view>
+
+    <!-- 杂卦传（卦义对举） -->
+    <view class="sec" wx:if="{{gua.za}}">
+      <view class="sec-title font-kai">杂卦传</view>
+      <view class="daxiang font-kai">{{gua.za}}</view>
+    </view>
+
     <view class="src-note">原文出自《周易》经传 · 生僻字随文括注拼音 · 白话与典故仅供阅读参考</view>
   </view>
 
