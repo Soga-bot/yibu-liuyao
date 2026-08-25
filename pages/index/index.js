@@ -28,8 +28,15 @@ Page({
   },
 
   onShake() {
-    // 先进问事签（独立页），确认所求后 redirect 进 3D 起卦页
-    wx.navigateTo({ url: '/package3d/pages/ask/ask' })
+    // 先进问事签（独立页），确认所求后 redirect 进 3D 起卦页。
+    // fail 露出错误（分包未编译/加载失败时静默无反应，最难排查）
+    wx.navigateTo({
+      url: '/package3d/pages/ask/ask',
+      fail: (e) => {
+        console.error('[首页] 进问事签失败', e)
+        wx.showToast({ title: '进入失败：' + (e.errMsg || '未知'), icon: 'none' })
+      }
+    })
   },
 
   onManual() {

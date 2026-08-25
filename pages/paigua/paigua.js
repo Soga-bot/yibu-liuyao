@@ -69,7 +69,13 @@ Page({
   },
 
   goShake() {
-    wx.navigateTo({ url: '/package3d/pages/ask/ask' })
+    wx.navigateTo({
+      url: '/package3d/pages/ask/ask',
+      fail: (e) => {
+        console.error('[解卦页] 进问事签失败', e)
+        wx.showToast({ title: '进入失败：' + (e.errMsg || '未知'), icon: 'none' })
+      }
+    })
   },
   goManual() {
     wx.navigateTo({ url: '/pages/paipan/paipan' })
