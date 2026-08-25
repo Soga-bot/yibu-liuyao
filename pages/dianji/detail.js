@@ -34,6 +34,7 @@ Page({
         guaciB: bh.guaci || '',
         dg: getDiangu(g.key, '卦辞'),
         tuan: zh.tuan ? annotate(zh.tuan) : '',
+        tuanDg: getDiangu(g.key, '彖传'),
         daxiang: annotate(g.daxiang),
         yaoci: g.yaoci.map((y, i) => ({
           ti: y.ti,
