@@ -954,7 +954,6 @@ Page({
     if (this._phase === 'loading') {
       const coin = this.pickCoin(t.clientX, t.clientY)
       if (coin) {
-        console.log('[装钱] 拾取', t.clientX, t.clientY)   // 【临时自检】拖钱手感稳定后删
         const rest = this._coins.filter((c) => !c.loaded)
         const cx = rest.reduce((s, c) => s + c.mesh.position.x, 0) / rest.length
         const cz = rest.reduce((s, c) => s + c.mesh.position.z, 0) / rest.length
