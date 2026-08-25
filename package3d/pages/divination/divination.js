@@ -629,30 +629,62 @@ Page({
 
   // 壳局部系包围盒 + 腹甲面探测：返回 {min,size,backY}（模型原生坐标）。
   // 世界包围盒先除缩放/平移换回局部系；backY 取「刻字中央带」内最低顶点——
-  // 腿/裙边/头尾在带外，拉不高刻字面，保证刻线贴的是腹甲真实表面
+  // 腿/裙边/头尾在带外，拉不高刻字面，保证刻线贴的是腹甲真实表面。
+  // 同时收集刻字带内全部顶点 _backPts：腹甲是弧面，整带一个 backY 垫平所有行，
+  // 行在弧顶会沉进壳里（穿模）——每行要各自探测高度与倾角（见 probeRow）
   measureShellBack(shell) {
     shell.updateMatrixWorld(true)
     const wb = new THREE.Box3().setFromObject(shell)       // fit 后世界系（此刻未挂场景/未调姿）
     const s = shell.scale.x
     const min = wb.min.clone().sub(shell.position).divideScalar(s)
     const size = wb.getSize(new THREE.Vector3()).divideScalar(s)
-    const bandX = size.x * 0.25
-    const bandZ = size.z * 0.45
+    const bandX = size.x * 0.26
+    const bandZ = size.z * 0.36
     const inv = new THREE.Matrix4().getInverse(shell.matrixWorld)
     const m = new THREE.Matrix4()
     const v = new THREE.Vector3()
     let backY = Infinity
+    const pts = []
     shell.traverse((o) => {
       if (!o.isMesh || !o.geometry || !o.geometry.attributes.position) return
       m.multiplyMatrices(inv, o.matrixWorld)               // 世界 → 壳局部
       const pos = o.geometry.attributes.position
       for (let i = 0; i < pos.count; i++) {
         v.fromBufferAttribute(pos, i).applyMatrix4(m)
-        if (Math.abs(v.x) <= bandX && Math.abs(v.z) <= bandZ && v.y < backY) backY = v.y
+        if (Math.abs(v.x) <= bandX && Math.abs(v.z) <= bandZ) {
+          if (v.y < backY) backY = v.y
+          pts.push({ x: v.x, y: v.y, z: v.z })
+        }
       }
     })
+    this._backPts = pts
     if (!isFinite(backY)) backY = min.y                    // 带内无顶点（理论不至）：退回整体盒
     return { min, size, backY }
+  },
+
+  // 行面探测：刻字带顶点里 z 落在行附近 ±0.9 行距的最低 y = 该行腹甲面高；
+  // 前后两半的最低 y 之差 → 行倾角 pitch（笔道顺弧面微仰/俯，防穿模与悬空）
+  probeRow(zc) {
+    const L = this._shellLocal
+    const pts = this._backPts
+    if (!pts || !pts.length) return { y: L.backY, pitch: 0 }
+    const h = L.size.z * 0.09
+    let yMid = Infinity
+    let yA = Infinity
+    let yB = Infinity
+    for (let k = 0; k < pts.length; k++) {
+      const p = pts[k]
+      const dz = p.z - zc
+      if (dz < -h || dz > h) continue
+      if (p.y < yMid) yMid = p.y
+      if (dz < -0.3 * h) { if (p.y < yA) yA = p.y }
+      else if (dz > 0.3 * h) { if (p.y < yB) yB = p.y }
+    }
+    if (!isFinite(yMid)) return { y: L.backY, pitch: 0 }
+    if (!isFinite(yA)) yA = yMid
+    if (!isFinite(yB)) yB = yMid
+    // +z 端面高更高（yB>yA）时需抬起 +z 端：rotateX 负角（推导见刻痕注释）
+    return { y: yMid, pitch: -Math.atan2(yB - yA, 1.3 * h) }
   },
 
   // 在壳背刻下第 i 爻（0=初）——「毛笔笔道」纯几何画法（不碰任何画布 API：
@@ -662,11 +694,13 @@ Page({
   // 局部轴向：腹甲面=backY，+Z→世界竖直。
   carveLine(i) {
     const L = this._shellLocal
-    const len = L.size.x * 0.46             // 爻线长度：过半壳宽
+    const len = L.size.x * 0.44             // 爻线长度（略收，避开两侧上翘的裙边）
     const gap = L.size.z * 0.1              // 六爻行距
     const line = this.data.lines[i]
     const z0 = L.min.z + L.size.z / 2 + (i - 2.5) * gap
-    const y0 = L.backY + gap * 0.02         // 微浮于探测面（贴死会与壳面 z-fighting 闪面）
+    const row = this.probeRow(z0)           // 该行腹甲面高 + 顺弧倾角（防穿模/悬空）
+    const y0 = row.y + gap * 0.02           // 微浮于探测面（贴死会与壳面 z-fighting 闪面）
+    const bake = Math.PI / 2 + row.pitch
     // 一道笔道：n+1 个中心点（纵向微抖 + 横向漂移），半宽正弦收锋（两头细中间丰）
     const brushGeo = (xc, l, w0) => {
       const n = 16
@@ -689,7 +723,9 @@ Page({
       s.absarc(pts[0][0], pts[0][1], pts[0][2], -Math.PI / 2, Math.PI / 2, true)
       s.closePath()
       const g = new THREE.ShapeGeometry(s)
-      g.rotateX(Math.PI / 2)   // 烘焙平躺：法线 -Y 朝壳外，笔道落进 XZ 面（mesh 旋转留给面内摆角）
+      // 烘焙平躺 + 行倾角：rotateX(π/2) 让法线 -Y 朝壳外、笔道落进 XZ 面；
+      // pitch 为负时 +z 端抬起（顺弧面），mesh 的 rotation.y 留给面内摆角
+      g.rotateX(bake)
       return g
     }
     const bars = []
@@ -706,20 +742,20 @@ Page({
       add(brushGeo(-len * 0.30, len * 0.44, gap * 0.15), y0)
       add(brushGeo(len * 0.30, len * 0.44, gap * 0.15), y0)
       if (line.dong) {                          // 老阴 ✕：中缝两臂（错层 0.012 防相交闪面）
-        add(brushGeo(0, gap * 0.52, gap * 0.11), y0 + gap * 0.012, { ry: Math.PI / 4 })
-        add(brushGeo(0, gap * 0.52, gap * 0.11), y0 + gap * 0.024, { ry: -Math.PI / 4 })
+        add(brushGeo(0, gap * 0.34, gap * 0.09), y0 + gap * 0.012, { ry: Math.PI / 4 })
+        add(brushGeo(0, gap * 0.34, gap * 0.09), y0 + gap * 0.024, { ry: -Math.PI / 4 })
       }
     } else {
       add(brushGeo(0, len, gap * 0.15), y0)
       if (line.dong) {                          // 老阳 ○：环平贴面、线从环心穿过（错层防闪面）
-        const r1 = gap * 0.30
+        const r1 = gap * 0.20
         const s = new THREE.Shape()
         s.absarc(0, 0, r1, 0, Math.PI * 2, false)
         const hole = new THREE.Path()
-        hole.absarc(0, 0, r1 - gap * 0.075, 0, Math.PI * 2, true)
+        hole.absarc(0, 0, r1 - gap * 0.055, 0, Math.PI * 2, true)
         s.holes.push(hole)
         const g = new THREE.ShapeGeometry(s)
-        g.rotateX(Math.PI / 2)
+        g.rotateX(bake)
         add(g, y0 + gap * 0.012, { growAll: true })
       }
     }
@@ -747,11 +783,14 @@ Page({
     const L = this._shellLocal
     const gap = L.size.z * 0.1
     const w = gap * 4.2
+    const nz = L.min.z + L.size.z / 2 + 3.6 * gap   // 上爻再上 1.1 行
+    const row = this.probeRow(nz)                   // 同爻线：贴该处弧面高与倾角
     const m = new THREE.Mesh(
       new THREE.PlaneGeometry(w, w * 128 / 512),
       new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cv), transparent: true }))
-    m.rotation.x = Math.PI / 2   // 平躺贴背：法线从 +Z 转到 -Y（朝壳外），字头朝局部 +Z（世界竖直）
-    m.position.set(0, L.backY + gap * 0.02, L.min.z + L.size.z / 2 + 3.6 * gap)   // 上爻再上 1.1 行
+    // 平躺贴背：法线从 +Z 转到 -Y（朝壳外），字头朝局部 +Z（世界竖直）+ 行倾角顺弧
+    m.rotation.x = Math.PI / 2 + row.pitch
+    m.position.set(0, row.y + gap * 0.03, nz)
     m.scale.setScalar(0.02)
     m.userData.growAll = true
     this._marksGroup.add(m)
