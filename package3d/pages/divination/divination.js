@@ -208,6 +208,7 @@ Page({
     this._clock = new THREE.Clock()
     this.resumeLoop()
     this.startAcc()
+    this.selfTestPick()   // 【临时自检】进页面即验证拾取链路，调通后删
   },
 
   // 铜钱状态对象
@@ -558,6 +559,11 @@ Page({
     if (!this._shellPivot) return
     const t = e.changedTouches[0]
     console.log('[触摸]', this._phase, t.clientX, t.clientY)   // 【临时自检】调通后删
+    // 待机时点/拖到铜钱 = 想起卦：等价点「摇卦起卦」按钮（先弹问事签，续爻则直接装钱）
+    if (this._phase === 'idle' && this.pickCoin(t.clientX, t.clientY)) {
+      this.triggerShake()
+      return
+    }
     // 装钱态：拾起一枚未入壳的铜钱（提起 0.3），拖动只移钱不转壳
     if (this._phase === 'loading') {
       const coin = this.pickCoin(t.clientX, t.clientY)
