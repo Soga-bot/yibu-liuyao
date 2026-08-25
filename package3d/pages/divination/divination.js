@@ -662,13 +662,14 @@ Page({
     return { min, size, backY }
   },
 
-  // 行面探测：刻字带顶点里 z 落在行附近 ±0.9 行距的最低 y = 该行腹甲面高；
-  // 前后两半的最低 y 之差 → 行倾角 pitch（笔道顺弧面微仰/俯，防穿模与悬空）
+  // 行面探测：刻字带顶点里 z 落在行附近 ±0.6 行距的最低 y = 该行腹甲面高；
+  // 前后两半的最低 y 之差 → 行倾角 pitch（笔道顺弧面微仰/俯，防穿模与悬空）。
+  // 窗口收紧到本行（±0.6 行距）防邻行/裙边把面高压低；pitch 限幅防局部坏点打歪
   probeRow(zc) {
     const L = this._shellLocal
     const pts = this._backPts
     if (!pts || !pts.length) return { y: L.backY, pitch: 0 }
-    const h = L.size.z * 0.09
+    const h = L.size.z * 0.06
     let yMid = Infinity
     let yA = Infinity
     let yB = Infinity
@@ -684,7 +685,8 @@ Page({
     if (!isFinite(yA)) yA = yMid
     if (!isFinite(yB)) yB = yMid
     // +z 端面高更高（yB>yA）时需抬起 +z 端：rotateX 负角（推导见刻痕注释）
-    return { y: yMid, pitch: -Math.atan2(yB - yA, 1.3 * h) }
+    const pitch = Math.max(-0.35, Math.min(0.35, -Math.atan2(yB - yA, 1.3 * h)))
+    return { y: yMid, pitch }
   },
 
   // 在壳背刻下第 i 爻（0=初）——「毛笔笔道」纯几何画法（不碰任何画布 API：
@@ -698,8 +700,10 @@ Page({
     const gap = L.size.z * 0.1              // 六爻行距
     const line = this.data.lines[i]
     const z0 = L.min.z + L.size.z / 2 + (i - 2.5) * gap
-    const row = this.probeRow(z0)           // 该行腹甲面高 + 顺弧倾角（防穿模/悬空）
-    const y0 = row.y + gap * 0.02           // 微浮于探测面（贴死会与壳面 z-fighting 闪面）
+    const row = this.probeRow(z0)           // 该行腹甲面高 + 顺弧倾角（防穿模与悬空）
+    // 立于面「外」侧（局部 -Y 再让 0.02 行距）：行面是弧顶，放面内必被最高弧带顶穿；
+    // 放面外则整行都在壳面之前，正对看不出浮起，也顺带避开 z-fighting
+    const y0 = row.y - gap * 0.02
     const bake = Math.PI / 2 + row.pitch
     // 一道笔道：n+1 个中心点（纵向微抖 + 横向漂移），半宽正弦收锋（两头细中间丰）
     const brushGeo = (xc, l, w0) => {
@@ -741,9 +745,9 @@ Page({
     if (line.yin) {
       add(brushGeo(-len * 0.30, len * 0.44, gap * 0.15), y0)
       add(brushGeo(len * 0.30, len * 0.44, gap * 0.15), y0)
-      if (line.dong) {                          // 老阴 ✕：中缝两臂（错层 0.012 防相交闪面）
-        add(brushGeo(0, gap * 0.34, gap * 0.09), y0 + gap * 0.012, { ry: Math.PI / 4 })
-        add(brushGeo(0, gap * 0.34, gap * 0.09), y0 + gap * 0.024, { ry: -Math.PI / 4 })
+      if (line.dong) {                          // 老阴 ✕：中缝两臂（更外侧错层防相交闪面）
+        add(brushGeo(0, gap * 0.34, gap * 0.09), y0 - gap * 0.01, { ry: Math.PI / 4 })
+        add(brushGeo(0, gap * 0.34, gap * 0.09), y0 - gap * 0.02, { ry: -Math.PI / 4 })
       }
     } else {
       add(brushGeo(0, len, gap * 0.15), y0)
@@ -756,7 +760,7 @@ Page({
         s.holes.push(hole)
         const g = new THREE.ShapeGeometry(s)
         g.rotateX(bake)
-        add(g, y0 + gap * 0.012, { growAll: true })
+        add(g, y0 - gap * 0.01, { growAll: true })
       }
     }
     return bars
@@ -788,9 +792,10 @@ Page({
     const m = new THREE.Mesh(
       new THREE.PlaneGeometry(w, w * 128 / 512),
       new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cv), transparent: true }))
-    // 平躺贴背：法线从 +Z 转到 -Y（朝壳外），字头朝局部 +Z（世界竖直）+ 行倾角顺弧
+    // 平躺贴背：法线从 +Z 转到 -Y（朝壳外），字头朝局部 +Z（世界竖直）+ 行倾角顺弧；
+    // 与爻线同法立于面外侧，防弧顶顶穿
     m.rotation.x = Math.PI / 2 + row.pitch
-    m.position.set(0, row.y + gap * 0.03, nz)
+    m.position.set(0, row.y - gap * 0.02, nz)
     m.scale.setScalar(0.02)
     m.userData.growAll = true
     this._marksGroup.add(m)
