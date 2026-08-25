@@ -154,10 +154,14 @@ Page({
     this._winW = info.windowWidth    // 触摸坐标 ↔ 屏幕投影换算用
     this._winH = info.windowHeight
 
-    // 卦名贴图的离屏 2D 画布节点（小程序无 wx.createCanvas，WXML 藏一张 type=2d）
-    wx.createSelectorQuery().select('#ink').fields({ node: true }).exec((r) => {
-      this._inkNode = r[0] && r[0].node
-    })
+    // 卦名贴图的真离屏画布（wx.createOffscreenCanvas，不进页面节点树）。
+    // 曾用 WXML 藏 type=2d 节点：页面里第二张 canvas（且 position:fixed）会诱发
+    // 同层渲染失效——原生画布层浮到所有 view 之上，返回键/提示/爻列表全部隐没
+    try {
+      this._inkNode = wx.createOffscreenCanvas({ type: '2d', width: 512, height: 128 })
+    } catch (e) {
+      console.error('离屏画布创建失败，卦名将不刻', e)
+    }
 
     // 复用一个 GLTFLoader
     this._gltfLoader = new THREE.GLTFLoader()
@@ -770,7 +774,7 @@ Page({
 
   // 卦成：上爻上方刻卦名（上卦象+下卦象+卦名，如「地雷复」）。
   // 画字必须走 CanvasTexture：小程序没有 wx.createCanvas（小游戏接口），
-  // 用 WXML 里藏的 type=2d 画布节点（init 时取好 _inkNode）
+  // 用 init 里创建的真离屏画布（wx.createOffscreenCanvas，不进节点树）
   carveGuaName() {
     const g = GUA_DATA[this.data.lines.map((l) => l.yin ? '0' : '1').join('')]
     if (!g) return []

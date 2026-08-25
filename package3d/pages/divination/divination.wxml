@@ -7,9 +7,6 @@
           bindtouchstart="onShellTouchStart" bindtouchmove="onShellTouchMove"
           bindtouchend="onShellTouchEnd" bindtouchcancel="onShellTouchEnd"></canvas>
 
-  <!-- 卦名离屏 2D 画布（小程序无 wx.createCanvas，藏一张节点供 CanvasTexture 用） -->
-  <canvas type="2d" id="ink" class="ink-cv"></canvas>
-
   <!-- 加载中提示 -->
   <view wx:if="{{loading}}" class="status">{{status}}</view>
 
