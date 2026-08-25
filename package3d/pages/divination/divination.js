@@ -69,9 +69,16 @@ const LOAD_ANGLE = 1.5         // 装钱态：壳后仰成碗（口朝上）
 const POUR_ANGLE = -1.9        // 倒钱态：壳前倾（口转向桌面）
 const TILT_SPEED = 6           // 壳姿态角指数趋近系数（越大转得越快）
 const POUR_RELEASE = 0.55      // 前倾角走过该比例时松钱
-const LOAD_RADIUS = 1.15       // 拖钱入壳判定：距壳心该半径内自动聚拢入壳
 const PICK_PX = 55             // 铜钱拾取热区半径(px)：屏幕空间拾取，手指友好
-const HOP_DUR = 0.35           // 铜钱落入壳内动画时长(s)
+// 装钱：三钱看作一个整体拖动，拖近洞口逐渐聚拢、洞口处最紧，到位依次跳入
+const GROUP_ENTER = 0.8        // 簇心距壳心该半径内 = 到位，自动入壳
+const GROUP_FAR = 1.8          // 簇心距壳心该距离外保持原间距（线性聚拢区间外沿）
+const GROUP_TIGHT = 0.55       // 洞口处间距系数（1=原间距，0.55≈三钱相扣成簇）
+const GROUP_LIFT = 0.25        // 整体提起高度（抓住=拿起一叠）
+const HOP_DUR = 0.4            // 单枚跳入壳内动画时长(s)
+const HOP_STAGGER = 0.45       // 三钱依次起跳间隔（HOP_DUR 的倍数）
+const HOP_ARC = 0.5            // 跳入抛物线弧高（世界单位）
+const HOP_SCALE = 0.18         // 跳入途中微放大（提起感）
 
 const POS_SHORT = ['初', '二', '三', '四', '五', '上']
 
@@ -187,7 +194,7 @@ Page({
       this._tiltTarget = 0
       this._tiltCb = null      // 姿态到位后的回调（一次性）
       this._loadCount = 0
-      this._dragCoin = null
+      this._dragGroup = null
       this._released = false
       this._hits = 0
       this._shellBaseRotZ = shell.rotation.z   // 摇晃晃动以此为基准
@@ -226,10 +233,11 @@ Page({
     this.beginLoad()
   },
 
-  // 铜钱状态对象
+  // 铜钱状态对象（baseScale：fitObject 后的基础缩放，跳跃动画中放大、结束还原）
   makeCoin(mesh) {
     return {
       mesh,
+      baseScale: mesh.scale.x,
       vel: new THREE.Vector3(),
       angVel: new THREE.Vector3(),
       settled: true
@@ -314,15 +322,31 @@ Page({
       this._shakeAmp *= 0.96
     }
 
-    // 铜钱跃入壳内动画（t<0 = 排队起跳）
+    // 铜钱跳入壳内动画（t<0 = 排队起跳）：水平线性 + 竖直抛物线弧 + 途中微放大
     if (this._coins) {
       for (const c of this._coins) {
         if (!c.anim) continue
         c.anim.t += dt / HOP_DUR
         if (c.anim.t <= 0) continue
         const k = Math.min(c.anim.t, 1)
-        c.mesh.position.lerpVectors(c.anim.from, c.anim.to, k)
-        if (k >= 1) c.anim = null
+        const arc = Math.sin(Math.PI * k)
+        c.mesh.position.x = c.anim.from.x + (c.anim.to.x - c.anim.from.x) * k
+        c.mesh.position.z = c.anim.from.z + (c.anim.to.z - c.anim.from.z) * k
+        c.mesh.position.y = c.anim.from.y + (c.anim.to.y - c.anim.from.y) * k + HOP_ARC * arc
+        c.mesh.scale.setScalar(c.baseScale * (1 + HOP_SCALE * arc))
+        if (k >= 1) {
+          c.mesh.position.copy(c.anim.to)
+          c.mesh.scale.setScalar(c.baseScale)
+          c.anim = null
+        }
+      }
+      // 三钱全部跳完（整体入壳）→ 壳立正进摇动阶段：钱落定碗内再立正，不穿帮
+      if (this._phase === 'loading' && this._loadCount >= 3 &&
+          this._coins.every((c) => !c.anim)) {
+        this._phase = 'righting'
+        this._tiltTarget = 0
+        this._tiltCb = () => this.startShakePhase()
+        this.updateBtn({ phase: 'righting', tip: '三钱入壳，立正待摇' })
       }
     }
 
@@ -448,7 +472,7 @@ Page({
     this._tilt = 0
     this._tiltTarget = 0
     this._tiltCb = null
-    this._dragCoin = null
+    this._dragGroup = null
     this._shaking = false
     if (this._coins) this._coins.forEach((c) => { c.anim = null; c.loaded = false })
     if (this._shell) this._shell.rotation.z = this._shellBaseRotZ
@@ -563,17 +587,23 @@ Page({
       this.triggerShake()
       return
     }
-    // 装钱态：拾起一枚未入壳的铜钱（提起 0.3），拖动只移钱不转壳
+    // 装钱态：抓住任意一枚 = 拿起三钱整体（一起提起），拖动整体平移+渐聚拢
     if (this._phase === 'loading') {
       const coin = this.pickCoin(t.clientX, t.clientY)
       if (coin) {
         console.log('[装钱] 拾取', t.clientX, t.clientY)   // 【临时自检】拖钱手感稳定后删
-        this._dragCoin = coin
+        const rest = this._coins.filter((c) => !c.loaded)
+        const cx = rest.reduce((s, c) => s + c.mesh.position.x, 0) / rest.length
+        const cz = rest.reduce((s, c) => s + c.mesh.position.z, 0) / rest.length
+        this._dragGroup = {
+          cx, cz,
+          offs: rest.map((c) => ({ c, ox: c.mesh.position.x - cx, oz: c.mesh.position.z - cz }))
+        }
         this._touchId = t.identifier
         this._dragLX = t.clientX   // 像素增量拖动的基准
         this._dragLY = t.clientY
         this._dragDist = this._camera.position.distanceTo(coin.mesh.position)
-        coin.mesh.position.y = FLOOR_Y + 0.3
+        rest.forEach((c) => { c.mesh.position.y = FLOOR_Y + GROUP_LIFT })
       }
       return
     }
@@ -588,9 +618,9 @@ Page({
     this._dragging = true
   },
   onShellTouchMove(e) {
-    if (this._dragCoin) {                 // 拖钱：沿桌面平面平移
+    if (this._dragGroup) {                // 拖钱整体：平移 + 越近洞口越聚拢
       const t = (e.touches || []).filter((x) => x.identifier === this._touchId)[0]
-      if (t) this.moveCoinOnTable(this._dragCoin, t.clientX, t.clientY)
+      if (t) this.moveGroupOnTable(t.clientX, t.clientY)
       return
     }
     if (!this._dragging || !this._shellPivot) return
@@ -609,12 +639,9 @@ Page({
     this._touchLastT = e.timeStamp
   },
   onShellTouchEnd(e) {
-    if (this._dragCoin) {                 // 松钱：判定是否落入壳口
+    if (this._dragGroup) {                // 松手：在洞口即入壳，否则落回桌面
       const still = (e.touches || []).some((x) => x.identifier === this._touchId)
-      if (!still) {
-        this.dropCoin(this._dragCoin)
-        this._dragCoin = null
-      }
+      if (!still) this.releaseGroup()
       return
     }
     if (!this._dragging) return
@@ -627,10 +654,11 @@ Page({
     }
   },
 
-  // ====== 装钱：屏幕空间拾取 / 像素增量拖动 / 入壳判定 ======
+  // ====== 装钱：屏幕空间拾取 / 三钱整体拖动 / 聚拢入壳 ======
   // 教训：本环境 Raycaster.intersectObjects 对模型 mesh 全 miss（矩阵已刷新仍 0 命中，
   // 壳同样 miss，疑为 threejs-miniprogram 构建裁剪），弃用几何求交改纯数学：
   // 拾取 = 投影铜钱中心到屏幕算距离；拖动 = 像素增量 × 该深度处世界/像素比。
+  // 三钱看作一个整体：抓任意一枚全部跟随，拖近洞口间距线性收紧（洞口处最紧）。
   pickCoin(cx, cy) {
     this._camera.updateMatrixWorld()
     const v = new THREE.Vector3()
@@ -647,48 +675,54 @@ Page({
     return best
   },
 
-  moveCoinOnTable(coin, cx, cy) {
-    // 该深度处 1px 对应的世界距离（竖直 FOV 换算，横竖同因子）
+  // 整体拖动三钱：像素增量 → 世界增量平移簇心；间距随「距洞口距离」线性收紧
+  moveGroupOnTable(cx, cy) {
     const k = 2 * Math.tan(this._camera.fov * Math.PI / 360) * this._dragDist / this._winH
-    coin.mesh.position.x = clamp(coin.mesh.position.x + (cx - this._dragLX) * k, -1.3, 1.3)
-    coin.mesh.position.z = clamp(coin.mesh.position.z + (cy - this._dragLY) * k, -0.3, 1.5)
+    const g = this._dragGroup
+    g.cx = clamp(g.cx + (cx - this._dragLX) * k, -1.3, 1.3)
+    g.cz = clamp(g.cz + (cy - this._dragLY) * k, -0.3, 1.5)
     this._dragLX = cx
     this._dragLY = cy
-    // 靠近壳口自动聚拢入壳：拖到壳口附近即被吸入，不必精确松手
+    // 聚拢系数：簇心距壳心 GROUP_FAR 外=原间距，GROUP_ENTER 内=最紧（线性过渡）
     const c0 = this._shellPivot.position
-    const dx = coin.mesh.position.x - c0.x
-    const dz = coin.mesh.position.z - c0.z
-    if (dx * dx + dz * dz < LOAD_RADIUS * LOAD_RADIUS) {
-      this.dropCoin(coin)
-      if (this._dragCoin === coin) this._dragCoin = null
-    }
+    const d = Math.sqrt((g.cx - c0.x) * (g.cx - c0.x) + (g.cz - c0.z) * (g.cz - c0.z))
+    const s = GROUP_TIGHT + (1 - GROUP_TIGHT) * clamp((d - GROUP_ENTER) / (GROUP_FAR - GROUP_ENTER), 0, 1)
+    g.offs.forEach((o) => {
+      o.c.mesh.position.x = clamp(g.cx + o.ox * s, -1.3, 1.3)
+      o.c.mesh.position.z = clamp(g.cz + o.oz * s, -0.3, 1.5)
+    })
+    if (d < GROUP_ENTER) this.enterShell()   // 拖到洞口：三钱依次跳入
   },
 
-  dropCoin(coin) {
-    coin.mesh.position.y = FLOOR_Y
-    if (this._phase !== 'loading' || coin.loaded) return
+  // 松手：簇心已在洞口 → 直接入壳；否则三钱落回桌面（保持当前聚拢间距，可再拖）
+  releaseGroup() {
+    const g = this._dragGroup
+    this._dragGroup = null
+    if (!g) return
     const c0 = this._shellPivot.position
-    const dx = coin.mesh.position.x - c0.x
-    const dz = coin.mesh.position.z - c0.z
-    if (Math.sqrt(dx * dx + dz * dz) > LOAD_RADIUS) return   // 没入壳：留在原地可再拖
-    // 入壳：跳进碗里
-    coin.loaded = true
-    coin.anim = {
-      from: coin.mesh.position.clone(),
-      to: new THREE.Vector3(c0.x + rand(-0.2, 0.2), c0.y - 0.35, c0.z + rand(-0.2, 0.2)),
-      t: 0
-    }
-    this._loadCount += 1
-    this.updateBtn()
-    if (this._loadCount >= 3) {
-      // 三钱齐：壳立正 → 摇动阶段
-      this._phase = 'righting'
-      this._tiltTarget = 0
-      this._tiltCb = () => this.startShakePhase()
-      this.updateBtn({ phase: 'righting', tip: '' })
-    } else {
-      this.setData({ tip: '拖动铜钱放入壳中（' + this._loadCount + '/3）' })
-    }
+    const d = Math.sqrt((g.cx - c0.x) * (g.cx - c0.x) + (g.cz - c0.z) * (g.cz - c0.z))
+    if (d < GROUP_ENTER) this.enterShell()
+    else g.offs.forEach((o) => { o.c.mesh.position.y = FLOOR_Y })
+  },
+
+  // 三钱整体入壳：从当前位置依次起跳（抛物线弧+微缩放），全部落定后壳立正
+  // （立正时机在 update 里等动画做完，见「三钱全部跳完」分支）
+  enterShell() {
+    this._dragGroup = null
+    const c0 = this._shellPivot.position
+    let i = 0
+    this._coins.forEach((c) => {
+      if (c.loaded) return
+      c.loaded = true
+      c.anim = {
+        from: c.mesh.position.clone(),
+        to: new THREE.Vector3(c0.x + rand(-0.18, 0.18), c0.y - 0.35, c0.z + rand(-0.18, 0.18)),
+        t: -i * HOP_STAGGER   // t<0 = 排队起跳，三钱一前一后
+      }
+      i += 1
+    })
+    this._loadCount = 3
+    this.updateBtn({ loadCount: 3, tip: '三钱入壳…' })
   },
 
   onShakeTap() {
