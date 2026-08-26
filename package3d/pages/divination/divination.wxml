@@ -34,10 +34,11 @@
     bindtap="onReset"
   >重摇</view>
 
-  <!-- 摇卦按钮：仅待机/摇动/卦成态显示（装钱等仪式阶段隐藏；所求已在问事签独立页问过） -->
+  <!-- 摇卦按钮：仅待机/摇动/卦成态显示（装钱等仪式阶段隐藏；所求已在问事签独立页问过）。
+       摇动中不再置灰：已晃过点按 = 立即倒出（停手即倒的显式通道） -->
   <view
     wx:if="{{!btnHidden}}"
-    class="btn {{shaking ? 'btn-disabled' : ''}}"
+    class="btn"
     hover-class="btn-hover"
     hover-stay-time="80"
     bindtap="onShakeTap"
