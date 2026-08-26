@@ -81,27 +81,104 @@
 .lead-btn::after { border: none; }
 .lead-hover { opacity: 0.85; }
 
-/* 解读生成中：朱金三点依次跳动（同按钮底色，替代干等文案） */
-.ask-btn {
+/* ---------- 解读生成中：八卦盘等待动画 ----------
+   外环先天序卦画径向排布，依次点亮熄灭追逐一圈；整盘缓慢自转；
+   中心「易」字呼吸。纯 CSS，无图片依赖。 */
+.ask-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30rpx 0 8rpx;
+}
+.bagua-disc {
+  position: relative;
+  width: 220rpx; height: 220rpx;
+  border: 2rpx solid rgba(139,105,20,0.35);
+  border-radius: 50%;
+  background: rgba(255,253,246,0.65);
+  box-shadow: inset 0 0 18rpx rgba(139,105,20,0.08);
+}
+.disc-rot {
+  position: absolute;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  animation: disc-spin 10s linear infinite;
+}
+@keyframes disc-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.ring-item {
+  position: absolute;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+.ri-0 { transform: rotate(0deg); }
+.ri-1 { transform: rotate(45deg); }
+.ri-2 { transform: rotate(90deg); }
+.ri-3 { transform: rotate(135deg); }
+.ri-4 { transform: rotate(180deg); }
+.ri-5 { transform: rotate(225deg); }
+.ri-6 { transform: rotate(270deg); }
+.ri-7 { transform: rotate(315deg); }
+.tri {
+  margin-top: 8rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: tri-chase 1.6s linear infinite;
+}
+/* 八卦依次点亮：各错开 1/8 周期，形成追逐的光点 */
+.ri-0 .tri { animation-delay: 0s; }
+.ri-1 .tri { animation-delay: 0.2s; }
+.ri-2 .tri { animation-delay: 0.4s; }
+.ri-3 .tri { animation-delay: 0.6s; }
+.ri-4 .tri { animation-delay: 0.8s; }
+.ri-5 .tri { animation-delay: 1s; }
+.ri-6 .tri { animation-delay: 1.2s; }
+.ri-7 .tri { animation-delay: 1.4s; }
+@keyframes tri-chase {
+  0%, 18%, 100% { opacity: 0.22; transform: scale(1); }
+  8% { opacity: 1; transform: scale(1.18); }
+}
+.tl {
+  width: 30rpx; height: 5rpx;
+  border-radius: 2rpx;
+  background: #3E2723;
+}
+.tl + .tl { margin-top: 4rpx; }
+.tl-yin {
+  background: none;
+  display: flex;
+  justify-content: space-between;
+}
+.tl-yin .th { width: 12rpx; height: 5rpx; border-radius: 2rpx; background: #3E2723; }
+.disc-center {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 76rpx; height: 76rpx;
+  margin: -38rpx 0 0 -38rpx;
+  border-radius: 50%;
+  background: rgba(139,105,20,0.1);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 30rpx;
-  letter-spacing: 6rpx;
+  font-size: 40rpx;
+  color: #8a5e15;
+  animation: center-breathe 1.6s ease-in-out infinite;
 }
-.ask-dots { display: flex; align-items: flex-end; margin-right: 16rpx; }
-.adot {
-  width: 12rpx; height: 12rpx;
-  border-radius: 50%;
-  background: #F6D77A;
-  margin: 0 5rpx;
-  animation: adot-jump 1s ease-in-out infinite;
+@keyframes center-breathe {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
 }
-.adot:nth-child(2) { animation-delay: 0.15s; }
-.adot:nth-child(3) { animation-delay: 0.3s; }
-@keyframes adot-jump {
-  0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
-  30% { transform: translateY(-10rpx); opacity: 1; }
+.ask-txt {
+  margin-top: 20rpx;
+  font-size: 26rpx;
+  color: #5D4037;
+  letter-spacing: 4rpx;
 }
 
 /* 已存解读 */

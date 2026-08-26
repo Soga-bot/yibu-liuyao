@@ -32,6 +32,18 @@ function fmtTime(t) {
   return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes())
 }
 
+// 等待动画的八卦环：先天序卦画（上→下，1 阳 0 阴），与八卦基础页同数据
+const BAGUA_RING = [
+  { n: '乾', l: [1, 1, 1] },
+  { n: '兑', l: [0, 1, 1] },
+  { n: '离', l: [1, 0, 1] },
+  { n: '震', l: [0, 0, 1] },
+  { n: '巽', l: [1, 1, 0] },
+  { n: '坎', l: [0, 1, 0] },
+  { n: '艮', l: [1, 0, 0] },
+  { n: '坤', l: [0, 0, 0] }
+]
+
 Page({
   data: {
     statusBarHeight: 20,
@@ -45,7 +57,8 @@ Page({
     bianName: '',
     bianKey: '',
     aiText: '',        // 已存的问易解读（本页生成或历史回看）
-    aiAtStr: ''
+    aiAtStr: '',
+    ring: BAGUA_RING   // 等待动画的八卦环
   },
 
   onLoad(options) {
