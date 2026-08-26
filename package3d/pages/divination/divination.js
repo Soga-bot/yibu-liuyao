@@ -73,6 +73,10 @@ const SHAKE_QUIET = 1300        // 摇动停止（末次命中后静默该时长
                                 // 的换气间隙（常见 0.8~1s 顿）。v0.3.13 曾试「节奏 EMA×1.8 夹
                                 // 600~1300」自适应：前两下快摇就把阈值压到 ~0.7s，换气即倒、
                                 // 摇两下就出——用户实测手感更差，v0.3.15 回摆固定从严
+const SHAKE_START_BED = 2000    // 起手声垫时限：进摇动即起的过程音，若该时限内没晃出任何有效
+                                // 命中则先止——零命中时停音判定（挂 _lastHitAt）与倒出判定
+                                // （要求 ≥1 命中）都不成立，不兜底就成了「不倒出、声垫无限
+                                // 响」；真晃出第一下命中 addShakeHit 会随手动重起
 const LOAD_ANGLE = Math.PI / 6 // 装钱态：壳后仰 30°（微张口迎钱，原 86° 太翻）
 const POUR_ANGLE = -1.65       // 倒钱态：壳前倾（口转向桌面；原 -1.9 过水平面 19°，近沿上翘太夸张）
 const TILT_SPEED = 6           // 壳姿态角指数趋近系数（越大转得越快）
@@ -326,6 +330,7 @@ Page({
     this._released = false
     this._shaking = true
     this._shakeAmp = 1
+    this._shakeStartAt = Date.now()   // 起手声垫计时的锚（零命中兜底用）
     this.playLoop()   // 摇卦过程音起（循环，倒出时止）
     this.updateBtn({
       phase: 'shaking', shaking: true, qiuRemind: true,
@@ -474,6 +479,13 @@ Page({
     // 手一停过程音先止（比倒出判定早），再晃再起——声音跟着手动
     if (this._phase === 'shaking' && this._loopOn && this._lastHitAt &&
         Date.now() - this._lastHitAt > 450) {
+      this.stopLoop()
+    }
+    // 起手声垫兜底：进了摇动却始终没晃出有效命中（拿在手里没动/太轻没过阈值），
+    // 声垫到 SHAKE_START_BED 先止——两条判定都以「有过命中」为前提，零命中时
+    // 都不成立，声垫就会无限响而龟壳永不倒出；真晃出第一下会随手动重起
+    if (this._phase === 'shaking' && this._loopOn && !this._lastHitAt &&
+        this._shakeStartAt && Date.now() - this._shakeStartAt > SHAKE_START_BED) {
       this.stopLoop()
     }
 
