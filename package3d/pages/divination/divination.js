@@ -315,7 +315,7 @@ Page({
     this._tiltTarget = 0
     this._tiltCb = null
     this._coins.forEach((c) => { c.loaded = false; c.anim = null })
-    this.updateBtn({ phase: 'loading', loadCount: 0, tip: tip || '拖动三枚铜钱凑向壳口' })
+    this.updateBtn({ phase: 'loading', loadCount: 0, qiuRemind: false, tip: tip || '拖动三枚铜钱凑向壳口' })
   },
 
   // 三钱入壳后：壳立正 → 进入摇动阶段
@@ -1175,7 +1175,9 @@ Page({
       i += 1
     })
     this._loadCount = 3
-    this.updateBtn({ loadCount: 3, tip: '三钱入壳…' })
+    // 默念提醒从三钱起跳入壳即现（跳入+立正+摇动全程在场，倒出即隐）：
+    // 比「摇动才开始」早 ~1.5s，静心引导不断节拍；弹窗方案会冻住入壳动画，弃
+    this.updateBtn({ loadCount: 3, tip: '三钱入壳…', qiuRemind: true })
   },
 
   onShakeTap() {
