@@ -1,10 +1,10 @@
 <!-- pages/settings/settings.wxml — 设置：深色模式三态 / 阅读正文字号 / 背景音乐 -->
 <!-- 固定顶栏（带返回）；主题/字号类挂根节点——本页即预览，切换即时生效 -->
-<view class="topbar {{themeCls}} {{fontCls}}" style="padding-top: {{statusBarHeight}}px;">
+<view class="topbar {{themeCls}} {{fontCls}}" style="padding-top: max(calc(6.4vh - 44rpx), {{statusBarHeight}}px);">
   <view class="back font-kai" bindtap="goBack">‹</view>
   <text class="title font-kai">设置</text>
 </view>
-<view class="page {{themeCls}} {{fontCls}}" style="padding-top: calc({{statusBarHeight}}px + 88rpx);">
+<view class="page {{themeCls}} {{fontCls}}" style="padding-top: max(calc(6.4vh + 44rpx), calc({{statusBarHeight}}px + 88rpx));">
   <view class="content">
 
     <!-- 深色模式：三态 -->

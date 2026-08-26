@@ -1,7 +1,7 @@
 <!-- pages/bagong/bagong.wxml — 卦象速查（京房八宫六十四卦） -->
 <view class="page {{themeCls}} {{fontCls}}">
   <view class="status-bar" style="height: {{statusBarHeight}}px;"></view>
-  <view class="topbar">
+  <view class="topbar" style="margin-top: max(calc(6.4vh - 44rpx), {{statusBarHeight}}px);">
     <view class="back font-kai" bindtap="goBack">‹</view>
     <text class="title font-kai">卦象速查</text>
   </view>

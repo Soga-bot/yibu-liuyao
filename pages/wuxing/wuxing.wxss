@@ -33,9 +33,9 @@
    校准链：v0.3.4 被压顶进状态栏（锚点 ≈3.8% 屏高）→ v0.3.5 钉正中 50vh →
    分值 5/6 → v0.3.6 = 11.5vh（用户报偏低）→ 分值「上移 = 之前锚点到当前
    锚点距离的 2/3」→ 11.5% − 2/3×7.7% = 6.4vh。margin 不参与 flex 收缩、
-   栏体禁缩，定位确定；spacer 藏起由 margin 顶替。仍仅此一页。
-   注意：6.4vh 字顶距状态栏底仅约 3px（用户机型），迁移轮拟加
-   max(vh 档, 状态栏 px) 双下限保护防更高状态栏机型侵入。 */
+   栏体禁缩，定位确定；spacer 藏起由 margin 顶替。v0.3.8 已迁移全站 8 页；
+   本页 wxml 顶栏内联 max(calc(6.4vh−44rpx), 状态栏px) 双下限——高状态栏机型
+   （刘海屏）回落自然位（状态栏 + 88rpx），本 wxss calc 为旧基础库回退。 */
 .status-bar { display: none; }
 .topbar { margin-top: calc(6.4vh - 44rpx); flex-shrink: 0; }
 

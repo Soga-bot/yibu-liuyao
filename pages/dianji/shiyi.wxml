@@ -1,10 +1,10 @@
 <!-- pages/dianji/shiyi.wxml — 十翼通读：系辞上/下、说卦传 -->
 <!-- 固定顶栏（带返回）：长正文页滚动钻不进状态栏底下；主题/字号类挂根节点 -->
-<view class="topbar {{themeCls}} {{fontCls}}" style="padding-top: {{statusBarHeight}}px;">
+<view class="topbar {{themeCls}} {{fontCls}}" style="padding-top: max(calc(6.4vh - 44rpx), {{statusBarHeight}}px);">
   <view class="back font-kai" bindtap="goBack">‹</view>
   <text class="title font-kai">十翼 · 通读</text>
 </view>
-<view class="page {{themeCls}} {{fontCls}}" style="padding-top: calc({{statusBarHeight}}px + 88rpx);">
+<view class="page {{themeCls}} {{fontCls}}" style="padding-top: max(calc(6.4vh + 44rpx), calc({{statusBarHeight}}px + 88rpx));">
 
   <view class="content">
     <block wx:for="{{books}}" wx:for-item="book" wx:key="name">
