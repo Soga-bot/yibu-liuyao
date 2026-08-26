@@ -5,9 +5,9 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #F8F3E9;
-  background-image: radial-gradient(circle at 20% 10%, rgba(139,105,20,0.05) 0, transparent 140rpx),
-                    radial-gradient(circle at 85% 85%, rgba(192,57,43,0.04) 0, transparent 160rpx);
+  background: var(--bg);
+  background-image: radial-gradient(circle at 20% 10%, var(--tint-05) 0, transparent 140rpx),
+                    radial-gradient(circle at 85% 85%, var(--rwash-05) 0, transparent 160rpx);
 }
 
 .topbar {
@@ -18,12 +18,12 @@
 .back {
   width: 64rpx; height: 64rpx;
   border-radius: 50%;
-  background: rgba(62,39,35,0.06);
-  color: #5D4037; font-size: 48rpx; line-height: 60rpx; text-align: center;
+  background: var(--shadow-1);
+  color: var(--text-2); font-size: 48rpx; line-height: 60rpx; text-align: center;
 }
 .title {
   flex: 1; text-align: center;
-  font-size: 38rpx; font-weight: bold; color: #3E2723;
+  font-size: 38rpx; font-weight: bold; color: var(--text);
   letter-spacing: 8rpx; margin-right: 64rpx;
 }
 
@@ -31,16 +31,16 @@
 
 /* ---------- 卡片 ---------- */
 .sec {
-  background: #fffaf0;
-  border: 1rpx solid rgba(139,105,20,0.22);
+  background: var(--card);
+  border: 1rpx solid var(--tint-20);
   border-radius: 16rpx;
   padding: 26rpx 28rpx 22rpx;
   margin-bottom: 24rpx;
-  box-shadow: 0 3rpx 12rpx rgba(62,39,35,0.05);
+  box-shadow: 0 3rpx 12rpx var(--shadow-1);
 }
 .sec-title {
   font-size: 28rpx;
-  color: #8a5e15;
+  color: var(--gold);
   font-weight: bold;
   letter-spacing: 3rpx;
   margin-bottom: 18rpx;
@@ -48,7 +48,7 @@
 .sec-note {
   margin-top: 16rpx;
   font-size: 23rpx;
-  color: #a8916e;
+  color: var(--text-weak);
   line-height: 1.7;
 }
 .m-row {
@@ -56,11 +56,11 @@
   align-items: center;
   justify-content: space-between;
   padding: 14rpx 0;
-  border-bottom: 1rpx dashed rgba(139,105,20,0.18);
+  border-bottom: 1rpx dashed var(--tint-15);
 }
 .m-row:last-of-type { border-bottom: none; }
-.m-k { font-size: 28rpx; color: #C62828; font-weight: bold; letter-spacing: 2rpx; }
-.m-v { font-size: 25rpx; color: #5D4037; text-align: right; }
+.m-k { font-size: 28rpx; color: var(--red); font-weight: bold; letter-spacing: 2rpx; }
+.m-v { font-size: 25rpx; color: var(--text-2); text-align: right; }
 
 /* ---------- 八卦一览（两列卡片） ---------- */
 .bg-grid {
@@ -76,9 +76,9 @@
   align-items: center;
   padding: 20rpx 0 16rpx;
   margin-bottom: 16rpx;
-  border: 1rpx solid rgba(139,105,20,0.16);
+  border: 1rpx solid var(--tint-15);
   border-radius: 12rpx;
-  background: rgba(248,243,233,0.6);
+  background: var(--wash-bg-60);
 }
 .bg-card:nth-last-child(-n+2) { margin-bottom: 0; }
 .bg-lines {
@@ -87,21 +87,21 @@
   gap: 8rpx;
   margin-bottom: 12rpx;
 }
-.bg-line { width: 64rpx; height: 10rpx; border-radius: 4rpx; background: #3E2723; }
+.bg-line { width: 64rpx; height: 10rpx; border-radius: 4rpx; background: var(--text); }
 .bg-yin {
   background: none;
   display: flex;
   justify-content: space-between;
 }
-.bg-yin .h { width: 27rpx; height: 10rpx; border-radius: 4rpx; background: #3E2723; }
-.bg-name { font-size: 30rpx; color: #3E2723; letter-spacing: 2rpx; }
-.bg-sub { margin-top: 4rpx; font-size: 22rpx; color: #a8916e; }
+.bg-yin .h { width: 27rpx; height: 10rpx; border-radius: 4rpx; background: var(--text); }
+.bg-name { font-size: 30rpx; color: var(--text); letter-spacing: 2rpx; }
+.bg-sub { margin-top: 4rpx; font-size: 22rpx; color: var(--text-weak); }
 
 /* ---------- 先天/后天九宫格 ---------- */
 .grid9 {
   display: flex;
   flex-direction: column;
-  border: 1rpx solid rgba(139,105,20,0.25);
+  border: 1rpx solid var(--tint-25);
   border-radius: 12rpx;
   overflow: hidden;
 }
@@ -116,18 +116,18 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-right: 1rpx solid rgba(139,105,20,0.18);
-  border-bottom: 1rpx solid rgba(139,105,20,0.18);
-  background: #fffdf6;
+  border-right: 1rpx solid var(--tint-15);
+  border-bottom: 1rpx solid var(--tint-15);
+  background: var(--tab-bg);
 }
 .grid9-row .g9:nth-child(3n) { border-right: none; }
 .grid9-row:last-child .g9 { border-bottom: none; }
-.g9-mid { background: rgba(139,105,20,0.08); }
-.g9-t { font-size: 34rpx; color: #3E2723; line-height: 1.2; }
+.g9-mid { background: var(--tint-10); }
+.g9-t { font-size: 34rpx; color: var(--text); line-height: 1.2; }
 .g9-f {
   margin-top: 6rpx;
   font-size: 21rpx;
-  color: #a8916e;
+  color: var(--text-weak);
   display: flex;
   align-items: center;
 }
@@ -144,7 +144,7 @@
   margin-right: 6rpx;
 }
 .d-mu { background: #4E7A3A; }
-.d-huo { background: #B4552D; }
+.d-huo { background: var(--red-bian); }
 .d-tu { background: #8D6E3F; }
 .d-jin { background: #A08850; }
 .d-shui { background: #3D5A80; }
@@ -153,7 +153,7 @@
   margin-top: 10rpx;
   text-align: center;
   font-size: 22rpx;
-  color: #a8916e;
+  color: var(--text-weak);
   letter-spacing: 2rpx;
 }
 
@@ -164,19 +164,19 @@
   padding: 12rpx 8rpx;
 }
 .grid-head {
-  color: #8a7355;
+  color: var(--text-3);
   font-size: 24rpx;
-  border-bottom: 1rpx solid rgba(139,105,20,0.22);
+  border-bottom: 1rpx solid var(--tint-20);
 }
-.grid-row { border-bottom: 1rpx dashed rgba(139,105,20,0.18); }
+.grid-row { border-bottom: 1rpx dashed var(--tint-15); }
 .grid-row:last-of-type { border-bottom: none; }
 .gh, .gc {
   flex: 1;
   text-align: center;
   font-size: 26rpx;
-  color: #5D4037;
+  color: var(--text-2);
 }
-.gc-x { color: #C62828; font-weight: bold; }
+.gc-x { color: var(--red); font-weight: bold; }
 
 /* ---------- 卦象速查入口 ---------- */
 .go-suca {
@@ -185,20 +185,20 @@
   align-items: center;
   justify-content: space-between;
   padding: 16rpx 20rpx;
-  border: 1rpx solid rgba(139,105,20,0.28);
+  border: 1rpx solid var(--tint-25);
   border-radius: 10rpx;
-  background: rgba(248,243,233,0.7);
+  background: var(--wash-bg-75);
   font-size: 26rpx;
-  color: #5D4037;
+  color: var(--text-2);
   letter-spacing: 1rpx;
 }
-.go-suca-hover { background: rgba(198,40,40,0.06); }
-.go-arrow { font-size: 32rpx; color: #a8916e; }
+.go-suca-hover { background: var(--rwash-05); }
+.go-arrow { font-size: 32rpx; color: var(--text-weak); }
 
 .foot-note {
   margin: 10rpx 0 20rpx;
   text-align: center;
   font-size: 22rpx;
-  color: #a8916e;
+  color: var(--text-weak);
 }
 .bottom-pad { height: 40rpx; }

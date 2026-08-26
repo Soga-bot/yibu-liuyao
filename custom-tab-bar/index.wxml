@@ -1,5 +1,5 @@
 <!-- custom-tab-bar/index.wxml -->
-<view class="tab-bar" style="padding-bottom: {{safeBottom}}px;">
+<view class="tab-bar {{dark ? 'dark' : ''}}" style="padding-bottom: {{safeBottom}}px;">
   <view
     wx:for="{{list}}"
     wx:key="index"

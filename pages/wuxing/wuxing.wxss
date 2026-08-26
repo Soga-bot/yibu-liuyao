@@ -3,9 +3,9 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #F8F3E9;
-  background-image: radial-gradient(circle at 20% 10%, rgba(139,105,20,0.05) 0, transparent 140rpx),
-                    radial-gradient(circle at 85% 85%, rgba(192,57,43,0.04) 0, transparent 160rpx);
+  background: var(--bg);
+  background-image: radial-gradient(circle at 20% 10%, var(--tint-05) 0, transparent 140rpx),
+                    radial-gradient(circle at 85% 85%, var(--rwash-05) 0, transparent 160rpx);
 }
 
 .topbar {
@@ -16,12 +16,12 @@
 .back {
   width: 64rpx; height: 64rpx;
   border-radius: 50%;
-  background: rgba(62,39,35,0.06);
-  color: #5D4037; font-size: 48rpx; line-height: 60rpx; text-align: center;
+  background: var(--shadow-1);
+  color: var(--text-2); font-size: 48rpx; line-height: 60rpx; text-align: center;
 }
 .title {
   flex: 1; text-align: center;
-  font-size: 38rpx; font-weight: bold; color: #3E2723;
+  font-size: 38rpx; font-weight: bold; color: var(--text);
   letter-spacing: 8rpx; margin-right: 64rpx;
 }
 
@@ -29,16 +29,16 @@
 
 /* ---------- 卡片 ---------- */
 .sec {
-  background: #fffaf0;
-  border: 1rpx solid rgba(139,105,20,0.22);
+  background: var(--card);
+  border: 1rpx solid var(--tint-20);
   border-radius: 16rpx;
   padding: 26rpx 28rpx 22rpx;
   margin-bottom: 24rpx;
-  box-shadow: 0 3rpx 12rpx rgba(62,39,35,0.05);
+  box-shadow: 0 3rpx 12rpx var(--shadow-1);
 }
 .sec-title {
   font-size: 28rpx;
-  color: #8a5e15;
+  color: var(--gold);
   font-weight: bold;
   letter-spacing: 3rpx;
   margin-bottom: 18rpx;
@@ -46,7 +46,7 @@
 .sec-note {
   margin-top: 16rpx;
   font-size: 23rpx;
-  color: #a8916e;
+  color: var(--text-weak);
   line-height: 1.7;
 }
 .m-row {
@@ -54,11 +54,11 @@
   align-items: center;
   justify-content: space-between;
   padding: 14rpx 0;
-  border-bottom: 1rpx dashed rgba(139,105,20,0.18);
+  border-bottom: 1rpx dashed var(--tint-15);
 }
 .m-row:last-of-type { border-bottom: none; }
-.m-k { font-size: 28rpx; color: #C62828; font-weight: bold; letter-spacing: 2rpx; }
-.m-v { font-size: 25rpx; color: #5D4037; }
+.m-k { font-size: 28rpx; color: var(--red); font-weight: bold; letter-spacing: 2rpx; }
+.m-v { font-size: 25rpx; color: var(--text-2); }
 
 /* ---------- 生克图 ---------- */
 .wx-map {
@@ -73,7 +73,7 @@
   z-index: 1;
 }
 .lk-sheng { height: 3rpx; background: rgba(138,94,21,0.55); border-radius: 2rpx; }
-.lk-ke { height: 0; border-top: 3rpx dashed rgba(198,40,40,0.6); }
+.lk-ke { height: 0; border-top: 3rpx dashed var(--rwash-60); }
 .wx-node {
   position: absolute;
   width: 96rpx; height: 96rpx;
@@ -84,7 +84,7 @@
   text-align: center;
   line-height: 96rpx;
   z-index: 2;
-  box-shadow: 0 4rpx 10rpx rgba(62,39,35,0.18);
+  box-shadow: 0 4rpx 10rpx var(--shadow-3);
 }
 /* 类名用 ASCII（mu/huo/tu/jin/shui），中文类选择器 WXSS 编译不过 */
 .n-mu { background: #4E7A3A; }
@@ -96,7 +96,7 @@
   margin-top: 8rpx;
   text-align: center;
   font-size: 22rpx;
-  color: #a8916e;
+  color: var(--text-weak);
   letter-spacing: 2rpx;
 }
 
@@ -107,24 +107,24 @@
   padding: 12rpx 8rpx;
 }
 .grid-head {
-  color: #8a7355;
+  color: var(--text-3);
   font-size: 24rpx;
-  border-bottom: 1rpx solid rgba(139,105,20,0.22);
+  border-bottom: 1rpx solid var(--tint-20);
 }
-.grid-row { border-bottom: 1rpx dashed rgba(139,105,20,0.18); }
+.grid-row { border-bottom: 1rpx dashed var(--tint-15); }
 .grid-row:last-of-type { border-bottom: none; }
 .gh, .gc {
   flex: 1;
   text-align: center;
   font-size: 26rpx;
-  color: #5D4037;
+  color: var(--text-2);
 }
-.gc-x { color: #C62828; font-weight: bold; }
+.gc-x { color: var(--red); font-weight: bold; }
 
 .foot-note {
   margin: 10rpx 0 20rpx;
   text-align: center;
   font-size: 22rpx;
-  color: #a8916e;
+  color: var(--text-weak);
 }
 .bottom-pad { height: 40rpx; }

@@ -2,7 +2,7 @@
 .status-bar { width: 100%; }
 .page {
   min-height: 100vh;
-  background: linear-gradient(180deg, #f6efe2 0%, #efe6d3 100%);
+  background: linear-gradient(180deg, var(--card) 0%, var(--card-2) 100%);
 }
 .topbar {
   display: flex;
@@ -13,14 +13,14 @@
 .back {
   width: 80rpx;
   font-size: 60rpx;
-  color: #5D4037;
+  color: var(--text-2);
   line-height: 1;
 }
 .title {
   flex: 1;
   text-align: center;
   font-size: 34rpx;
-  color: #3d2b1f;
+  color: var(--text);
   margin-right: 80rpx;
 }
 .content {
@@ -30,24 +30,24 @@
   margin: 40rpx 0 20rpx;
   text-align: center;
   font-size: 38rpx;
-  color: #5D4037;
+  color: var(--text-2);
   letter-spacing: 6rpx;
 }
 .sec {
   margin-top: 20rpx;
   padding: 24rpx 28rpx;
-  background: rgba(255, 252, 245, 0.72);
+  background: var(--wash-card-70);
   border-radius: 16rpx;
 }
 .sec-title {
   font-size: 26rpx;
-  color: #8a5e15;
+  color: var(--gold);
   letter-spacing: 4rpx;
   margin-bottom: 12rpx;
 }
 .daxiang {
   font-size: 28rpx;
-  color: #4a3f35;
+  color: var(--text-4);
   line-height: 1.9;
   letter-spacing: 2rpx;
 }
@@ -56,10 +56,10 @@
   margin-bottom: 14rpx;
   padding: 12rpx 18rpx;
   background: rgba(138, 94, 21, 0.06);
-  border-left: 6rpx solid #c9a86a;
+  border-left: 6rpx solid var(--gold-lt);
   border-radius: 8rpx;
   font-size: 24rpx;
-  color: #6b5a48;
+  color: var(--text-5);
   line-height: 1.7;
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
 }
@@ -67,5 +67,5 @@
   margin-top: 30rpx;
   text-align: center;
   font-size: 22rpx;
-  color: #a8916e;
+  color: var(--text-weak);
 }

@@ -6,11 +6,11 @@
   padding-bottom: 140rpx; /* 避开自定义 TabBar */
   display: flex;
   flex-direction: column; /* 纵向弹性布局：剩余高度由两根 gap-grow 均分 */
-  background-color: #F8F3E9;
+  background-color: var(--bg);
   /* 宣纸暗纹：极淡的同心圆点缀，营造古纸质感 */
   background-image:
-    radial-gradient(circle at 20% 15%, rgba(139, 105, 20, 0.04) 0, transparent 120rpx),
-    radial-gradient(circle at 85% 80%, rgba(192, 57, 43, 0.04) 0, transparent 140rpx);
+    radial-gradient(circle at 20% 15%, var(--tint-05) 0, transparent 120rpx),
+    radial-gradient(circle at 85% 80%, var(--rwash-05) 0, transparent 140rpx);
 }
 
 /* 间隔条改为固定间距（不参与弹性分配）：
@@ -34,9 +34,9 @@
 .title {
   font-size: 88rpx;
   font-weight: bold;
-  color: #3E2723;
+  color: var(--text);
   letter-spacing: 12rpx;
-  text-shadow: 0 2rpx 4rpx rgba(62, 39, 35, 0.12);
+  text-shadow: 0 2rpx 4rpx var(--shadow-3);
   padding-left: 12rpx; /* 抵消字间距偏移，整体居中 */
 }
 
@@ -79,7 +79,7 @@
   margin-top: 6rpx;
   font-size: 18rpx;
   letter-spacing: 6rpx;
-  color: #a8916e;
+  color: var(--text-weak);
 }
 
 /* ---------- 三枚铜钱 ---------- */
@@ -121,8 +121,8 @@
     inset -10rpx -12rpx 26rpx rgba(66, 42, 8, 0.5),
     inset 8rpx 10rpx 22rpx rgba(255, 243, 205, 0.42),
     /* 桌面投影：贴地紧影 + 漫射软影 */
-    0 3rpx 6rpx rgba(62, 39, 35, 0.22),
-    0 12rpx 26rpx rgba(62, 39, 35, 0.32);
+    0 3rpx 6rpx var(--shadow-3),
+    0 12rpx 26rpx var(--shadow-4);
 }
 
 /* 中央方孔 */
@@ -131,7 +131,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: #F8F3E9;
+  background-color: var(--bg);
   box-shadow:
     /* 孔内斜切：上侧暗、下侧亮，穿丄件的凹陷感 */
     inset 0 3rpx 6rpx rgba(60, 38, 6, 0.5),
@@ -139,7 +139,7 @@
     /* 孔沿铸痕：暗圈 + 亮圈双描边 */
     0 0 0 3rpx rgba(154, 108, 26, 0.85),
     0 0 0 5rpx rgba(255, 236, 170, 0.22),
-    0 2rpx 5rpx rgba(62, 39, 35, 0.3);
+    0 2rpx 5rpx var(--shadow-4);
 }
 
 /* 大钱 */
@@ -201,7 +201,7 @@
 .slogan {
   text-align: center;
   font-size: 40rpx;
-  color: #5D4037;
+  color: var(--text-2);
   letter-spacing: 6rpx;
   margin-top: 20rpx;
 }
@@ -209,7 +209,7 @@
 .disclaimer {
   text-align: center;
   font-size: 22rpx;
-  color: #a8916e;
+  color: var(--text-weak);
   letter-spacing: 1rpx;
   margin-top: 16rpx;
   padding: 0 40rpx;
@@ -235,7 +235,7 @@
 .day-text {
   margin: 0 26rpx;
   font-size: 26rpx;
-  color: #8a5e15;
+  color: var(--gold);
   letter-spacing: 3rpx;
 }
 
@@ -255,7 +255,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6rpx 14rpx rgba(62, 39, 35, 0.2);
+  box-shadow: 0 6rpx 14rpx var(--shadow-3);
   transition: transform 0.1s ease, opacity 0.1s ease;
 }
 
@@ -287,10 +287,10 @@
 /* 手动排盘：金黄底 + 深褐字 + 深褐边 */
 .btn-manual {
   background: linear-gradient(135deg, #F2B73C 0%, #E0920E 100%);
-  border: 2rpx solid #8a5e15;
+  border: 2rpx solid var(--gold);
 }
 .btn-manual .btn-text {
-  color: #5D4037;
+  color: var(--text-2);
 }
 
 /* ---------- 二级入口 ---------- */
@@ -303,7 +303,7 @@
 .sub-item {
   position: relative;
   font-size: 30rpx;
-  color: #5D4037;
+  color: var(--text-2);
   letter-spacing: 2rpx;
   padding-bottom: 10rpx;
   display: flex;
@@ -315,7 +315,7 @@
 }
 
 .sub-active {
-  color: #3E2723;
+  color: var(--text);
   font-weight: bold;
 }
 
@@ -326,12 +326,12 @@
   width: 48rpx;
   height: 4rpx;
   margin-left: -24rpx;
-  background-color: #C62828;
+  background-color: var(--red);
   border-radius: 2rpx;
 }
 
 .arrow {
   margin-left: 8rpx;
-  color: #a8916e;
+  color: var(--text-weak);
   font-size: 34rpx;
 }

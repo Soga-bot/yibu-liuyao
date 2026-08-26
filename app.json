@@ -19,13 +19,15 @@
     }
   ],
   "window": {
-    "navigationBarBackgroundColor": "#F8F3E9",
-    "navigationBarTextStyle": "black",
+    "navigationBarBackgroundColor": "@navBg",
+    "navigationBarTextStyle": "@navTxt",
     "navigationBarTitleText": "易卜六爻",
     "navigationStyle": "custom",
-    "backgroundColor": "#F8F3E9",
-    "backgroundTextStyle": "dark"
+    "backgroundColor": "@bg",
+    "backgroundTextStyle": "@bgTxt"
   },
+  "darkmode": true,
+  "themeLocation": "theme.json",
   "tabBar": {
     "custom": true,
     "color": "#8a7355",

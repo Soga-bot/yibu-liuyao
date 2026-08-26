@@ -2,14 +2,14 @@
 .page {
   min-height: 100vh;
   padding-bottom: 140rpx;
-  background-color: #F8F3E9;
-  background-image: radial-gradient(circle at 20% 10%, rgba(139,105,20,0.05) 0, transparent 140rpx),
-                    radial-gradient(circle at 85% 85%, rgba(192,57,43,0.04) 0, transparent 160rpx);
+  background-color: var(--bg);
+  background-image: radial-gradient(circle at 20% 10%, var(--tint-05) 0, transparent 140rpx),
+                    radial-gradient(circle at 85% 85%, var(--rwash-05) 0, transparent 160rpx);
 }
 .nav-title {
   text-align: center;
   font-size: 40rpx;
-  color: #3E2723;
+  color: var(--text);
   font-weight: bold;
   letter-spacing: 6rpx;
   padding: 50rpx 0 10rpx;
@@ -24,7 +24,7 @@
   padding: 26rpx 24rpx;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 4rpx 14rpx rgba(62,39,35,0.08);
+  box-shadow: 0 4rpx 14rpx var(--shadow-2);
 }
 .quick-card + .quick-card { margin-left: 24rpx; }
 .qc-shake {
@@ -35,32 +35,32 @@
 .qc-shake .qc-sub { color: rgba(246,215,122,0.75); }
 .qc-manual {
   background: linear-gradient(135deg, #F2B73C 0%, #E0920E 100%);
-  border: 2rpx solid #8a5e15;
+  border: 2rpx solid var(--gold);
 }
-.qc-manual .qc-name { color: #5D4037; }
-.qc-manual .qc-sub { color: rgba(93,64,55,0.7); }
+.qc-manual .qc-name { color: var(--text-2); }
+.qc-manual .qc-sub { color: var(--text-2); }
 .qc-name { font-size: 32rpx; font-weight: bold; letter-spacing: 3rpx; }
 .qc-sub { font-size: 22rpx; margin-top: 10rpx; letter-spacing: 1rpx; }
 .card-hover { opacity: 0.85; transform: scale(0.98); }
 
 /* ---------- 知识卡 ---------- */
 .card {
-  background: #fffaf0;
-  border: 1rpx solid rgba(139,105,20,0.25);
+  background: var(--card);
+  border: 1rpx solid var(--tint-25);
   border-radius: 16rpx;
   padding: 24rpx 28rpx;
   margin-top: 24rpx;
-  box-shadow: 0 4rpx 14rpx rgba(62,39,35,0.06);
+  box-shadow: 0 4rpx 14rpx var(--shadow-1);
 }
 .card-head { display: flex; align-items: center; justify-content: space-between; }
 .card-title {
   font-size: 30rpx;
-  color: #8a5e15;
+  color: var(--gold);
   font-weight: bold;
   letter-spacing: 3rpx;
 }
 .card-arrow {
-  color: #a8916e;
+  color: var(--text-weak);
   font-size: 36rpx;
   transform: rotate(90deg);
   transition: transform 0.15s ease;
@@ -70,28 +70,28 @@
 .k-row {
   display: flex;
   padding: 18rpx 0;
-  border-bottom: 1rpx dashed rgba(139,105,20,0.18);
+  border-bottom: 1rpx dashed var(--tint-15);
 }
 .k-row:last-of-type { border-bottom: none; }
 .k-k {
   flex: 0 0 172rpx;
   font-size: 27rpx;
-  color: #C62828;
+  color: var(--red);
   font-weight: bold;
   letter-spacing: 2rpx;
 }
 .k-v {
   flex: 1;
   font-size: 26rpx;
-  color: #5D4037;
+  color: var(--text-2);
   line-height: 1.65;
 }
 .k-note {
   margin-top: 6rpx;
   padding: 16rpx 18rpx;
-  background: rgba(139,105,20,0.06);
+  background: var(--tint-05);
   border-radius: 10rpx;
   font-size: 23rpx;
-  color: #8a7355;
+  color: var(--text-3);
   line-height: 1.7;
 }

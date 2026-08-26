@@ -1,9 +1,108 @@
-/* app.wxss — 全局样式：传统中式米黄宣纸底，整体衬线字 */
+/* app.wxss — 全局样式：传统中式米黄宣纸底，整体衬线字
+   深色模式（墨色宣纸）：页面配色统一走 page 级 CSS 变量，各页 wxss 引 var(--x)，
+   随系统 prefers-color-scheme 自动翻转。
+   不入变量的例外：红底按钮烫金字、铜钱/印章插画渐变、五行彩圆白字（饱和底上的
+   颜色两主题通用）。tint/shadow 按透明度分桶，桶内取最高频 α 为代表（差 ≤0.04，
+   视觉不可辨）。 */
 
 page {
-  background-color: #F8F3E9;
-  color: #3E2723;
+  /* 面 */
+  --bg: #F8F3E9;            /* 页面底 */
+  --card: #fffaf0;          /* 卡片底 */
+  --card-2: #FBF4E4;        /* 变卦盒底 */
+  --tab-bg: #fffdf6;        /* TabBar 底 */
+  /* 字 */
+  --text: #3E2723;          /* 主文字 / 爻线 */
+  --text-2: #5D4037;        /* 次级正文 */
+  --text-3: #8a7355;        /* 白话 / 弱标签 */
+  --text-weak: #a8916e;     /* 弱化文字 */
+  --text-4: #4a3f35;        /* 白话正文（楷） */
+  --text-5: #6b5a48;        /* 白话次弱 */
+  --ink-deep: #6d3b0a;      /* 辞文深褐 */
+  /* 强调 */
+  --red: #C62828;           /* 朱红：动爻/空亡/爻题 */
+  --red-deep: #9b1c1c;
+  --red-bian: #B4552D;      /* 变卦标记 */
+  --gold: #8a5e15;          /* 金褐：表头/区块题 */
+  --gold-lt: #c9a86a;       /* 淡金描边 */
+  --edge: #e0d0ac;          /* 变卦盒边框 */
+  /* 金褐 tint（边框/虚线/淡染，按透明度分桶） */
+  --tint-05: rgba(139,105,20,0.06);
+  --tint-10: rgba(139,105,20,0.08);
+  --tint-15: rgba(139,105,20,0.18);
+  --tint-20: rgba(139,105,20,0.22);
+  --tint-25: rgba(139,105,20,0.25);
+  --tint-30: rgba(139,105,20,0.30);
+  --tint-35: rgba(139,105,20,0.35);
+  --tint-40: rgba(139,105,20,0.40);
+  /* 墨影 */
+  --shadow-1: rgba(62,39,35,0.06);
+  --shadow-2: rgba(62,39,35,0.08);
+  --shadow-3: rgba(62,39,35,0.20);
+  --shadow-4: rgba(62,39,35,0.30);
+  /* 朱红淡染（动爻行底 / 红章晕） */
+  --rwash-05: rgba(198,40,40,0.05);
+  --rwash-30: rgba(198,40,40,0.30);
+  --rwash-40: rgba(198,40,40,0.40);
+  --rwash-60: rgba(198,40,40,0.60);
+  /* 半透面纱（叠在页面/卡片底色上的浮层） */
+  --wash-bg-60: rgba(248,243,233,0.60);
+  --wash-bg-75: rgba(248,243,233,0.72);
+  --wash-card-70: rgba(255,253,246,0.70);
+  --wash-card-90: rgba(255,253,246,0.90);
+
+  background-color: var(--bg);
+  color: var(--text);
   font-family: "Songti SC", "STSong", "SimSun", "Source Han Serif SC", serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  page {
+    /* 面：宣纸翻墨 */
+    --bg: #191310;
+    --card: #241B14;
+    --card-2: #2A2018;
+    --tab-bg: #201812;
+    /* 字：墨字翻宣纸字 */
+    --text: #E9DCC3;
+    --text-2: #C8B394;
+    --text-3: #A08A68;
+    --text-weak: #9C8A6E;
+    --text-4: #BFB09A;
+    --text-5: #A79578;
+    --ink-deep: #D9C9A8;
+    /* 强调：红金提亮 */
+    --red: #E05545;
+    --red-deep: #C74A3C;
+    --red-bian: #D07A52;
+    --gold: #C9A227;
+    --gold-lt: #D4BC82;
+    --edge: #4A3D2C;
+    /* tint 换暖金灰基色，α 同档 */
+    --tint-05: rgba(201,178,140,0.06);
+    --tint-10: rgba(201,178,140,0.08);
+    --tint-15: rgba(201,178,140,0.18);
+    --tint-20: rgba(201,178,140,0.22);
+    --tint-25: rgba(201,178,140,0.25);
+    --tint-30: rgba(201,178,140,0.30);
+    --tint-35: rgba(201,178,140,0.35);
+    --tint-40: rgba(201,178,140,0.40);
+    /* 墨影加深为黑 */
+    --shadow-1: rgba(0,0,0,0.30);
+    --shadow-2: rgba(0,0,0,0.38);
+    --shadow-3: rgba(0,0,0,0.50);
+    --shadow-4: rgba(0,0,0,0.60);
+    /* 红染基色随 --red */
+    --rwash-05: rgba(224,85,69,0.10);
+    --rwash-30: rgba(224,85,69,0.30);
+    --rwash-40: rgba(224,85,69,0.40);
+    --rwash-60: rgba(224,85,69,0.60);
+    /* 面纱随底色 */
+    --wash-bg-60: rgba(25,19,16,0.60);
+    --wash-bg-75: rgba(25,19,16,0.75);
+    --wash-card-70: rgba(36,27,20,0.70);
+    --wash-card-90: rgba(36,27,20,0.92);
+  }
 }
 
 /* 复用：传统衬线/楷体 */

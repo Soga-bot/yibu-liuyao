@@ -2,14 +2,14 @@
 .page {
   min-height: 100vh;
   padding-bottom: 140rpx;
-  background-color: #F8F3E9;
-  background-image: radial-gradient(circle at 20% 10%, rgba(139,105,20,0.05) 0, transparent 140rpx),
-                    radial-gradient(circle at 85% 85%, rgba(192,57,43,0.04) 0, transparent 160rpx);
+  background-color: var(--bg);
+  background-image: radial-gradient(circle at 20% 10%, var(--tint-05) 0, transparent 140rpx),
+                    radial-gradient(circle at 85% 85%, var(--rwash-05) 0, transparent 160rpx);
 }
 .nav-title {
   text-align: center;
   font-size: 40rpx;
-  color: #3E2723;
+  color: var(--text);
   font-weight: bold;
   letter-spacing: 6rpx;
   padding: 50rpx 0 10rpx;
@@ -21,41 +21,41 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(135deg, #fffaf0 0%, #fdf3dd 100%);
-  border: 1rpx solid rgba(139,105,20,0.3);
+  background: linear-gradient(135deg, var(--card) 0%, var(--card-2) 100%);
+  border: 1rpx solid var(--tint-30);
   border-radius: 16rpx;
   padding: 28rpx 30rpx;
-  box-shadow: 0 4rpx 14rpx rgba(62,39,35,0.06);
+  box-shadow: 0 4rpx 14rpx var(--shadow-1);
 }
 .stat-main { display: flex; align-items: center; }
 .stat-num {
   font-size: 64rpx;
-  color: #C62828;
+  color: var(--red);
   font-weight: bold;
   line-height: 1;
 }
 .stat-txt { display: flex; flex-direction: column; margin-left: 24rpx; }
-.stat-label { font-size: 30rpx; color: #3E2723; font-weight: bold; letter-spacing: 2rpx; }
-.stat-sub { font-size: 22rpx; color: #a8916e; margin-top: 8rpx; }
+.stat-label { font-size: 30rpx; color: var(--text); font-weight: bold; letter-spacing: 2rpx; }
+.stat-sub { font-size: 22rpx; color: var(--text-weak); margin-top: 8rpx; }
 .clear-btn {
   font-size: 24rpx;
-  color: #8a5e15;
-  border: 1rpx solid rgba(139,105,20,0.45);
+  color: var(--gold);
+  border: 1rpx solid var(--tint-40);
   border-radius: 30rpx;
   padding: 8rpx 26rpx;
 }
-.clear-hover { background: rgba(139,105,20,0.1); }
+.clear-hover { background: var(--tint-10); }
 
 /* ---------- 历史列表 ---------- */
 .his-card {
   display: flex;
   align-items: center;
-  background: #fffaf0;
-  border: 1rpx solid rgba(139,105,20,0.22);
+  background: var(--card);
+  border: 1rpx solid var(--tint-20);
   border-radius: 16rpx;
   padding: 22rpx 26rpx;
   margin-top: 20rpx;
-  box-shadow: 0 3rpx 12rpx rgba(62,39,35,0.05);
+  box-shadow: 0 3rpx 12rpx var(--shadow-1);
 }
 
 /* 小卦象：6 爻线（上→下），动爻标红 */
@@ -65,66 +65,66 @@
   flex-direction: column;
   align-items: center;
 }
-.gx .l-yang { width: 56rpx; height: 7rpx; background: #3E2723; border-radius: 2rpx; }
+.gx .l-yang { width: 56rpx; height: 7rpx; background: var(--text); border-radius: 2rpx; }
 .gx .l-yin { width: 56rpx; height: 7rpx; display: flex; justify-content: space-between; }
-.gx .l-yin .s { width: 24rpx; height: 7rpx; background: #3E2723; border-radius: 2rpx; }
+.gx .l-yin .s { width: 24rpx; height: 7rpx; background: var(--text); border-radius: 2rpx; }
 .gx .l-yang + .l-yang, .gx .l-yang + .l-yin,
 .gx .l-yin + .l-yang, .gx .l-yin + .l-yin { margin-top: 7rpx; }
-.gx .l-yang.l-dong { background: #C62828; }
-.gx .l-yin.l-dong .s { background: #C62828; }
+.gx .l-yang.l-dong { background: var(--red); }
+.gx .l-yin.l-dong .s { background: var(--red); }
 
 .his-info { flex: 1; margin-left: 26rpx; min-width: 0; }
 .h-name-row { display: flex; align-items: baseline; }
-.h-name { font-size: 32rpx; color: #3E2723; font-weight: bold; letter-spacing: 3rpx; }
+.h-name { font-size: 32rpx; color: var(--text); font-weight: bold; letter-spacing: 3rpx; }
 /* 「问易」标记：该卦已有 AI 解读，点击回看（catchtap 不冒泡到行点击） */
 .h-wen {
   font-size: 20rpx;
-  color: #9b1c1c;
-  border: 1rpx solid rgba(198,40,40,0.45);
+  color: var(--red-deep);
+  border: 1rpx solid var(--rwash-40);
   border-radius: 8rpx;
   padding: 2rpx 10rpx;
   margin-left: 14rpx;
-  background: rgba(198,40,40,0.05);
+  background: var(--rwash-05);
 }
 .h-gz {
   font-size: 21rpx;
-  color: #8a5e15;
-  border: 1rpx solid rgba(139,105,20,0.4);
+  color: var(--gold);
+  border: 1rpx solid var(--tint-40);
   border-radius: 8rpx;
   padding: 2rpx 10rpx;
   margin-left: 16rpx;
 }
-.h-time { display: block; margin-top: 8rpx; font-size: 24rpx; color: #a8916e; }
-.g-arrow { color: #a8916e; font-size: 36rpx; margin-left: 12rpx; }
+.h-time { display: block; margin-top: 8rpx; font-size: 24rpx; color: var(--text-weak); }
+.g-arrow { color: var(--text-weak); font-size: 36rpx; margin-left: 12rpx; }
 
 .hint {
   margin-top: 20rpx;
   text-align: center;
   font-size: 22rpx;
-  color: #a8916e;
+  color: var(--text-weak);
 }
 
 /* ---------- 空态 ---------- */
 .empty {
   margin-top: 90rpx;
   text-align: center;
-  color: #a8916e;
+  color: var(--text-weak);
 }
 .empty-glyph { display: block; font-size: 120rpx; color: #b07d22; }
-.empty-tip { display: block; margin-top: 30rpx; font-size: 32rpx; color: #5D4037; }
+.empty-tip { display: block; margin-top: 30rpx; font-size: 32rpx; color: var(--text-2); }
 .empty-sub { display: block; margin-top: 16rpx; font-size: 24rpx; }
 
 /* ---------- 关于 ---------- */
 .about-card {
-  background: rgba(139,105,20,0.05);
-  border: 1rpx dashed rgba(139,105,20,0.35);
+  background: var(--tint-05);
+  border: 1rpx dashed var(--tint-35);
   border-radius: 16rpx;
   padding: 28rpx 30rpx;
   margin-top: 44rpx;
 }
 .about-title {
   font-size: 28rpx;
-  color: #8a5e15;
+  color: var(--gold);
   font-weight: bold;
   letter-spacing: 3rpx;
 }
@@ -132,14 +132,14 @@
   display: block;
   margin-top: 16rpx;
   font-size: 24rpx;
-  color: #8a7355;
+  color: var(--text-3);
   line-height: 1.8;
 }
 .about-ver {
   display: block;
   margin-top: 16rpx;
   font-size: 22rpx;
-  color: #b7a483;
+  color: var(--text-weak);
 }
 
 /* 历史条目：所问之事（问事签带入，未填不显示） */
@@ -147,6 +147,6 @@
   display: block;
   margin-top: 8rpx;
   font-size: 24rpx;
-  color: #8a6b3f;
+  color: var(--text-3);
   letter-spacing: 1rpx;
 }
