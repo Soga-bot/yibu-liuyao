@@ -43,8 +43,13 @@
       </block>
 
       <!-- 已开通：取读按钮（解读生成后即时落库，历史可回看） -->
-      <button wx:else class="lead-btn" hover-class="lead-hover" bindtap="onAsk"
-              disabled="{{loading}}">{{loading ? '解读生成中…' : (aiText ? '再问一次' : '开始问易')}}</button>
+      <block wx:else>
+        <view wx:if="{{loading}}" class="lead-btn ask-btn">
+          <view class="ask-dots"><view class="adot"></view><view class="adot"></view><view class="adot"></view></view>
+          <text>解读生成中</text>
+        </view>
+        <button wx:else class="lead-btn" hover-class="lead-hover" bindtap="onAsk">{{aiText ? '再问一次' : '开始问易'}}</button>
+      </block>
     </view>
 
     <view class="foot-note">AI 解读仅供传统文化学习参考 · 不构成任何决策依据</view>
