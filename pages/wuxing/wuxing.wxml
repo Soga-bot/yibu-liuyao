@@ -17,7 +17,7 @@
         <view wx:for="{{keLines}}" wx:key="index" class="lk lk-ke"
               style="left: {{item.l}}rpx; top: {{item.t}}rpx; width: {{item.w}}rpx; transform: rotate({{item.r}}deg);"></view>
         <!-- 五行节点（顶点起顺时针：木火土金水） -->
-        <view wx:for="{{nodes}}" wx:key="w" class="wx-node n-{{item.w}}"
+        <view wx:for="{{nodes}}" wx:key="w" class="wx-node n-{{item.c}}"
               style="left: {{item.x}}rpx; top: {{item.y}}rpx;">{{item.w}}</view>
       </view>
       <view class="map-legend">实线相生 · 虚线相克</view>

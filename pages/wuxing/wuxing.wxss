@@ -86,11 +86,12 @@
   z-index: 2;
   box-shadow: 0 4rpx 10rpx rgba(62,39,35,0.18);
 }
-.n-木 { background: #4E7A3A; }
-.n-火 { background: #B4552D; }
-.n-土 { background: #8D6E3F; }
-.n-金 { background: #A08850; }
-.n-水 { background: #3D5A80; }
+/* 类名用 ASCII（mu/huo/tu/jin/shui），中文类选择器 WXSS 编译不过 */
+.n-mu { background: #4E7A3A; }
+.n-huo { background: #B4552D; }
+.n-tu { background: #8D6E3F; }
+.n-jin { background: #A08850; }
+.n-shui { background: #3D5A80; }
 .map-legend {
   margin-top: 8rpx;
   text-align: center;
