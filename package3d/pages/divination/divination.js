@@ -69,11 +69,10 @@ const SHAKE_COOLDOWN = 350      // 两次触发最小间隔(ms)：自然摇频 3
                                 // 卡太高会吞掉连摇的一半、拉开命中间距，间接误触停止判定
 
 // ====== 装钱→摇动→倒出流程 ======
-// 停止判定：静默阈值 = 自身摇动节奏（命中间隔 EMA）× K，夹在 [MIN, MAX]——
-// 快摇者贴下限最跟手（停手 ~0.6s 即倒），慢摇者自动放宽，中途换气不误判成停
-const SHAKE_QUIET_MIN = 600
-const SHAKE_QUIET_MAX = 1300
-const SHAKE_QUIET_K = 1.8
+const SHAKE_QUIET = 1300        // 摇动停止（末次命中后静默该时长）即倒出——要盖过连摇中自然
+                                // 的换气间隙（常见 0.8~1s 顿）。v0.3.13 曾试「节奏 EMA×1.8 夹
+                                // 600~1300」自适应：前两下快摇就把阈值压到 ~0.7s，换气即倒、
+                                // 摇两下就出——用户实测手感更差，v0.3.15 回摆固定从严
 const LOAD_ANGLE = Math.PI / 6 // 装钱态：壳后仰 30°（微张口迎钱，原 86° 太翻）
 const POUR_ANGLE = -1.65       // 倒钱态：壳前倾（口转向桌面；原 -1.9 过水平面 19°，近沿上翘太夸张）
 const TILT_SPEED = 6           // 壳姿态角指数趋近系数（越大转得越快）
@@ -327,22 +326,16 @@ Page({
     this._released = false
     this._shaking = true
     this._shakeAmp = 1
-    this._hitGap = 0        // 摇动节奏 EMA 清零（停止判定阈值跟手，见 update）
     this.updateBtn({
       phase: 'shaking', shaking: true, qiuRemind: true,
-      tip: '第' + (this.data.lines.length + 1) + '爻 · 摇一摇手机，停手即倒出'
+      tip: '第' + (this.data.lines.length + 1) + '爻 · 摇一摇手机（或连点屏幕）'
     })
   },
 
   // 一次有效晃动：壳摆一下，壳内铜钱翻个身，一记钱壳碰撞短音——音随手动
   addShakeHit(delta) {
-    const now = Date.now()
-    if (this._lastHitAt) {   // 摇动节奏 EMA：停止判定阈值随自身快慢伸缩
-      const gap = now - this._lastHitAt
-      this._hitGap = this._hitGap ? this._hitGap * 0.6 + gap * 0.4 : gap
-    }
     this._hits += 1
-    this._lastHitAt = now
+    this._lastHitAt = Date.now()
     this._shakeAmp = 1
     this.buzz('medium')   // 每次有效晃动一记中震：手腕发力的触觉回响
     // 实时音效：每次命中即一响（替代旧循环过程音）；音量随本次晃动强度，带微抖更自然
@@ -472,12 +465,11 @@ Page({
       }
     }
 
-    // 摇动停止判定：只要晃过（≥1 次命中）且静默超过「自身节奏×K」（夹在
-    // MIN~MAX）即倒出——摇几下、摇多久由用户定，停手就出；快摇贴下限最跟手，
-    // 慢摇自动放宽、中途换气不误判。命中不足 1 次（没真晃过）不自动倒
-    if (this._phase === 'shaking' && this._hits >= 1 && this._lastHitAt) {
-      const quiet = clamp((this._hitGap || 0) * SHAKE_QUIET_K, SHAKE_QUIET_MIN, SHAKE_QUIET_MAX)
-      if (Date.now() - this._lastHitAt > quiet) this.beginPour()
+    // 摇动停止判定：只要晃过（≥1 次命中）且静默 SHAKE_QUIET ms 即倒出——
+    // 摇几下、摇多久由用户定；静默阈值固定从严，连摇中的换气间隙绝不误判
+    if (this._phase === 'shaking' && this._hits >= 1 &&
+        this._lastHitAt && Date.now() - this._lastHitAt > SHAKE_QUIET) {
+      this.beginPour()
     }
 
     if (this._shellPivot) {
@@ -998,12 +990,11 @@ Page({
     const loaded = 'loadCount' in p ? p.loadCount : this._loadCount
     let label
     if (phase === 'loading') label = '铜钱 ' + loaded + ' / 3'
-    else if (shaking) label = '摇动中 · 点按倒出'
+    else if (shaking) label = '摇动中…'
     else if (done) label = '重新起卦'
     else if (linesLen) label = '摇第' + (linesLen + 1) + '爻'
     else label = '摇卦起卦'
-    // 装钱/立正/倒钱/落定/回正/刻录阶段藏按钮（摇动保留：已晃过点按=立即倒出，
-    // 没晃过点按=补一记晃动兜底）
+    // 装钱/立正/倒钱/落定/回正/刻录阶段藏按钮（摇动保留：连点=补晃动兜底）
     const hidden = ['loading', 'righting', 'pouring', 'settling', 'returning', 'inscribing'].indexOf(phase) >= 0
     this.setData(Object.assign({ btnLabel: label, btnHidden: hidden }, p))
   },
@@ -1193,13 +1184,8 @@ Page({
       wx.redirectTo({ url: '/package3d/pages/divination/divination', fail: () => {} })
       return
     }
-    // 摇动阶段点按钮：已晃过 = 立即倒出（「停手即倒」的显式通道，不必等静默阈值）；
-    // 一下没晃（开发者工具模拟不了加速度计）= 补一次有效晃动，晃起来再点即倒
-    if (this._phase === 'shaking') {
-      if (this._hits >= 1) this.beginPour()
-      else this.addShakeHit()
-      return
-    }
+    // 摇动阶段点按钮 = 补一次有效晃动（开发者工具模拟不了加速度计的兜底）
+    if (this._phase === 'shaking') { this.addShakeHit(); return }
     this.triggerShake()
   },
 

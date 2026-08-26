@@ -157,6 +157,9 @@
 .btn-hover {
   background: #B11D1D;
 }
+.btn-disabled {
+  opacity: 0.6;
+}
 /* 问事签已拆独立页（package3d/pages/ask）：弹卡曾长期被首进的原生画布层压住
    （同层渲染偶发失效，浮层全被盖），与画布同页无解，故移出本页 */
 
