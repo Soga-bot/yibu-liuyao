@@ -3,7 +3,7 @@
   <view class="status-bar" style="height: {{statusBarHeight}}px;"></view>
 
   <!-- 顶部 -->
-  <view class="topbar" style="margin-top: max(calc(6.4vh - 44rpx), {{statusBarHeight}}px);">
+  <view class="topbar">
     <view class="back" bindtap="goBack">‹</view>
     <text class="title">手动排盘</text>
   </view>

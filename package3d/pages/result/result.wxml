@@ -2,7 +2,7 @@
 <view class="page {{themeCls}} {{fontCls}}">
   <view class="status-bar" style="height: {{statusBarHeight}}px;"></view>
 
-  <view class="topbar" style="margin-top: max(calc(6.4vh - 44rpx), {{statusBarHeight}}px);">
+  <view class="topbar">
     <view class="back" bindtap="goBack">‹</view>
     <text class="title">卦成</text>
   </view>

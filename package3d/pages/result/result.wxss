@@ -242,7 +242,7 @@
 /* ===== 标题定位（v0.3.8 迁移自五行页定稿）：栏中心 = 6.4vh =====
    校准链：被压顶进状态栏(锚点≈3.8%) → 正中50vh → 5/6 → 11.5vh(偏低) →
    2/3 → 6.4vh（用户确认）。margin 不参与 flex 收缩、栏体禁缩；spacer 藏起
-   由 margin 顶替。wxml 内联 max(calc(6.4vh−44rpx), 状态栏px) 为高状态栏机型
-   双下限，本 wxss calc 为旧基础库回退。 */
+   状态栏双下限保护暂缓（v0.3.9：内联 max() 疑与工具编译冲突先移除，
+   后续换 js 计算 px 绑定回归）。 */
 .status-bar { display: none; }
 .topbar { margin-top: calc(6.4vh - 44rpx); flex-shrink: 0; }
