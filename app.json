@@ -8,6 +8,7 @@
     "pages/dianji/shiyi",
     "pages/wuxing/wuxing",
     "pages/bagua/bagua",
+    "pages/bagong/bagong",
     "pages/mine/mine"
   ],
   "subPackages": [

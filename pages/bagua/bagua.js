@@ -88,5 +88,16 @@ Page({
 
   goBack() {
     wx.navigateBack({ fail: () => wx.switchTab({ url: '/pages/index/index' }) })
+  },
+
+  onSuCha() {
+    // 卦象速查：京房八宫六十四卦整表（点卦可入典籍详情）
+    wx.navigateTo({
+      url: '/pages/bagong/bagong',
+      fail: (e) => {
+        console.error('[八卦基础] 进卦象速查失败', e)
+        wx.showToast({ title: '进入失败：' + (e.errMsg || '未知'), icon: 'none' })
+      }
+    })
   }
 })

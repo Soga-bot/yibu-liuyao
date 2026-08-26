@@ -90,6 +90,10 @@
         <text class="m-v">八纯卦各领一宫，六亲由卦宫推</text>
       </view>
       <view class="sec-note">典籍库每卦所标「宫」与排盘所装六亲皆以八宫为纲——先识八卦，后入六十四卦。</view>
+      <view class="go-suca" hover-class="go-suca-hover" hover-stay-time="60" bindtap="onSuCha">
+        <text>卦象速查 · 八宫六十四卦</text>
+        <text class="go-arrow">›</text>
+      </view>
     </view>
 
     <view class="foot-note">本页为传统文化通识整理 · 仅供学习参考</view>

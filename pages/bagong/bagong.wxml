@@ -1,0 +1,39 @@
+<!-- pages/bagong/bagong.wxml — 卦象速查（京房八宫六十四卦） -->
+<view class="status-bar" style="height: {{statusBarHeight}}px;"></view>
+<view class="page">
+  <view class="topbar">
+    <view class="back font-kai" bindtap="goBack">‹</view>
+    <text class="title font-kai">卦象速查</text>
+  </view>
+
+  <scroll-view scroll-y class="content">
+    <view class="sec intro">
+      <view class="sec-title font-kai">八宫六十四卦</view>
+      <view class="sec-note">每宫自本宫卦起，依次变初、二、三、四、五爻，游魂四爻复、归魂下卦复，共八卦；<text class="chg-demo">红爻</text>为相对本宫之变爻。排盘所装六亲即以卦宫为纲。点任一卦可入典籍库详情。</view>
+    </view>
+
+    <view class="sec" wx:for="{{groups}}" wx:for-item="gp" wx:key="gong">
+      <view class="gp-head">
+        <text class="gp-title font-kai">{{gp.gong}}宫 · 属{{gp.wx}}</text>
+        <text class="gp-yy">{{gp.yy}}宫</text>
+      </view>
+      <view class="gp-grid">
+        <view class="bcell" wx:for="{{gp.cells}}" wx:for-item="c" wx:key="key"
+              hover-class="bcell-hover" hover-stay-time="60"
+              bindtap="onCell" data-key="{{c.key}}">
+          <text class="btag">{{c.tag}}</text>
+          <view class="blines">
+            <view wx:for="{{c.lines}}" wx:for-item="l" wx:key="index"
+                  class="bl {{l.v ? '' : 'bl-yin'}} {{l.chg ? 'bl-chg' : ''}}">
+              <block wx:if="{{!l.v}}"><view class="bh"></view><view class="bh"></view></block>
+            </view>
+          </view>
+          <text class="bname font-kai">{{c.full}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="foot-note">本页为传统文化通识整理 · 仅供学习参考</view>
+    <view class="bottom-pad"></view>
+  </scroll-view>
+</view>
