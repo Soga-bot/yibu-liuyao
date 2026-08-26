@@ -67,5 +67,9 @@
       <text>五行基础</text>
       <text class="arrow">›</text>
     </view>
+    <view class="sub-item" hover-class="sub-hover" hover-stay-time="80" bindtap="onBagua">
+      <text>八卦基础</text>
+      <text class="arrow">›</text>
+    </view>
   </view>
 </view>

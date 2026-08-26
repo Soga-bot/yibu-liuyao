@@ -1,0 +1,98 @@
+<!-- pages/bagua/bagua.wxml — 八卦基础（通识学习页） -->
+<view class="status-bar" style="height: {{statusBarHeight}}px;"></view>
+<view class="page">
+  <view class="topbar">
+    <view class="back font-kai" bindtap="goBack">‹</view>
+    <text class="title font-kai">八卦基础</text>
+  </view>
+
+  <scroll-view scroll-y class="content">
+    <!-- 八卦一览 -->
+    <view class="sec">
+      <view class="sec-title font-kai">八卦一览</view>
+      <view class="bg-grid">
+        <view class="bg-card" wx:for="{{bagua}}" wx:key="n">
+          <view class="bg-lines">
+            <block wx:for="{{item.lines}}" wx:for-item="l" wx:key="index">
+              <view wx:if="{{l}}" class="bg-line"></view>
+              <view wx:else class="bg-line bg-yin"><view class="h"></view><view class="h"></view></view>
+            </block>
+          </view>
+          <view class="bg-name font-kai">{{item.n}} · {{item.xiang}}</view>
+          <view class="bg-sub">先天{{item.shu}} · 性{{item.qing}}</view>
+        </view>
+      </view>
+      <view class="sec-note">卦画自下而上读（下为初、上为上）。传统卦歌（朱熹《周易本义》卷首所载）：乾三连、坤六断、震仰盂、艮覆碗、离中虚、坎中满、兑上缺、巽下断。</view>
+    </view>
+
+    <!-- 先天八卦 -->
+    <view class="sec">
+      <view class="sec-title font-kai">先天八卦 · 数序与方位</view>
+      <view class="grid9">
+        <view wx:for="{{xiantian}}" wx:for-item="row" wx:for-index="ri" wx:key="ri" class="grid9-row">
+          <view wx:for="{{row}}" wx:for-item="c" wx:for-index="ci" wx:key="ci"
+                class="g9 {{c.f ? '' : 'g9-mid'}}">
+            <text class="g9-t font-kai">{{c.t}}</text>
+            <text wx:if="{{c.f}}" class="g9-f">{{c.f}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="map-legend">上南下北 · 左东右西</view>
+      <view class="sec-note">相传为伏羲所画：乾一、兑二、离三、震四、巽五、坎六、艮七、坤八。乾坤相对、坎离相对，讲「对待」；此数序亦为传统记诵与卦画推演之用。</view>
+    </view>
+
+    <!-- 后天八卦 -->
+    <view class="sec">
+      <view class="sec-title font-kai">后天八卦 · 方位与洛书</view>
+      <view class="grid9">
+        <view wx:for="{{houtian}}" wx:for-item="row" wx:for-index="ri" wx:key="ri" class="grid9-row">
+          <view wx:for="{{row}}" wx:for-item="c" wx:for-index="ci" wx:key="ci"
+                class="g9 {{c.f ? '' : 'g9-mid'}}">
+            <text wx:if="{{c.shu}}" class="g9-shu">{{c.shu}}</text>
+            <text class="g9-t font-kai">{{c.t}}</text>
+            <text wx:if="{{c.f}}" class="g9-f"><text wx:if="{{c.wx}}" class="g9-dot d-{{c.wx}}"></text>{{c.f}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="map-legend">上南下北 · 左东右西 · 角标为洛书数</view>
+      <view class="sec-note">相传为文王所定，配洛书九宫：坎一、坤二、震三、巽四、中五、乾六、兑七、艮八、离九。春震东、夏离南、秋兑西、冬坎北，讲「流行」；方位配五行，色点同五行基础页。</view>
+    </view>
+
+    <!-- 说卦取象速查 -->
+    <view class="sec">
+      <view class="sec-title font-kai">说卦取象速查</view>
+      <view class="grid-head">
+        <text class="gh">卦</text>
+        <text class="gh">性情</text>
+        <text class="gh">家人</text>
+        <text class="gh">动物</text>
+        <text class="gh">身体</text>
+      </view>
+      <view class="grid-row" wx:for="{{qu}}" wx:key="n">
+        <text class="gc gc-x">{{item.n}}</text>
+        <text class="gc">{{item.qing}}</text>
+        <text class="gc">{{item.jia}}</text>
+        <text class="gc">{{item.shou}}</text>
+        <text class="gc">{{item.shen}}</text>
+      </view>
+      <view class="sec-note">均录自《说卦传》七至十章：乾坤为父母，三索而得六子——震长男、巽长女、坎中男、离中女、艮少男、兑少女。典籍库卦详情页「说卦传 · 取象」即此来源。</view>
+    </view>
+
+    <!-- 相重成卦 -->
+    <view class="sec">
+      <view class="sec-title font-kai">八卦相重 · 六十四卦</view>
+      <view class="m-row">
+        <text class="m-k font-kai">相重成卦</text>
+        <text class="m-v">下卦为内、上卦为外，八八六十四卦</text>
+      </view>
+      <view class="m-row">
+        <text class="m-k font-kai">卦宫</text>
+        <text class="m-v">八纯卦各领一宫，六亲由卦宫推</text>
+      </view>
+      <view class="sec-note">典籍库每卦所标「宫」与排盘所装六亲皆以八宫为纲——先识八卦，后入六十四卦。</view>
+    </view>
+
+    <view class="foot-note">本页为传统文化通识整理 · 仅供学习参考</view>
+    <view class="bottom-pad"></view>
+  </scroll-view>
+</view>

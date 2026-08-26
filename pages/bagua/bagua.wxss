@@ -1,0 +1,187 @@
+/* pages/bagua/bagua.wxss — 八卦基础（古朴宣纸风，复用 wuxing 范式）
+   类名一律 ASCII（WXSS 编译器不接受中文类选择器），中文只进内容 */
+.status-bar { width: 100%; }
+.page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #F8F3E9;
+  background-image: radial-gradient(circle at 20% 10%, rgba(139,105,20,0.05) 0, transparent 140rpx),
+                    radial-gradient(circle at 85% 85%, rgba(192,57,43,0.04) 0, transparent 160rpx);
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 24rpx 8rpx;
+}
+.back {
+  width: 64rpx; height: 64rpx;
+  border-radius: 50%;
+  background: rgba(62,39,35,0.06);
+  color: #5D4037; font-size: 48rpx; line-height: 60rpx; text-align: center;
+}
+.title {
+  flex: 1; text-align: center;
+  font-size: 38rpx; font-weight: bold; color: #3E2723;
+  letter-spacing: 8rpx; margin-right: 64rpx;
+}
+
+.content { flex: 1; padding: 16rpx 28rpx 0; box-sizing: border-box; }
+
+/* ---------- 卡片 ---------- */
+.sec {
+  background: #fffaf0;
+  border: 1rpx solid rgba(139,105,20,0.22);
+  border-radius: 16rpx;
+  padding: 26rpx 28rpx 22rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 3rpx 12rpx rgba(62,39,35,0.05);
+}
+.sec-title {
+  font-size: 28rpx;
+  color: #8a5e15;
+  font-weight: bold;
+  letter-spacing: 3rpx;
+  margin-bottom: 18rpx;
+}
+.sec-note {
+  margin-top: 16rpx;
+  font-size: 23rpx;
+  color: #a8916e;
+  line-height: 1.7;
+}
+.m-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14rpx 0;
+  border-bottom: 1rpx dashed rgba(139,105,20,0.18);
+}
+.m-row:last-of-type { border-bottom: none; }
+.m-k { font-size: 28rpx; color: #C62828; font-weight: bold; letter-spacing: 2rpx; }
+.m-v { font-size: 25rpx; color: #5D4037; text-align: right; }
+
+/* ---------- 八卦一览（两列卡片） ---------- */
+.bg-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+.bg-card {
+  width: 48%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx 0 16rpx;
+  margin-bottom: 16rpx;
+  border: 1rpx solid rgba(139,105,20,0.16);
+  border-radius: 12rpx;
+  background: rgba(248,243,233,0.6);
+}
+.bg-card:nth-last-child(-n+2) { margin-bottom: 0; }
+.bg-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  margin-bottom: 12rpx;
+}
+.bg-line { width: 64rpx; height: 10rpx; border-radius: 4rpx; background: #3E2723; }
+.bg-yin {
+  background: none;
+  display: flex;
+  justify-content: space-between;
+}
+.bg-yin .h { width: 27rpx; height: 10rpx; border-radius: 4rpx; background: #3E2723; }
+.bg-name { font-size: 30rpx; color: #3E2723; letter-spacing: 2rpx; }
+.bg-sub { margin-top: 4rpx; font-size: 22rpx; color: #a8916e; }
+
+/* ---------- 先天/后天九宫格 ---------- */
+.grid9 {
+  display: flex;
+  flex-direction: column;
+  border: 1rpx solid rgba(139,105,20,0.25);
+  border-radius: 12rpx;
+  overflow: hidden;
+}
+.grid9-row {
+  display: flex;
+}
+.g9 {
+  position: relative;
+  flex: 1;
+  height: 120rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-right: 1rpx solid rgba(139,105,20,0.18);
+  border-bottom: 1rpx solid rgba(139,105,20,0.18);
+  background: #fffdf6;
+}
+.grid9-row .g9:nth-child(3n) { border-right: none; }
+.grid9-row:last-child .g9 { border-bottom: none; }
+.g9-mid { background: rgba(139,105,20,0.08); }
+.g9-t { font-size: 34rpx; color: #3E2723; line-height: 1.2; }
+.g9-f {
+  margin-top: 6rpx;
+  font-size: 21rpx;
+  color: #a8916e;
+  display: flex;
+  align-items: center;
+}
+.g9-shu {
+  position: absolute;
+  top: 6rpx; right: 10rpx;
+  font-size: 20rpx;
+  color: rgba(138,94,21,0.55);
+}
+.g9-dot {
+  display: inline-block;
+  width: 14rpx; height: 14rpx;
+  border-radius: 50%;
+  margin-right: 6rpx;
+}
+.d-mu { background: #4E7A3A; }
+.d-huo { background: #B4552D; }
+.d-tu { background: #8D6E3F; }
+.d-jin { background: #A08850; }
+.d-shui { background: #3D5A80; }
+
+.map-legend {
+  margin-top: 10rpx;
+  text-align: center;
+  font-size: 22rpx;
+  color: #a8916e;
+  letter-spacing: 2rpx;
+}
+
+/* ---------- 取象速查表 ---------- */
+.grid-head, .grid-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12rpx 8rpx;
+}
+.grid-head {
+  color: #8a7355;
+  font-size: 24rpx;
+  border-bottom: 1rpx solid rgba(139,105,20,0.22);
+}
+.grid-row { border-bottom: 1rpx dashed rgba(139,105,20,0.18); }
+.grid-row:last-of-type { border-bottom: none; }
+.gh, .gc {
+  flex: 1;
+  text-align: center;
+  font-size: 26rpx;
+  color: #5D4037;
+}
+.gc-x { color: #C62828; font-weight: bold; }
+
+.foot-note {
+  margin: 10rpx 0 20rpx;
+  text-align: center;
+  font-size: 22rpx;
+  color: #a8916e;
+}
+.bottom-pad { height: 40rpx; }
