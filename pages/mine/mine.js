@@ -1,4 +1,6 @@
-// pages/mine/mine.js — 我的：摇卦历史 + 关于
+// pages/mine/mine.js — 我的：摇卦历史 + 背景音乐 + 关于
+import { bgmState, bgmToggle } from '../../utils/bgm.js'
+
 const app = getApp()
 
 const HISTORY_KEY = 'ly_history' // 与 paipan.js 保持一致
@@ -15,6 +17,8 @@ Page({
     statusBarHeight: 20,
     items: [],
     count: 0,
+    bgmOn: true,     // 背景音乐开关（首次默认开；出声须手点音符——微信规范禁自动播放）
+    bgmReady: false, // 音源是否已配置（预留接口未填 = false）
     version: VERSION
   },
 
@@ -26,6 +30,8 @@ Page({
       this.getTabBar().setData({ selected: 3 })
     }
     this.reload()
+    const b = bgmState()
+    this.setData({ bgmOn: b.on, bgmReady: b.configured })
   },
 
   reload() {
@@ -59,6 +65,12 @@ Page({
         wx.showToast({ title: '进入失败', icon: 'none' })
       }
     })
+  },
+
+  // 背景音乐音符按钮：唯一出声入口（用户手势），全局单例跨页不断播
+  onBgm() {
+    const r = bgmToggle()
+    this.setData({ bgmOn: r.on })
   },
 
   // 回看：直达只读「卦成」结果页复原完整盘面（from=history 不重复落库；

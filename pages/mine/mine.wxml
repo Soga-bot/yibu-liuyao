@@ -51,6 +51,15 @@
       <text class="empty-sub">首页摇卦或手动排盘后自动记录</text>
     </view>
 
+    <!-- 背景音乐（预留接口：音源配置后生效；微信规范禁自动播放，须手动点音符开启） -->
+    <view class="bgm-card">
+      <view class="bgm-info">
+        <text class="bgm-name font-kai">背景音乐</text>
+        <text class="bgm-sub">{{bgmReady ? '音量预置 22% · 点音符开启/暂停 · 全局生效' : '音源预留中 · 配置后点音符开启（音量预置 22%）'}}</text>
+      </view>
+      <view class="bgm-note {{bgmOn ? 'on' : ''}}" hover-class="bgm-note-hover" bindtap="onBgm">♪</view>
+    </view>
+
     <!-- 关于 -->
     <view class="about-card">
       <view class="about-title font-kai">关于本工具</view>

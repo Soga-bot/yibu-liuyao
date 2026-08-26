@@ -28,6 +28,7 @@
   },
   "darkmode": true,
   "themeLocation": "theme.json",
+  "requiredBackgroundModes": ["audio"],
   "tabBar": {
     "custom": true,
     "color": "#8a7355",

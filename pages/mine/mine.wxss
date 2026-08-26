@@ -150,3 +150,44 @@
   color: var(--text-3);
   letter-spacing: 1rpx;
 }
+
+/* ---------- 背景音乐（预留接口：音源配置后点音符开启；微信规范禁自动播放） ---------- */
+.bgm-card {
+  margin-top: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--card);
+  border: 1rpx solid var(--tint-20);
+  border-radius: 16rpx;
+  padding: 24rpx 28rpx;
+  box-shadow: 0 3rpx 12rpx var(--shadow-1);
+}
+.bgm-name {
+  display: block;
+  font-size: 30rpx;
+  color: var(--text);
+  letter-spacing: 2rpx;
+}
+.bgm-sub {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: var(--text-weak);
+}
+.bgm-note {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  border: 2rpx solid var(--gold-lt);
+  color: var(--text-3);
+  font-size: 40rpx;
+  line-height: 68rpx;
+  text-align: center;
+}
+.bgm-note.on {
+  background: var(--red);
+  border-color: var(--red);
+  color: #F6D77A;
+}
+.bgm-note-hover { opacity: 0.7; }
