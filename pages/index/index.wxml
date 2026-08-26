@@ -6,7 +6,7 @@
   <!-- 顶部：标题 + 红色印章 -->
   <view class="header">
     <view class="title-wrap">
-      <text class="title font-kai">易卜六爻</text>
+      <text class="title font-kai">易研六爻</text>
       <view class="seal font-kai">
         <text class="seal-text">卜</text>
       </view>

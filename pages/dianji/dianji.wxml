@@ -1,11 +1,12 @@
 <!-- pages/dianji/dianji.wxml — 典籍库：64 卦列表 + 搜索 -->
 <!-- 手动主题/字号覆盖类挂根节点（auto 不挂类随系统；见 utils/theme.js） -->
-<view class="topbar {{themeCls}} {{fontCls}}" style="padding-top: {{statusBarHeight}}px;">
-  <view class="topbar-title font-kai">典籍库</view>
-</view>
-<view class="page {{themeCls}} {{fontCls}}" style="padding-top: calc({{statusBarHeight}}px + 88rpx);">
+<view class="page {{themeCls}} {{fontCls}}">
+  <view class="status-bar" style="height: {{statusBarHeight}}px;"></view>
+  <view class="topbar">
+    <view class="topbar-title font-kai">典籍库</view>
+  </view>
 
-  <view class="content">
+  <scroll-view scroll-y class="content">
     <!-- 搜索框 -->
     <view class="search-box">
       <input class="search-input font-kai" placeholder="搜索卦名 / 卦宫 / 全名（如火水未济）" placeholder-class="search-ph"
@@ -48,5 +49,5 @@
       <text class="empty-tip">未找到「{{keyword}}」相关卦</text>
       <text class="empty-sub">试试：乾、水火、既济、离宫…</text>
     </view>
-  </view>
+  </scroll-view>
 </view>

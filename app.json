@@ -22,7 +22,7 @@
   "window": {
     "navigationBarBackgroundColor": "@navBg",
     "navigationBarTextStyle": "@navTxt",
-    "navigationBarTitleText": "易卜六爻",
+    "navigationBarTitleText": "易研六爻",
     "navigationStyle": "custom",
     "backgroundColor": "@bg",
     "backgroundTextStyle": "@bgTxt"

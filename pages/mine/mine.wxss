@@ -1,19 +1,15 @@
 /* pages/mine/mine.wxss — 我的：摇卦历史 + 关于 */
 .page {
-  min-height: 100vh;
-  padding-bottom: 140rpx;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
   background-color: var(--bg);
   background-image: radial-gradient(circle at 20% 10%, var(--tint-05) 0, transparent 140rpx),
                     radial-gradient(circle at 85% 85%, var(--rwash-05) 0, transparent 160rpx);
 }
-/* 固定顶栏：纯色不透明 + 底边细金线，滚动内容从顶栏底下过而不是钻进状态栏 */
+/* 顶栏在文档流内（非 fixed）：内容在 scroll-view 里滚，物理上不可能钻到顶栏底下 */
 .topbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-  background: var(--bg);
+  flex-shrink: 0;
   border-bottom: 1rpx solid var(--tint-30);
 }
 .topbar-title {
@@ -25,7 +21,7 @@
   font-weight: bold;
   letter-spacing: 6rpx;
 }
-.content { padding: 24rpx 28rpx 0; }
+.content { flex: 1; padding: 24rpx 28rpx 140rpx; box-sizing: border-box; }
 
 /* ---------- 统计卡 ---------- */
 .stat-card {

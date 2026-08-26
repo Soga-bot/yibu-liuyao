@@ -211,7 +211,7 @@ Page({
   onShareAppMessage() {
     const a = this._args
     if (!a || !a.yao) {
-      return { title: '易卜六爻 · 《周易》卦象典籍与排盘演示', path: '/pages/index/index' }
+      return { title: '易研六爻 · 《周易》卦象典籍与排盘演示', path: '/pages/index/index' }
     }
     let path = '/package3d/pages/result/result?yao=' + a.yao + '&dong=' + a.dong + '&gz=' + a.gz + '&from=share'
     if (a.q) path += '&q=' + encodeURIComponent(a.q)

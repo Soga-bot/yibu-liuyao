@@ -69,6 +69,6 @@ Page({
 
   // 转发（文化演示口径，不涉占断措辞）
   onShareAppMessage() {
-    return { title: '易卜六爻 · 《周易》卦象典籍与排盘演示', path: '/pages/index/index' }
+    return { title: '易研六爻 · 《周易》卦象典籍与排盘演示', path: '/pages/index/index' }
   }
 })

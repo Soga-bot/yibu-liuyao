@@ -95,7 +95,7 @@ Page({
   // 转发：落地本卦知识页（标题即全称，无个人所问，审核口径纯文化）
   onShareAppMessage() {
     const g = this.data.gua
-    if (!g) return { title: '易卜六爻 · 《周易》卦象典籍', path: '/pages/dianji/dianji' }
+    if (!g) return { title: '易研六爻 · 《周易》卦象典籍', path: '/pages/dianji/dianji' }
     const msg = { title: '周易 · ' + g.full, path: '/pages/dianji/detail?key=' + this._key }
     if (this._shareImg) msg.imageUrl = this._shareImg
     return msg

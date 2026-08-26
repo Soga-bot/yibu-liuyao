@@ -75,9 +75,9 @@
 .gua-name { font-size: 60rpx; color: var(--text); font-weight: bold; letter-spacing: 6rpx; }
 .gua-meta { font-size: 26rpx; color: var(--gold); margin-top: 10rpx; letter-spacing: 2rpx; }
 .bian { color: var(--red); }
-.gua-desc { font-size: 24rpx; color: var(--text-2); margin-top: 12rpx; letter-spacing: 1rpx; }
-.gua-daxiang { font-size: 26rpx; color: var(--ink-deep); margin-top: 8rpx; letter-spacing: 2rpx; line-height: 1.5; }
-.gua-guaci { font-size: 26rpx; color: var(--text); margin-top: 10rpx; letter-spacing: 2rpx; line-height: 1.6; text-align: center; }
+.gua-desc { font-size: calc(24rpx * var(--fss, 1)); color: var(--text-2); margin-top: 12rpx; letter-spacing: 1rpx; }
+.gua-daxiang { font-size: calc(26rpx * var(--fss, 1)); color: var(--ink-deep); margin-top: 8rpx; letter-spacing: 2rpx; line-height: 1.5; }
+.gua-guaci { font-size: calc(26rpx * var(--fss, 1)); color: var(--text); margin-top: 10rpx; letter-spacing: 2rpx; line-height: 1.6; text-align: center; }
 .c-ti { color: var(--gold); font-size: 24rpx; }
 
 .biao {
@@ -106,7 +106,7 @@
   padding: 14rpx 16rpx 18rpx;
   border-bottom: 1rpx dashed var(--tint-20);
   background: var(--tint-05);
-  font-size: 26rpx; color: var(--ink-deep); line-height: 1.7;
+  font-size: calc(26rpx * var(--fss, 1)); color: var(--ink-deep); line-height: 1.7;
 }
 .biao-hint { margin-top: 10rpx; font-size: 22rpx; color: var(--text-weak); text-align: center; }
 .c-shen { color: var(--ink-deep); }

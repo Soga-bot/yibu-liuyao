@@ -105,7 +105,7 @@ function drawCard(ctx, opts) {
   // 落款
   ctx.fillStyle = '#a8916e'
   ctx.font = '16px "Songti SC","STSong","SimSun",serif'
-  ctx.fillText('—— 易卜六爻 · 周易文化 ——', W / 2, 456)
+  ctx.fillText('—— 易研六爻 · 周易文化 ——', W / 2, 456)
 }
 
 function makeShareCard(page, opts) {

@@ -15,6 +15,7 @@
         <view class="seg-item {{themeMode === 'light' ? 'on' : ''}}" hover-class="seg-hover" data-m="light" bindtap="onTheme">浅色</view>
         <view class="seg-item {{themeMode === 'dark' ? 'on' : ''}}" hover-class="seg-hover" data-m="dark" bindtap="onTheme">深色</view>
       </view>
+      <view class="card-note">当前系统为{{sysDark ? '深色' : '浅色'}}——「跟随系统」即随它自动切换；系统为浅色时与「浅色」效果相同，差别在系统切深色时显现</view>
       <view class="card-note">3D 摇卦页保持浅色（深底看不清龟壳铜钱），其余页面跟随此处设置</view>
     </view>
 
@@ -27,7 +28,7 @@
         <view class="seg-item {{fontMode === 'huge' ? 'on' : ''}}" hover-class="seg-hover" data-f="huge" bindtap="onFont">特大</view>
       </view>
       <view class="preview font-kai">天行健，君子以自强不息；地势坤，君子以厚德载物。</view>
-      <view class="card-note">作用于典籍详情、十翼通读与问易解读的正文，界面其余字号不变</view>
+      <view class="card-note">作用于成卦、卦详情、十翼通读与问易解读的正文，界面其余字号不变</view>
     </view>
 
     <!-- 背景音乐（自「我的」迁入；预留接口，微信规范禁自动播放，须手动点音符） -->

@@ -1,11 +1,12 @@
 <!-- pages/paigua/paigua.wxml — 解卦：术语速查 + 起卦入口 -->
 <!-- 手动主题/字号覆盖类挂根节点（auto 不挂类随系统；见 utils/theme.js） -->
-<view class="topbar {{themeCls}} {{fontCls}}" style="padding-top: {{statusBarHeight}}px;">
-  <view class="topbar-title font-kai">解卦</view>
-</view>
-<view class="page {{themeCls}} {{fontCls}}" style="padding-top: calc({{statusBarHeight}}px + 88rpx);">
+<view class="page {{themeCls}} {{fontCls}}">
+  <view class="status-bar" style="height: {{statusBarHeight}}px;"></view>
+  <view class="topbar">
+    <view class="topbar-title font-kai">解卦</view>
+  </view>
 
-  <view class="content">
+  <scroll-view scroll-y class="content">
     <!-- 起卦入口（只跳转，排盘仍在首页两条链路） -->
     <view class="quick-row">
       <view class="quick-card qc-shake" hover-class="card-hover" bindtap="goShake">
@@ -32,5 +33,5 @@
         <view wx:if="{{item.note}}" class="k-note">{{item.note}}</view>
       </view>
     </view>
-  </view>
+  </scroll-view>
 </view>

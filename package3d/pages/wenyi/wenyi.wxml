@@ -26,7 +26,7 @@
 
     <!-- AI 解读 -->
     <view class="card">
-      <view class="card-h font-kai">问易 · AI 解读</view>
+      <view class="card-h font-kai">问易解读</view>
 
       <!-- 已存解读（本页生成落库 / 历史回看） -->
       <view wx:if="{{aiText}}" class="ai-box">
@@ -36,7 +36,7 @@
 
       <!-- 未开通：预告 + 引导读原文，不做死胡同 -->
       <block wx:if="{{!open}}">
-        <view wx:if="{{!aiText}}" class="note">问易服务开通后，此处将呈现结合卦象、爻辞与所问之事的 AI 文字解读（经自有服务器生成，密钥不下发小程序端）。</view>
+        <view wx:if="{{!aiText}}" class="note">问易服务开通后，此处将呈现结合卦象、爻辞与所问之事的合参文字解读（经自有服务器生成，密钥不下发小程序端）。</view>
         <view class="note-sub">当前可先读本卦原文——典籍详情内含卦辞白话、彖象与说卦取象：</view>
         <button class="lead-btn" hover-class="lead-hover" bindtap="onGuaci">读本卦《{{name || '…'}}》</button>
         <button wx:if="{{bianName}}" class="lead-btn ghost" hover-class="lead-hover" bindtap="onBianGuaci">读变卦《{{bianName}}》</button>
@@ -64,7 +64,7 @@
       </block>
     </view>
 
-    <view class="foot-note">AI 解读仅供传统文化学习参考 · 不构成任何决策依据</view>
+    <view class="foot-note">问易解读仅供传统文化学习参考 · 不构成任何决策依据</view>
     <view class="bottom-pad"></view>
   </scroll-view>
 </view>

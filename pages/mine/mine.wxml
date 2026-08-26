@@ -1,11 +1,12 @@
 <!-- pages/mine/mine.wxml — 我的：摇卦历史 + 关于 -->
 <!-- 手动主题/字号覆盖类挂根节点（auto 不挂类随系统；见 utils/theme.js） -->
-<view class="topbar {{themeCls}} {{fontCls}}" style="padding-top: {{statusBarHeight}}px;">
-  <view class="topbar-title font-kai">我的</view>
-</view>
-<view class="page {{themeCls}} {{fontCls}}" style="padding-top: calc({{statusBarHeight}}px + 88rpx);">
+<view class="page {{themeCls}} {{fontCls}}">
+  <view class="status-bar" style="height: {{statusBarHeight}}px;"></view>
+  <view class="topbar">
+    <view class="topbar-title font-kai">我的</view>
+  </view>
 
-  <view class="content">
+  <scroll-view scroll-y class="content">
     <!-- 统计卡 -->
     <view class="stat-card">
       <view class="stat-main">
@@ -66,8 +67,8 @@
     <!-- 关于 -->
     <view class="about-card">
       <view class="about-title font-kai">关于本工具</view>
-      <text class="about-text">「易卜六爻」以《周易》经文与传统纳甲筮法为底本，数字化演示传统起卦与排盘流程，仅供传统文化研究参考，不构成人生决策依据。重大决定请咨询专业人士。</text>
+      <text class="about-text">「易研六爻」以《周易》经文与传统纳甲筮法为底本，数字化演示传统起卦与排盘流程，仅供传统文化研究参考，不构成人生决策依据。重大决定请咨询专业人士。</text>
       <text class="about-ver">版本 {{version}} · 数据保存在本机</text>
     </view>
-  </view>
+  </scroll-view>
 </view>
