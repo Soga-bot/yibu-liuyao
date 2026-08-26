@@ -44,7 +44,7 @@
 .m-label { font-size: 24rpx; color: #a8916e; letter-spacing: 2rpx; }
 .m-val { font-size: 28rpx; color: #3E2723; letter-spacing: 1rpx; }
 
-/* 排盘按钮样式复用为「重新起卦」（主行动点） */
+/* 主行动点：问易 · AI 解卦；次行动点：重新起卦（降为描边按钮） */
 .cast-btn {
   margin: 32rpx 0 8rpx;
   background: linear-gradient(135deg, #C62828 0%, #9b1c1c 100%);
@@ -53,6 +53,14 @@
   box-shadow: 0 6rpx 16rpx rgba(198,40,40,0.3);
 }
 .cast-btn::after { border: none; }
+.recast-btn {
+  margin: 20rpx 0 8rpx;
+  background: rgba(255,253,246,0.9);
+  color: #9b1c1c; font-size: 30rpx; letter-spacing: 8rpx;
+  border-radius: 48rpx; border: 2rpx solid rgba(198,40,40,0.45);
+}
+.recast-btn::after { border: none; }
+.recast-btn-hover { opacity: 0.8; }
 
 /* 结果（与 paipan 一致） */
 .result-card {

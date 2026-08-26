@@ -118,6 +118,8 @@ Page({
       bian,
       rows
     })
+    // 问易入口带参用（与 result 同参：yao/dong/gz/q）
+    this._args = { yao: yaoStr, dong: dongStr, gz: jz, q: qiu }
     // 落摇卦历史（与手动排盘同库：mine 页统一渲染）
     saveHistory({
       t: Date.now(),
@@ -133,6 +135,23 @@ Page({
   toggleCi(e) {
     const i = +e.currentTarget.dataset.i
     this.setData({ ['rows[' + i + '].showCi']: !this.data.rows[i].showCi })
+  },
+
+  // 问易（AI 解卦）：带同一卦参数进解读页（AI 经自有服务器中转，密钥不下发端上）
+  goWenyi() {
+    const a = this._args
+    if (!a || !a.yao) {
+      wx.showToast({ title: '未取得卦象', icon: 'none' })
+      return
+    }
+    wx.navigateTo({
+      url: '/package3d/pages/wenyi/wenyi?yao=' + a.yao + '&dong=' + a.dong +
+           '&gz=' + a.gz + '&q=' + encodeURIComponent(a.q || ''),
+      fail: (e) => {
+        console.error('[结果页] 进问易失败', e)
+        wx.showToast({ title: '进入失败：' + (e.errMsg || '未知'), icon: 'none' })
+      }
+    })
   },
 
   // 重新起卦：回问事签重新默祷（新的一卦）

@@ -115,7 +115,8 @@
       <view class="m-val">未取得卦象，请返回重摇</view>
     </view>
 
-    <button class="cast-btn" bindtap="goAsk">重新起卦</button>
+    <button class="cast-btn" bindtap="goWenyi">问易 · AI 解卦</button>
+    <button class="recast-btn" hover-class="recast-btn-hover" hover-stay-time="60" bindtap="goAsk">重新起卦</button>
 
     <view class="foot-note">本内容仅供传统文化学习参考</view>
     <view class="bottom-pad"></view>
