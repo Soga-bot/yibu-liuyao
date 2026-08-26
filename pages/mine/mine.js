@@ -4,7 +4,7 @@ import { themeClass, fontClass } from '../../utils/theme.js'
 const app = getApp()
 
 const HISTORY_KEY = 'ly_history' // 与 paipan.js 保持一致
-const VERSION = '0.3.4' // 与 docs/版本说明.md 对齐（v0.3.4 = 顶栏机制归一，栏高由子元素行高撑起）
+const VERSION = '0.3.5' // 与 docs/版本说明.md 对齐（v0.3.5 = 标题定位校准轮·临时，五行页顶栏钉屏幕正中待分值）
 
 function pad(n) { return n < 10 ? '0' + n : '' + n }
 function fmtTime(t) {
