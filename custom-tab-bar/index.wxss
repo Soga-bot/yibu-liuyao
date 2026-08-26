@@ -1,6 +1,15 @@
 /* custom-tab-bar/index.wxss */
 
 .tab-bar {
+  /* 自带浅色默认：变量从 page 块继承在本组件不可靠（custom-tab-bar 不挂
+     page 子树，跟随系统·浅色时根节点无任何类 → 5 个 var 全未定义 →
+     底色按「计算时无效」回落透明、滚动文字从栏后透出，v0.3.12 就地声明
+     兜底；.dark/.light 手动覆盖类特异性更高，继续原样生效） */
+  --tab-bg: #fffdf6;
+  --tint-15: rgba(139,105,20,0.18);
+  --shadow-1: rgba(62,39,35,0.06);
+  --text-3: #8a7355;
+  --red: #C62828;
   position: fixed;
   bottom: 0;
   left: 0;
@@ -39,9 +48,10 @@
   color: var(--red);
 }
 
-/* 手动主题覆盖（设置页 ly_theme）：变量继承自 page = 跟随系统，
-   手动指定时在此重声明本组件消费到的变量（与 app.wxss 同步改）。
-   图标已由 .dark 类切深色版，light 态沿用默认（浅色）data-URI。 */
+/* 手动主题覆盖（设置页 ly_theme）：跟随系统时浅色走 .tab-bar 就地默认、
+   深色由 JS 挂 .dark 类；手动指定浅/深在此重声明本组件消费到的变量
+   （与 app.wxss 同步改）。图标已由 .dark 类切深色版，light 态沿用默认
+   （浅色）data-URI。 */
 .tab-bar.dark {
   --tab-bg: #201812;
   --tint-15: rgba(201,178,140,0.18);
