@@ -7,6 +7,7 @@ import { getZhuanBh } from '../../data/baihua-zhuan.js'
 import { getDiangu } from '../../data/diangu.js'
 import { getWenyan, getXugua, getZagua, getTrigramXiang } from '../../data/shiyi.js'
 import { annotate, namePinyin } from '../../utils/pinyin.js'
+import { makeShareCard } from '../../utils/sharecard.js'
 
 Page({
   data: {
@@ -76,9 +77,35 @@ Page({
         xiang: g.key.split('').reverse().map(b => +b) // 上爻在前
       }
     })
+    // 分享卡（宣纸风卦象卡）：一句话取卦义 desc
+    this._key = g.key
+    makeShareCard(this, {
+      name: g.name,
+      full,
+      xiang: g.key.split('').reverse().map(b => +b),   // 上→下
+      line: g.desc || ''
+    })
   },
 
   goBack() {
     wx.navigateBack({ fail: () => wx.switchTab({ url: '/pages/dianji/dianji' }) })
+  },
+
+  // 转发：落地本卦知识页（标题即全称，无个人所问，审核口径纯文化）
+  onShareAppMessage() {
+    const g = this.data.gua
+    if (!g) return { title: '易卜六爻 · 《周易》卦象典籍', path: '/pages/dianji/dianji' }
+    const msg = { title: '周易 · ' + g.full, path: '/pages/dianji/detail?key=' + this._key }
+    if (this._shareImg) msg.imageUrl = this._shareImg
+    return msg
+  },
+
+  // 朋友圈（单页模式）：静态知识页可晒，query 带 key 直达本卦
+  onShareTimeline() {
+    const g = this.data.gua
+    return {
+      title: g ? '周易 · ' + g.full : '周易卦象典籍',
+      query: this._key ? 'key=' + this._key : ''
+    }
   }
 })

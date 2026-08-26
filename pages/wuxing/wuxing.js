@@ -110,5 +110,12 @@ Page({
 
   goBack() {
     wx.navigateBack({ fail: () => wx.switchTab({ url: '/pages/index/index' }) })
+  },
+
+  onShareAppMessage() {
+    return { title: '五行基础 · 生克乘侮与方位速查', path: '/pages/wuxing/wuxing' }
+  },
+  onShareTimeline() {
+    return { title: '五行基础 · 生克乘侮与方位速查' }
   }
 })

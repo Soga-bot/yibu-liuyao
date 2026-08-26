@@ -99,5 +99,12 @@ Page({
         wx.showToast({ title: '进入失败：' + (e.errMsg || '未知'), icon: 'none' })
       }
     })
+  },
+
+  onShareAppMessage() {
+    return { title: '八卦基础 · 先天后天八卦与取象速查', path: '/pages/bagua/bagua' }
+  },
+  onShareTimeline() {
+    return { title: '八卦基础 · 先后天八卦与取象速查' }
   }
 })

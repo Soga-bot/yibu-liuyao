@@ -119,5 +119,12 @@ Page({
 
   goBack() {
     wx.navigateBack({ fail: () => wx.switchTab({ url: '/pages/index/index' }) })
+  },
+
+  onShareAppMessage() {
+    return { title: '卦象速查 · 京房八宫六十四卦表', path: '/pages/bagong/bagong' }
+  },
+  onShareTimeline() {
+    return { title: '卦象速查 · 京房八宫六十四卦表' }
   }
 })

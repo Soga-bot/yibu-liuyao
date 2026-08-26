@@ -11,7 +11,7 @@
     <!-- 所问 + 日干支 -->
     <view class="meta-card">
       <view class="meta-row" wx:if="{{qiu}}"><text class="m-label">所问</text><text class="m-val font-kai">问：{{qiu}}</text></view>
-      <view class="meta-row"><text class="m-label">起卦</text><text class="m-val">{{replay ? '历史回看' : '三钱摇卦'}} · {{gz}}日</text></view>
+      <view class="meta-row"><text class="m-label">起卦</text><text class="m-val">{{replayLabel}} · {{gz}}日</text></view>
     </view>
 
     <!-- 排盘结果（与手动排盘同观感，只读） -->
@@ -117,8 +117,12 @@
 
     <button class="cast-btn" bindtap="goWenyi">问易 · AI 解卦</button>
     <button class="recast-btn" hover-class="recast-btn-hover" hover-stay-time="60" bindtap="goAsk">重新起卦</button>
+    <button class="recast-btn" hover-class="recast-btn-hover" hover-stay-time="60" open-type="share">分享此卦</button>
 
     <view class="foot-note">本内容仅供传统文化学习参考</view>
     <view class="bottom-pad"></view>
   </scroll-view>
+
+  <!-- 分享卡隐藏画布：屏外定位（display:none 取不到 2d 节点，须真实布局） -->
+  <canvas type="2d" id="shareCard" class="share-canvas"></canvas>
 </view>

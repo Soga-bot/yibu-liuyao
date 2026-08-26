@@ -7,6 +7,7 @@ import { GUA_DATA } from '../../../data/gua.js'
 import { getZhuan } from '../../../data/zhuan.js'
 import { getBaihua } from '../../../data/baihua.js'
 import { annotate, namePinyin } from '../../../utils/pinyin.js'
+import { makeShareCard } from '../../../utils/sharecard.js'
 
 const POS_NAMES = ['初爻', '二爻', '三爻', '四爻', '五爻', '上爻'] // index0=初
 
@@ -40,7 +41,8 @@ Page({
     statusBarHeight: 20,
     qiu: '',
     gz: '',
-    replay: false,   // 历史回看模式（from=history）
+    replay: false,      // 回放态（历史回看 / 好友分享）：不落库
+    replayLabel: '三钱摇卦',
     result: null,
     rows: null    // 排盘显示行（上→初）
   },
@@ -48,8 +50,10 @@ Page({
   onLoad(options) {
     const app = getApp()
     this.setData({ statusBarHeight: (app && app.globalData.statusBarHeight) || 20 })
-    // from=history：历史回看（不重复落库，起卦行改标「历史回看」）；id 为原记录 id
-    const fromHist = !!(options && options.from === 'history')
+    // from=history：历史回看；from=share：好友分享进入。皆为回放态（不重复落库，起卦行改标）
+    const fromHist = !!(options && (options.from === 'history' || options.from === 'share'))
+    const replayLabel = options && options.from === 'share' ? '好友分享'
+      : (options && options.from === 'history' ? '历史回看' : '三钱摇卦')
     this._histId = (options && options.id) || ''
     const qiu = options && options.q ? decodeURIComponent(options.q).slice(0, 30) : ''
     const yaoStr = options && options.yao && /^[01]{6}$/.test(options.yao) ? options.yao : ''
@@ -114,6 +118,7 @@ Page({
       qiu,
       gz: jz,
       replay: fromHist,
+      replayLabel,
       result: Object.assign(r, {
         desc: kb.desc || '',
         daxiang: annotate(kb.daxiang || ''),
@@ -128,6 +133,17 @@ Page({
     })
     // 问易入口带参用（与 result 同参：yao/dong/gz/q）
     this._args = { yao: yaoStr, dong: dongStr, gz: jz, q: qiu }
+    // 分享卡（宣纸风卦象卡）：全称沿用传统「上象+下象+卦名」，八纯作「X为Y」
+    this._full = kb.waiXiang === kb.neiXiang
+      ? r.name + '为' + kb.waiXiang
+      : kb.waiXiang + kb.neiXiang + r.name
+    makeShareCard(this, {
+      name: r.name,
+      full: this._full,
+      xiang: yaoStr.split('').reverse().map((b) => +b),   // 上→下
+      dong: dongStr.split('').reverse().map((b) => +b),
+      line: bh.guaci || kb.desc || ''
+    })
     // 落摇卦历史（与手动排盘同库：mine 页统一渲染）；历史回看跳过
     if (!fromHist) {
       const eff = saveHistory({
@@ -173,5 +189,18 @@ Page({
   },
   goBack() {
     wx.navigateBack({ fail: () => wx.switchTab({ url: '/pages/index/index' }) })
+  },
+
+  // 转发：对方从分享进入即回放态（from=share，不落其历史）；标题不带所问之事（隐私）
+  onShareAppMessage() {
+    const a = this._args
+    if (!a || !a.yao) {
+      return { title: '易卜六爻 · 《周易》卦象典籍与排盘演示', path: '/pages/index/index' }
+    }
+    let path = '/package3d/pages/result/result?yao=' + a.yao + '&dong=' + a.dong + '&gz=' + a.gz + '&from=share'
+    if (a.q) path += '&q=' + encodeURIComponent(a.q)
+    const msg = { title: '《周易》· ' + (this._full || ''), path }
+    if (this._shareImg) msg.imageUrl = this._shareImg
+    return msg
   }
 })

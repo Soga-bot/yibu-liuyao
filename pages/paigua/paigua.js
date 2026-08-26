@@ -136,5 +136,9 @@ Page({
   },
   goManual() {
     wx.navigateTo({ url: '/pages/paipan/paipan' })
+  },
+
+  onShareAppMessage() {
+    return { title: '周易解卦知识 · 六亲六神与用神速查', path: '/pages/paigua/paigua' }
   }
 })

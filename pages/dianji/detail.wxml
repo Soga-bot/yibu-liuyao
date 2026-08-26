@@ -121,4 +121,7 @@
     <text class="empty-tip">未找到该卦</text>
     <text class="empty-sub">请从典籍库列表重新进入</text>
   </view>
+
+  <!-- 分享卡隐藏画布：屏外定位（display:none 取不到 2d 节点，须真实布局） -->
+  <canvas type="2d" id="shareCard" class="share-canvas"></canvas>
 </view>

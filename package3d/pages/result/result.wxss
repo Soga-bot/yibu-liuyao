@@ -225,3 +225,12 @@
   color: var(--text-2);
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
 }
+
+/* 分享卡隐藏画布：屏外定位（本页无 webgl，无同层渲染冲突；divination 页禁用此法） */
+.share-canvas {
+  position: fixed;
+  left: -9999rpx;
+  top: 0;
+  width: 600px;
+  height: 480px;
+}

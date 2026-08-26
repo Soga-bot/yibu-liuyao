@@ -23,5 +23,12 @@ Page({
 
   goBack() {
     wx.navigateBack({ fail: () => wx.switchTab({ url: '/pages/dianji/dianji' }) })
+  },
+
+  onShareAppMessage() {
+    return { title: '周易十翼 · 系辞传与说卦传通读', path: '/pages/dianji/shiyi' }
+  },
+  onShareTimeline() {
+    return { title: '周易十翼 · 系辞传与说卦传通读' }
   }
 })

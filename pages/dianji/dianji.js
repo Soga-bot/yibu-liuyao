@@ -55,5 +55,9 @@ Page({
 
   goShiyi() {
     wx.navigateTo({ url: '/pages/dianji/shiyi' })
+  },
+
+  onShareAppMessage() {
+    return { title: '《周易》六十四卦 · 卦爻辞白话与彖象典故', path: '/pages/dianji/dianji' }
   }
 })

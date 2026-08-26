@@ -214,3 +214,12 @@
 .empty-glyph { display: block; font-size: 120rpx; color: #b07d22; }
 .empty-tip { display: block; margin-top: 30rpx; font-size: 32rpx; color: var(--text-2); }
 .empty-sub { display: block; margin-top: 16rpx; font-size: 24rpx; }
+
+/* 分享卡隐藏画布：屏外定位（display:none 取不到 2d 节点，须真实布局） */
+.share-canvas {
+  position: fixed;
+  left: -9999rpx;
+  top: 0;
+  width: 600px;
+  height: 480px;
+}
