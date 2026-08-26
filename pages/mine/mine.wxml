@@ -70,5 +70,6 @@
       <text class="about-text">「易研六爻」以《周易》经文与传统纳甲筮法为底本，数字化演示传统起卦与排盘流程，仅供传统文化研究参考，不构成人生决策依据。重大决定请咨询专业人士。</text>
       <text class="about-ver">版本 {{version}} · 数据保存在本机</text>
     </view>
+  <view class="tab-clear"></view>
   </scroll-view>
 </view>

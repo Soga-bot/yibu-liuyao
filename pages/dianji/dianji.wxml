@@ -49,5 +49,6 @@
       <text class="empty-tip">未找到「{{keyword}}」相关卦</text>
       <text class="empty-sub">试试：乾、水火、既济、离宫…</text>
     </view>
+  <view class="tab-clear"></view>
   </scroll-view>
 </view>

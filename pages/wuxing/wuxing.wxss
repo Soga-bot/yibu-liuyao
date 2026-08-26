@@ -11,18 +11,20 @@
 .topbar {
   display: flex;
   align-items: center;
-  padding: 8rpx 24rpx 8rpx;
+  height: 88rpx;
+  padding: 0 24rpx;
 }
 .back {
-  width: 56rpx; height: 56rpx;
-  border-radius: 50%;
-  background: var(--shadow-1);
-  color: var(--text-2); font-size: 38rpx; line-height: 56rpx; text-align: center;
+  width: 64rpx;
+  padding: 16rpx 0;
+  font-size: 52rpx;
+  color: var(--text-2);
+  line-height: 1;
 }
 .title {
   flex: 1; text-align: center;
   font-size: 38rpx; font-weight: bold; color: var(--text);
-  letter-spacing: 8rpx; margin-right: 56rpx;
+  letter-spacing: 8rpx; margin-right: 64rpx;
 }
 
 .content { flex: 1; padding: 16rpx 28rpx 0; box-sizing: border-box; }

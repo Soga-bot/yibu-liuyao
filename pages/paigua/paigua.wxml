@@ -33,5 +33,6 @@
         <view wx:if="{{item.note}}" class="k-note">{{item.note}}</view>
       </view>
     </view>
+  <view class="tab-clear"></view>
   </scroll-view>
 </view>

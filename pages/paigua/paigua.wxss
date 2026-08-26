@@ -21,7 +21,9 @@
   font-weight: bold;
   letter-spacing: 6rpx;
 }
-.content { flex: 1; padding: 24rpx 28rpx 140rpx; box-sizing: border-box; }
+.content { flex: 1; padding: 24rpx 28rpx 0; box-sizing: border-box; }
+/* tabbar 让位：实体垫块——scroll-view 自带 padding-bottom 部分机型吞掉，不依赖它 */
+.tab-clear { height: calc(170rpx + env(safe-area-inset-bottom)); }
 
 /* ---------- 起卦入口 ---------- */
 .quick-row { display: flex; margin-bottom: 28rpx; }
