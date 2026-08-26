@@ -76,6 +76,16 @@
 .his-info { flex: 1; margin-left: 26rpx; min-width: 0; }
 .h-name-row { display: flex; align-items: baseline; }
 .h-name { font-size: 32rpx; color: #3E2723; font-weight: bold; letter-spacing: 3rpx; }
+/* 「问易」标记：该卦已有 AI 解读，点击回看（catchtap 不冒泡到行点击） */
+.h-wen {
+  font-size: 20rpx;
+  color: #9b1c1c;
+  border: 1rpx solid rgba(198,40,40,0.45);
+  border-radius: 8rpx;
+  padding: 2rpx 10rpx;
+  margin-left: 14rpx;
+  background: rgba(198,40,40,0.05);
+}
 .h-gz {
   font-size: 21rpx;
   color: #8a5e15;

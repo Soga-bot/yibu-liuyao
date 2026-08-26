@@ -21,15 +21,18 @@ const HISTORY_MAX = 100
 function saveHistory(entry) {
   let list = wx.getStorageSync(HISTORY_KEY) || []
   // 与最近一条完全相同的卦不重复入列；所问不同视为两条
+  let eff = entry
   const top = list[0]
   if (top && top.yao === entry.yao && top.dong === entry.dong && top.gz === entry.gz &&
       (top.qiu || '') === (entry.qiu || '')) {
     top.t = entry.t
+    eff = top                     // 合并进旧条目：id 沿用旧的（问易解读挂靠不换目标）
   } else {
     list.unshift(entry)
   }
   if (list.length > HISTORY_MAX) list.length = HISTORY_MAX
   wx.setStorageSync(HISTORY_KEY, list)
+  return eff
 }
 
 Page({
@@ -121,7 +124,8 @@ Page({
     // 问易入口带参用（与 result 同参：yao/dong/gz/q）
     this._args = { yao: yaoStr, dong: dongStr, gz: jz, q: qiu }
     // 落摇卦历史（与手动排盘同库：mine 页统一渲染）
-    saveHistory({
+    const eff = saveHistory({
+      id: String(Date.now()),   // 唯一标识：问易解读等回写挂靠（与 paipan.js 同格式）
       t: Date.now(),
       yao: yaoStr,
       dong: dongStr,
@@ -129,6 +133,7 @@ Page({
       name: r.name,
       qiu
     })
+    this._histId = eff ? (eff.id || '') : ''
   },
 
   // 点爻行展开/收起爻辞（只读页里唯一交互：查原文，非编辑）
@@ -146,7 +151,8 @@ Page({
     }
     wx.navigateTo({
       url: '/package3d/pages/wenyi/wenyi?yao=' + a.yao + '&dong=' + a.dong +
-           '&gz=' + a.gz + '&q=' + encodeURIComponent(a.q || ''),
+           '&gz=' + a.gz + '&q=' + encodeURIComponent(a.q || '') +
+           '&id=' + (this._histId || ''),
       fail: (e) => {
         console.error('[结果页] 进问易失败', e)
         wx.showToast({ title: '进入失败：' + (e.errMsg || '未知'), icon: 'none' })

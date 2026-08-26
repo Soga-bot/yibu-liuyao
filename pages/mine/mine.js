@@ -40,9 +40,24 @@ Page({
         gz: h.gz,
         name: h.name,
         qiu: h.qiu || '',
+        hasAi: !!h.ai,                                          // 已有问易解读
+        id: h.id || '',
         xiang: h.yao.split('').reverse().map(b => +b),          // 卦象 上→下
         dongT: h.dong.split('').reverse().map(b => +b)          // 动爻标记 上→下
       }))
+    })
+  },
+
+  // 「问易」标记：回看该卦已存的 AI 解读（catchtap 不触发行点击）
+  onWen(e) {
+    const id = e.currentTarget.dataset.id
+    if (!id) return
+    wx.navigateTo({
+      url: '/package3d/pages/wenyi/wenyi?id=' + id,
+      fail: (err) => {
+        console.error('[我的] 回看问易解读失败', err)
+        wx.showToast({ title: '进入失败', icon: 'none' })
+      }
     })
   },
 

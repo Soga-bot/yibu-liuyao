@@ -28,16 +28,23 @@
     <view class="card">
       <view class="card-h font-kai">问易 · AI 解读</view>
 
+      <!-- 已存解读（本页生成落库 / 历史回看） -->
+      <view wx:if="{{aiText}}" class="ai-box">
+        <view class="ai-meta">问易解读 · {{aiAtStr}}</view>
+        <text class="ai-text">{{aiText}}</text>
+      </view>
+
       <!-- 未开通：预告 + 引导读原文，不做死胡同 -->
       <block wx:if="{{!open}}">
-        <view class="note">问易服务开通后，此处将呈现结合卦象、爻辞与所问之事的 AI 文字解读（经自有服务器生成，密钥不下发小程序端）。</view>
+        <view wx:if="{{!aiText}}" class="note">问易服务开通后，此处将呈现结合卦象、爻辞与所问之事的 AI 文字解读（经自有服务器生成，密钥不下发小程序端）。</view>
         <view class="note-sub">当前可先读本卦原文——典籍详情内含卦辞白话、彖象与说卦取象：</view>
         <button class="lead-btn" hover-class="lead-hover" bindtap="onGuaci">读本卦《{{name || '…'}}》</button>
         <button wx:if="{{bianName}}" class="lead-btn ghost" hover-class="lead-hover" bindtap="onBianGuaci">读变卦《{{bianName}}》</button>
       </block>
 
-      <!-- 已开通：渲染 AI 解读（接入后端后启用） -->
-      <view wx:else class="note">解读内容区（接入后端后渲染）。</view>
+      <!-- 已开通：取读按钮（解读生成后即时落库，历史可回看） -->
+      <button wx:else class="lead-btn" hover-class="lead-hover" bindtap="onAsk"
+              disabled="{{loading}}">{{loading ? '解读生成中…' : (aiText ? '再问一次' : '开始问易')}}</button>
     </view>
 
     <view class="foot-note">AI 解读仅供传统文化学习参考 · 不构成任何决策依据</view>

@@ -115,6 +115,7 @@ Page({
     // 写入摇卦历史（历史回看 from=history 除外；手动/3D 均记录）
     if (this._from !== 'history') {
       saveHistory({
+        id: String(Date.now()),   // 唯一标识：问易解读等回写挂靠（与 result.js 同格式）
         t: Date.now(),
         yao: key,
         dong: this.data.yao.map(y => y.dong ? '1' : '0').join(''),
