@@ -9,21 +9,23 @@
 }
 .status-bar { width: 100%; }
 
+/* 栏高不写死：由 .back/.title 的 88rpx 行高撑起（与「我的」标题行同一机制） */
 .topbar {
   display: flex;
   align-items: center;
-  height: 88rpx;
   padding: 0 24rpx;
 }
 .back {
   width: 64rpx;
-  padding: 16rpx 0;
+  height: 88rpx;
   font-size: 52rpx;
   color: var(--text-2);
-  line-height: 1;
+  line-height: 88rpx;
+  text-align: center;
 }
 .title {
   flex: 1; text-align: center;
+  height: 88rpx; line-height: 88rpx;
   font-size: 38rpx; font-weight: bold; color: var(--text);
   letter-spacing: 8rpx; margin-right: 64rpx;
 }

@@ -12,21 +12,22 @@
   z-index: 100;
   display: flex;
   align-items: center;
-  height: 88rpx;
   padding: 0 30rpx;
   background: var(--card);
   border-bottom: 1rpx solid var(--tint-30);
 }
 .back {
   width: 64rpx;
-  padding: 16rpx 0;
+  height: 88rpx;
   font-size: 52rpx;
   color: var(--text-2);
-  line-height: 1;
+  line-height: 88rpx;
+  text-align: center;
 }
 .title {
   flex: 1;
   text-align: center;
+  height: 88rpx; line-height: 88rpx;
   font-size: 34rpx;
   color: var(--text);
   margin-right: 64rpx;
