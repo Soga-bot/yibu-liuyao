@@ -18,6 +18,10 @@
   <!-- 提示文案（最近一爻结果 / 引导） -->
   <view wx:if="{{tip}}" class="tip">{{tip}}</view>
 
+  <!-- 摇动中的默念提醒：每一爻摇动期都浮现（问事签的所问带入；倒出即隐）。
+       措辞守审核红线：只说「默念所问」 -->
+  <view wx:if="{{qiuRemind}}" class="qiu-remind">{{qiuTip}}</view>
+
   <!-- 爻进度：左→右 = 初→上，摇一枚亮一格 -->
   <view wx:if="{{lines.length}}" class="lines">
     <view class="line-slot {{item.justSet ? 'pop' : ''}}" wx:for="{{lines}}" wx:key="posName">

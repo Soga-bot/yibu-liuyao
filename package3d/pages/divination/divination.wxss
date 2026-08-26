@@ -99,6 +99,26 @@
   100% { transform: scale(1); }
 }
 
+/* 摇动中的默念提醒（每爻一现）：主按钮正上方——摇动期「重摇」键隐藏让位，
+   同档不叠；呼吸式渐隐渐显引人注目又不刺眼，长所问自动换行 */
+.qiu-remind {
+  position: absolute;
+  left: 40rpx;
+  right: 40rpx;
+  bottom: calc(env(safe-area-inset-bottom) + 188rpx);
+  text-align: center;
+  color: #5A3E22;
+  font-size: 26rpx;
+  line-height: 1.6;
+  letter-spacing: 2rpx;
+  z-index: 5;
+  animation: qiuBreath 2.4s ease-in-out infinite alternate;
+}
+@keyframes qiuBreath {
+  from { opacity: 0.55; }
+  to { opacity: 1; }
+}
+
 /* 清零重摇（小按钮，主按钮上方） */
 .reset {
   position: absolute;

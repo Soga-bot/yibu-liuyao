@@ -115,6 +115,8 @@ Page({
     lines: [],       // 已得爻（摇出顺序 = 初→上）：{yin, dong, name, mark, pos}
     done: false,     // 6 爻已满，已跳转/待重摇
     tip: '',         // 最近一爻结果 / 引导文案
+    qiuTip: '',      // 摇动中的默念提醒文案（onLoad 按所问拼好，wxml 深层三元不可靠）
+    qiuRemind: false,// 默念提醒行显隐：仅摇动阶段（每爻一现，倒出即隐）
     failed: false,   // 3D 初始化失败（画布/模型）：按钮变「重新加载」
     phase: 'idle',   // 流程阶段（按钮文案用）
     loadCount: 0,    // 已入壳铜钱数
@@ -130,6 +132,10 @@ Page({
     this.setData({ sbTop: (wx.getWindowInfo().statusBarHeight || 20) + 8 })
     // 所问之事由问事签独立页经 q 参数带入（直接进本页则视为未问，流程照常）
     this._qiu = options && options.q ? decodeURIComponent(options.q).slice(0, 30) : ''
+    // 每爻摇动中的默念提醒（措辞守审核红线：只说「默念所问」）
+    this.setData({
+      qiuTip: this._qiu ? '心中默念：「' + this._qiu + '」' : '心中默念所问之事'
+    })
     console.log('[流程] 3D 页进入，所问 =', this._qiu || '(未填)')
   },
   // 画布在 onReady 创建（首次布局完成后）：onLoad 过早创建画布会让同层渲染
@@ -322,7 +328,10 @@ Page({
     this._shaking = true
     this._shakeAmp = 1
     this._hitGap = 0        // 摇动节奏 EMA 清零（停止判定阈值跟手，见 update）
-    this.updateBtn({ phase: 'shaking', shaking: true, tip: '第' + (this.data.lines.length + 1) + '爻 · 摇一摇手机，停手即倒出' })
+    this.updateBtn({
+      phase: 'shaking', shaking: true, qiuRemind: true,
+      tip: '第' + (this.data.lines.length + 1) + '爻 · 摇一摇手机，停手即倒出'
+    })
   },
 
   // 一次有效晃动：壳摆一下，壳内铜钱翻个身，一记钱壳碰撞短音——音随手动
@@ -351,7 +360,7 @@ Page({
     this._tiltTarget = POUR_ANGLE
     this._tiltCb = null
     this._released = false
-    this.updateBtn({ phase: 'pouring', tip: '' })
+    this.updateBtn({ phase: 'pouring', tip: '', qiuRemind: false })
   },
 
   // 松钱：从壳底前缘把三钱扇形抛向 POUR_SLOTS 三个落位（初速按抛体反解，
@@ -873,7 +882,7 @@ Page({
     this._homeYaw = Math.round(this._shellYaw / (Math.PI * 2)) * Math.PI * 2
     this._homing = true
     this.placeCoinsIdle()
-    this.updateBtn({ lines: [], done: false, phase: 'idle', loadCount: 0, shaking: false, tip: '已重置，摇一摇或点按钮起卦' })
+    this.updateBtn({ lines: [], done: false, phase: 'idle', loadCount: 0, shaking: false, qiuRemind: false, tip: '已重置，摇一摇或点按钮起卦' })
   },
 
   // 渲染循环
