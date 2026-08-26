@@ -4,7 +4,7 @@ import { bgmState, bgmToggle } from '../../utils/bgm.js'
 const app = getApp()
 
 const HISTORY_KEY = 'ly_history' // 与 paipan.js 保持一致
-const VERSION = '0.1.0'
+const VERSION = '0.2.0' // 与 docs/版本说明.md 对齐（v0.2.0 = 深色/分享/背景音乐预留）
 
 function pad(n) { return n < 10 ? '0' + n : '' + n }
 function fmtTime(t) {
