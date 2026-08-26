@@ -1,10 +1,10 @@
-// pages/mine/mine.js — 我的：摇卦历史 + 背景音乐 + 关于
-import { bgmState, bgmToggle } from '../../utils/bgm.js'
+// pages/mine/mine.js — 我的：摇卦历史 + 设置入口 + 关于（背景音乐/主题/字号在设置页）
+import { themeClass, fontClass } from '../../utils/theme.js'
 
 const app = getApp()
 
 const HISTORY_KEY = 'ly_history' // 与 paipan.js 保持一致
-const VERSION = '0.2.0' // 与 docs/版本说明.md 对齐（v0.2.0 = 深色/分享/背景音乐预留）
+const VERSION = '0.3.0' // 与 docs/版本说明.md 对齐（v0.3.0 = 固定顶栏/问易回看/设置页）
 
 function pad(n) { return n < 10 ? '0' + n : '' + n }
 function fmtTime(t) {
@@ -15,10 +15,10 @@ function fmtTime(t) {
 Page({
   data: {
     statusBarHeight: 20,
+    themeCls: '',    // 手动主题覆盖类（t-dark/t-light，auto 为空）
+    fontCls: '',     // 阅读字号类（fs-big/fs-huge，标准为空）
     items: [],
     count: 0,
-    bgmOn: true,     // 背景音乐开关（首次默认开；出声须手点音符——微信规范禁自动播放）
-    bgmReady: false, // 音源是否已配置（预留接口未填 = false）
     version: VERSION
   },
 
@@ -29,9 +29,8 @@ Page({
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
       this.getTabBar().setData({ selected: 3 })
     }
+    this.setData({ themeCls: themeClass(), fontCls: fontClass() })
     this.reload()
-    const b = bgmState()
-    this.setData({ bgmOn: b.on, bgmReady: b.configured })
   },
 
   reload() {
@@ -67,10 +66,15 @@ Page({
     })
   },
 
-  // 背景音乐音符按钮：唯一出声入口（用户手势），全局单例跨页不断播
-  onBgm() {
-    const r = bgmToggle()
-    this.setData({ bgmOn: r.on })
+  // 设置：深色模式三态 / 阅读正文字号 / 背景音乐（独立设置页）
+  goSettings() {
+    wx.navigateTo({
+      url: '/pages/settings/settings',
+      fail: (err) => {
+        console.error('[我的] 进设置失败', err)
+        wx.showToast({ title: '进入失败', icon: 'none' })
+      }
+    })
   },
 
   // 回看：直达只读「卦成」结果页复原完整盘面（from=history 不重复落库；

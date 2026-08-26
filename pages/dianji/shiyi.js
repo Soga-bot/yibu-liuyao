@@ -1,6 +1,7 @@
 // pages/dianji/shiyi.js — 十翼通读页：系辞上/下、说卦传全篇（各章附章旨提要）
 import { getXici, SHUOGUA, getZhangzhi } from '../../data/shiyi.js'
 import { annotate } from '../../utils/pinyin.js'
+import { themeClass, fontClass } from '../../utils/theme.js'
 
 Page({
   data: {
@@ -10,7 +11,7 @@ Page({
 
   onLoad() {
     const app = getApp()
-    this.setData({ statusBarHeight: (app && app.globalData.statusBarHeight) || 20 })
+    this.setData({ statusBarHeight: (app && app.globalData.statusBarHeight) || 20, themeCls: themeClass(), fontCls: fontClass() })
     const books = [
       ...getXici().map(b => ({
         name: b.book,

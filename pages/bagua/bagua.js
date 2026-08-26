@@ -4,6 +4,7 @@
 // 不另手录一份，两处文本不会分叉。
 
 import { TRIGRAM_XIANG } from '../../data/shiyi.js'
+import { themeClass, fontClass } from '../../utils/theme.js'
 
 // 解析失败即刻报错，宁可崩不可静默出空串
 const pick = (s, re, tag) => {
@@ -83,7 +84,7 @@ Page({
 
   onLoad() {
     const app = getApp()
-    this.setData({ statusBarHeight: (app && app.globalData.statusBarHeight) || 20 })
+    this.setData({ statusBarHeight: (app && app.globalData.statusBarHeight) || 20, themeCls: themeClass(), fontCls: fontClass() })
   },
 
   goBack() {

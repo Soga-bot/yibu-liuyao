@@ -1,5 +1,6 @@
 // pages/index/index.js
 import { dateToGanZhi, kongWangByGanZhiIdx } from '../../utils/liuyao.js'
+import { themeClass, fontClass } from '../../utils/theme.js'
 
 const app = getApp()
 
@@ -16,6 +17,7 @@ Page({
 
   onShow() {
     // 今日干支 + 旬空（onShow 重算：跨天停留首页也能刷新）
+    this.setData({ themeCls: themeClass(), fontCls: fontClass() })
     const d = dateToGanZhi(new Date())
     this.setData({
       dayGanZhi: d.gan + d.zhi,

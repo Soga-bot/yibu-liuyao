@@ -109,3 +109,50 @@ page {
 .font-kai {
   font-family: "Kaiti SC", "STKaiti", "KaiTi", "Source Han Serif SC", serif;
 }
+
+/* ============ 手动主题覆盖（设置页「深色模式」三态） ============
+   变量默认定义在 page{}（浅）+ @media dark（深）= 跟随系统；
+   用户在设置页手动指定浅/深时，页面根包装 view 挂 .t-light / .t-dark，
+   在子树内整体覆盖继承值。**改主题色需四处同步**：
+   page{} 浅色块、@media dark 块、.t-light、.t-dark。
+   （divination 3D 页不挂类：整页钉死浅色，保证龟壳铜钱观感。） */
+.t-light {
+  --bg: #F8F3E9; --card: #fffaf0; --card-2: #FBF4E4; --tab-bg: #fffdf6;
+  --text: #3E2723; --text-2: #5D4037; --text-3: #8a7355; --text-weak: #a8916e;
+  --text-4: #4a3f35; --text-5: #6b5a48; --ink-deep: #6d3b0a;
+  --red: #C62828; --red-deep: #9b1c1c; --red-bian: #B4552D;
+  --gold: #8a5e15; --gold-lt: #c9a86a; --edge: #e0d0ac;
+  --tint-05: rgba(139,105,20,0.06); --tint-10: rgba(139,105,20,0.08);
+  --tint-15: rgba(139,105,20,0.18); --tint-20: rgba(139,105,20,0.22);
+  --tint-25: rgba(139,105,20,0.25); --tint-30: rgba(139,105,20,0.30);
+  --tint-35: rgba(139,105,20,0.35); --tint-40: rgba(139,105,20,0.40);
+  --shadow-1: rgba(62,39,35,0.06); --shadow-2: rgba(62,39,35,0.08);
+  --shadow-3: rgba(62,39,35,0.20); --shadow-4: rgba(62,39,35,0.30);
+  --rwash-05: rgba(198,40,40,0.05); --rwash-30: rgba(198,40,40,0.30);
+  --rwash-40: rgba(198,40,40,0.40); --rwash-60: rgba(198,40,40,0.60);
+  --wash-bg-60: rgba(248,243,233,0.60); --wash-bg-75: rgba(248,243,233,0.72);
+  --wash-card-70: rgba(255,253,246,0.70); --wash-card-90: rgba(255,253,246,0.90);
+}
+.t-dark {
+  --bg: #191310; --card: #241B14; --card-2: #2A2018; --tab-bg: #201812;
+  --text: #E9DCC3; --text-2: #C8B394; --text-3: #A08A68; --text-weak: #9C8A6E;
+  --text-4: #BFB09A; --text-5: #A79578; --ink-deep: #D9C9A8;
+  --red: #E05545; --red-deep: #C74A3C; --red-bian: #D07A52;
+  --gold: #C9A227; --gold-lt: #D4BC82; --edge: #4A3D2C;
+  --tint-05: rgba(201,178,140,0.06); --tint-10: rgba(201,178,140,0.08);
+  --tint-15: rgba(201,178,140,0.18); --tint-20: rgba(201,178,140,0.22);
+  --tint-25: rgba(201,178,140,0.25); --tint-30: rgba(201,178,140,0.30);
+  --tint-35: rgba(201,178,140,0.35); --tint-40: rgba(201,178,140,0.40);
+  --shadow-1: rgba(0,0,0,0.30); --shadow-2: rgba(0,0,0,0.38);
+  --shadow-3: rgba(0,0,0,0.50); --shadow-4: rgba(0,0,0,0.60);
+  --rwash-05: rgba(224,85,69,0.10); --rwash-30: rgba(224,85,69,0.30);
+  --rwash-40: rgba(224,85,69,0.40); --rwash-60: rgba(224,85,69,0.60);
+  --wash-bg-60: rgba(25,19,16,0.60); --wash-bg-75: rgba(25,19,16,0.75);
+  --wash-card-70: rgba(36,27,20,0.70); --wash-card-90: rgba(36,27,20,0.92);
+}
+
+/* 阅读正文字号三档（设置页「正文字号」管理）：
+   缩放系数 --fss，阅读正文页正文写 font-size: calc(Xrpx * var(--fss, 1))，
+   层级（卦辞>爻辞>白话）保持不压扁。挂在与 .t-* 同一个根包装 view 上。 */
+.fs-big { --fss: 1.15; }
+.fs-huge { --fss: 1.3; }

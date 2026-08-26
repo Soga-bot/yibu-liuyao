@@ -8,6 +8,7 @@ import { getDiangu } from '../../data/diangu.js'
 import { getWenyan, getXugua, getZagua, getTrigramXiang } from '../../data/shiyi.js'
 import { annotate, namePinyin } from '../../utils/pinyin.js'
 import { makeShareCard } from '../../utils/sharecard.js'
+import { themeClass, fontClass } from '../../utils/theme.js'
 
 Page({
   data: {
@@ -17,7 +18,7 @@ Page({
 
   onLoad(options) {
     const app = getApp()
-    this.setData({ statusBarHeight: (app && app.globalData.statusBarHeight) || 20 })
+    this.setData({ statusBarHeight: (app && app.globalData.statusBarHeight) || 20, themeCls: themeClass(), fontCls: fontClass() })
     const g = getGua((options && options.key) || '')
     if (!g) return
     const wx = GONG_WUXING[g.gong] || ''

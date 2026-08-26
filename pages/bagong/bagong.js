@@ -5,6 +5,7 @@
 // 点任一卦可跳典籍库详情页。
 
 import { GUA_LIST, GUA_DATA } from '../../data/gua.js'
+import { themeClass, fontClass } from '../../utils/theme.js'
 
 // 八宫（先天数序，同八卦基础页）：纯卦名 + 宫阴阳（说卦十男阳女阴）+ 宫五行
 const PALACES = [
@@ -104,7 +105,7 @@ Page({
 
   onLoad() {
     const app = getApp()
-    this.setData({ statusBarHeight: (app && app.globalData.statusBarHeight) || 20 })
+    this.setData({ statusBarHeight: (app && app.globalData.statusBarHeight) || 20, themeCls: themeClass(), fontCls: fontClass() })
   },
 
   onCell(e) {

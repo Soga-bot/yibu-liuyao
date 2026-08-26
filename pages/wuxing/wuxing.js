@@ -2,6 +2,8 @@
 // 解卦 tab 的六亲/六神是「用」，本页是「体」：生克、干支归属、旬空的来龙去脉。
 // 内容皆为传统通识，写死在此，不依赖网络与知识库。
 
+import { themeClass, fontClass } from '../../utils/theme.js'
+
 // ---------- 生克图几何（rpx）：五行五角排布，外圈实线相生、内圈虚线相克 ----------
 const CX = 240, CY = 250, R = 175          // 画布中心与半径
 // c 为类名用的 ASCII 串：WXSS 编译器不接受中文类选择器（.n-木 报错），样式类一律走 c
@@ -105,7 +107,7 @@ Page({
 
   onLoad() {
     const app = getApp()
-    this.setData({ statusBarHeight: (app && app.globalData.statusBarHeight) || 20 })
+    this.setData({ statusBarHeight: (app && app.globalData.statusBarHeight) || 20, themeCls: themeClass(), fontCls: fontClass() })
   },
 
   goBack() {

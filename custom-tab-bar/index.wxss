@@ -39,6 +39,24 @@
   color: var(--red);
 }
 
+/* 手动主题覆盖（设置页 ly_theme）：变量继承自 page = 跟随系统，
+   手动指定时在此重声明本组件消费到的变量（与 app.wxss 同步改）。
+   图标已由 .dark 类切深色版，light 态沿用默认（浅色）data-URI。 */
+.tab-bar.dark {
+  --tab-bg: #201812;
+  --tint-15: rgba(201,178,140,0.18);
+  --shadow-1: rgba(0,0,0,0.30);
+  --text-3: #A08A68;
+  --red: #E05545;
+}
+.tab-bar.light {
+  --tab-bg: #fffdf6;
+  --tint-15: rgba(139,105,20,0.18);
+  --shadow-1: rgba(62,39,35,0.06);
+  --text-3: #8a7355;
+  --red: #C62828;
+}
+
 /* ---------- 首页：房子 ---------- */
 .tab-icon-0 {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a7355' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/%3E%3Cpath d='M9 22V12h6v10'/%3E%3C/svg%3E");

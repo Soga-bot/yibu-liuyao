@@ -2,7 +2,7 @@
 <!-- 独立普通页面（无 canvas）：曾放在 3D 页里做弹卡，首进时原生画布层压住
      WebView 浮层导致弹卡不可见（asking=true 但用户看不到），刷新才恢复——
      根因是同层渲染偶发失效，弹卡与画布同页无解，故拆独立页彻底避开 -->
-<view class="page">
+<view class="page {{themeCls}} {{fontCls}}">
   <!-- 返回 -->
   <view class="back" hover-class="back-hover" bindtap="onBack">‹</view>
 

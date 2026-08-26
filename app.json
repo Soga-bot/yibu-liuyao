@@ -9,7 +9,8 @@
     "pages/wuxing/wuxing",
     "pages/bagua/bagua",
     "pages/bagong/bagong",
-    "pages/mine/mine"
+    "pages/mine/mine",
+    "pages/settings/settings"
   ],
   "subPackages": [
     {

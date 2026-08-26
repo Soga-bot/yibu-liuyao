@@ -1,4 +1,6 @@
 // pages/paigua/paigua.js — 解卦：术语速查 + 起卦入口
+import { themeClass, fontClass } from '../../utils/theme.js'
+
 const app = getApp()
 
 // 六亲（各爻地支五行与卦宫五行的生克关系）：含义 + 传统所主的人事
@@ -78,6 +80,8 @@ const LIANGXIAN = [
 Page({
   data: {
     statusBarHeight: 20,
+    themeCls: '',   // 手动主题覆盖类（t-dark/t-light，auto 为空）
+    fontCls: '',    // 阅读字号类（fs-big/fs-huge，标准为空）
     groups: [
       {
         id: 'liuqin', title: '六亲', rows: LIUQIN, open: true,
@@ -117,6 +121,7 @@ Page({
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
       this.getTabBar().setData({ selected: 1 })
     }
+    this.setData({ themeCls: themeClass(), fontCls: fontClass() })
   },
 
   // 折叠/展开知识组

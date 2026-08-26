@@ -8,6 +8,7 @@ import { getZhuan } from '../../../data/zhuan.js'
 import { getBaihua } from '../../../data/baihua.js'
 import { annotate, namePinyin } from '../../../utils/pinyin.js'
 import { makeShareCard } from '../../../utils/sharecard.js'
+import { themeClass, fontClass } from '../../../utils/theme.js'
 
 const POS_NAMES = ['初爻', '二爻', '三爻', '四爻', '五爻', '上爻'] // index0=初
 
@@ -43,6 +44,7 @@ Page({
     gz: '',
     replay: false,      // 回放态（历史回看 / 好友分享）：不落库
     replayLabel: '三钱摇卦',
+    wenyiDone: false,   // 该卦已有问易解读 → 主按钮改「回看」态（直达已存文字）
     result: null,
     rows: null    // 排盘显示行（上→初）
   },
@@ -157,6 +159,20 @@ Page({
       })
       if (eff && eff.id) this._histId = eff.id
     }
+    this._refreshWenyiBtn()
+  },
+
+  onShow() {
+    // 手动主题/字号类刷新 + 从问易页返回时按钮切「回看」态
+    this.setData({ themeCls: themeClass(), fontCls: fontClass() })
+    this._refreshWenyiBtn()
+  },
+
+  // 主按钮分态：挂靠的历史条目已有问易解读（含去重合并进旧条目的情形）→「回看」
+  _refreshWenyiBtn() {
+    if (!this._histId) return
+    const e = (wx.getStorageSync(HISTORY_KEY) || []).find((x) => x.id === this._histId)
+    this.setData({ wenyiDone: !!(e && e.ai && e.ai.text) })
   },
 
   // 点爻行展开/收起爻辞（只读页里唯一交互：查原文，非编辑）

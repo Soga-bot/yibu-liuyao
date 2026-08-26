@@ -6,15 +6,26 @@
   background-image: radial-gradient(circle at 20% 10%, var(--tint-05) 0, transparent 140rpx),
                     radial-gradient(circle at 85% 85%, var(--rwash-05) 0, transparent 160rpx);
 }
-.nav-title {
+/* 固定顶栏：纯色不透明 + 底边细金线，滚动内容从顶栏底下过而不是钻进状态栏 */
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: var(--bg);
+  border-bottom: 1rpx solid var(--tint-30);
+}
+.topbar-title {
+  height: 88rpx;
+  line-height: 88rpx;
   text-align: center;
   font-size: 40rpx;
   color: var(--text);
   font-weight: bold;
   letter-spacing: 6rpx;
-  padding: 50rpx 0 10rpx;
 }
-.content { padding: 20rpx 28rpx 0; }
+.content { padding: 24rpx 28rpx 0; }
 
 /* ---------- 搜索 ---------- */
 .search-box {

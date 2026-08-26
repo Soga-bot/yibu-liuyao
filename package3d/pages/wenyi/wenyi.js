@@ -4,8 +4,10 @@
 // 页面引导先读本卦/变卦卦辞，不做死胡同。入参与 result 页同：yao/dong/gz/q。
 import { paipan, dateToGanZhi, TIAN_GAN, DI_ZHI } from '../../../utils/liuyao.js'
 import { GUA_DATA } from '../../../data/gua.js'
+import { themeClass, fontClass } from '../../../utils/theme.js'
 
-// 服务器中转地址：接入时只改此处（POST { yao, dong, gz, q }，返回 { text }）
+// 服务器中转地址：接入时只改此处（POST { yao, dong, gz, q, name, bian, bianName }，
+// 返回 { text }；解读须按「本变合参」规格生成，见 docs/问易解读规格.md）
 const AI_API = ''
 
 // 后续接入的请求骨架：现在留着不调用，接后端时补渲染逻辑即可
@@ -62,6 +64,7 @@ Page({
   },
 
   onLoad(options) {
+    this.setData({ themeCls: themeClass(), fontCls: fontClass() })
     const app = getApp()
     this.setData({
       statusBarHeight: (app && app.globalData.statusBarHeight) || 20,
@@ -74,13 +77,17 @@ Page({
     let qiu = options && options.q ? decodeURIComponent(options.q).slice(0, 30) : ''
     this._id = (options && options.id) || ''
     this._entry = null
-    if (!yaoStr && this._id) {
+    // 有 id 就挂靠条目：「我的」问易标记只带 id（从记录取参）；
+    // result 页带全参进也挂靠——已存解读直接回看，不再空页重新引导
+    if (this._id) {
       const e = (wx.getStorageSync(HISTORY_KEY) || []).find((x) => x.id === this._id)
       if (e) {
-        yaoStr = /^[01]{6}$/.test(e.yao || '') ? e.yao : ''
-        dongStr = /^[01]{6}$/.test(e.dong || '') ? e.dong : ''
-        gzOpt = e.gz || ''
-        qiu = (e.qiu || '').slice(0, 30)
+        if (!yaoStr) {
+          yaoStr = /^[01]{6}$/.test(e.yao || '') ? e.yao : ''
+          dongStr = /^[01]{6}$/.test(e.dong || '') ? e.dong : ''
+          gzOpt = e.gz || ''
+          qiu = (e.qiu || '').slice(0, 30)
+        }
         this._entry = e
       }
     }
@@ -116,7 +123,12 @@ Page({
   onAsk() {
     if (!AI_API || !this._args) return
     this.setData({ loading: true })
-    askAI({ yao: this._args.yao, dong: this._args.dong, gz: this._args.gz, q: this._args.q })
+    // 本变合参：payload 带卦名与变卦（无动爻时 bian/bianName 为空串，后端只解本卦）
+    askAI({
+      yao: this._args.yao, dong: this._args.dong, gz: this._args.gz, q: this._args.q,
+      name: this.data.name,
+      bian: this.data.bianKey, bianName: this.data.bianName
+    })
       .then((d) => {
         const text = d && d.text ? String(d.text) : ''
         this.setData({ aiText: text, aiAtStr: fmtTime(Date.now()), loading: false })

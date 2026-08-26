@@ -1,7 +1,9 @@
 <!-- pages/mine/mine.wxml — 我的：摇卦历史 + 关于 -->
-<view class="status-bar" style="height: {{statusBarHeight}}px;"></view>
-<view class="page">
-  <view class="nav-title font-kai">我的</view>
+<!-- 手动主题/字号覆盖类挂根节点（auto 不挂类随系统；见 utils/theme.js） -->
+<view class="topbar {{themeCls}} {{fontCls}}" style="padding-top: {{statusBarHeight}}px;">
+  <view class="topbar-title font-kai">我的</view>
+</view>
+<view class="page {{themeCls}} {{fontCls}}" style="padding-top: calc({{statusBarHeight}}px + 88rpx);">
 
   <view class="content">
     <!-- 统计卡 -->
@@ -51,13 +53,14 @@
       <text class="empty-sub">首页摇卦或手动排盘后自动记录</text>
     </view>
 
-    <!-- 背景音乐（预留接口：音源配置后生效；微信规范禁自动播放，须手动点音符开启） -->
-    <view class="bgm-card">
-      <view class="bgm-info">
-        <text class="bgm-name font-kai">背景音乐</text>
-        <text class="bgm-sub">{{bgmReady ? '音量预置 22% · 点音符开启/暂停 · 全局生效' : '音源预留中 · 配置后点音符开启（音量预置 22%）'}}</text>
+    <!-- 设置入口：深色模式 / 正文字号 / 背景音乐（迁入独立设置页） -->
+    <view class="set-card" bindtap="goSettings" hover-class="card-hover">
+      <view class="set-glyph font-kai">设</view>
+      <view class="set-info">
+        <text class="set-name font-kai">设置</text>
+        <text class="set-sub">深色模式 · 正文字号 · 背景音乐</text>
       </view>
-      <view class="bgm-note {{bgmOn ? 'on' : ''}}" hover-class="bgm-note-hover" bindtap="onBgm">♪</view>
+      <text class="g-arrow">›</text>
     </view>
 
     <!-- 关于 -->

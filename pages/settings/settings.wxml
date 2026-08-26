@@ -1,0 +1,44 @@
+<!-- pages/settings/settings.wxml — 设置：深色模式三态 / 阅读正文字号 / 背景音乐 -->
+<!-- 固定顶栏（带返回）；主题/字号类挂根节点——本页即预览，切换即时生效 -->
+<view class="topbar {{themeCls}} {{fontCls}}" style="padding-top: calc({{statusBarHeight}}px + 16rpx);">
+  <view class="back font-kai" bindtap="goBack">‹</view>
+  <text class="title font-kai">设置</text>
+</view>
+<view class="page {{themeCls}} {{fontCls}}" style="padding-top: calc({{statusBarHeight}}px + 88rpx);">
+  <view class="content">
+
+    <!-- 深色模式：三态 -->
+    <view class="card">
+      <view class="card-title font-kai">深色模式</view>
+      <view class="seg">
+        <view class="seg-item {{themeMode === 'auto' ? 'on' : ''}}" hover-class="seg-hover" data-m="auto" bindtap="onTheme">跟随系统</view>
+        <view class="seg-item {{themeMode === 'light' ? 'on' : ''}}" hover-class="seg-hover" data-m="light" bindtap="onTheme">浅色</view>
+        <view class="seg-item {{themeMode === 'dark' ? 'on' : ''}}" hover-class="seg-hover" data-m="dark" bindtap="onTheme">深色</view>
+      </view>
+      <view class="card-note">3D 摇卦页保持浅色（深底看不清龟壳铜钱），其余页面跟随此处设置</view>
+    </view>
+
+    <!-- 正文字号：三档（预览行即时缩放） -->
+    <view class="card">
+      <view class="card-title font-kai">正文字号</view>
+      <view class="seg">
+        <view class="seg-item {{fontMode === 'std' ? 'on' : ''}}" hover-class="seg-hover" data-f="std" bindtap="onFont">标准</view>
+        <view class="seg-item {{fontMode === 'big' ? 'on' : ''}}" hover-class="seg-hover" data-f="big" bindtap="onFont">大</view>
+        <view class="seg-item {{fontMode === 'huge' ? 'on' : ''}}" hover-class="seg-hover" data-f="huge" bindtap="onFont">特大</view>
+      </view>
+      <view class="preview font-kai">天行健，君子以自强不息；地势坤，君子以厚德载物。</view>
+      <view class="card-note">作用于典籍详情、十翼通读与问易解读的正文，界面其余字号不变</view>
+    </view>
+
+    <!-- 背景音乐（自「我的」迁入；预留接口，微信规范禁自动播放，须手动点音符） -->
+    <view class="card bgm-card">
+      <view class="bgm-info">
+        <text class="bgm-name font-kai">背景音乐</text>
+        <text class="bgm-sub">{{bgmReady ? '音量预置 22% · 点音符开启/暂停 · 全局生效' : '音源预留中 · 配置后点音符开启（音量预置 22%）'}}</text>
+      </view>
+      <view class="bgm-note {{bgmOn ? 'on' : ''}}" hover-class="bgm-note-hover" bindtap="onBgm">♪</view>
+    </view>
+
+    <view class="foot">设置保存在本机，不上传</view>
+  </view>
+</view>

@@ -1,6 +1,7 @@
 // pages/paipan/paipan.js — 手动排盘（输入6爻+日干支 → 排盘展示）
 import { paipan, dateToGanZhi, TIAN_GAN, DI_ZHI } from '../../utils/liuyao.js'
 import { GUA_DATA } from '../../data/gua.js'
+import { themeClass, fontClass } from '../../utils/theme.js'
 
 const POS_NAMES = ['初爻', '二爻', '三爻', '四爻', '五爻', '上爻'] // index0=初
 
@@ -44,7 +45,7 @@ Page({
 
   onLoad(options) {
     const app = getApp()
-    this.setData({ statusBarHeight: (app && app.globalData.statusBarHeight) || 20 })
+    this.setData({ statusBarHeight: (app && app.globalData.statusBarHeight) || 20, themeCls: themeClass(), fontCls: fontClass() })
     this._from = (options && options.from) || '' // history=历史回看，不写记录
     // 所问之事（3D 问事签带入），随历史落库；手动排盘为空
     this._qiu = options && options.q ? decodeURIComponent(options.q).slice(0, 30) : ''

@@ -1,7 +1,9 @@
 <!-- pages/dianji/dianji.wxml — 典籍库：64 卦列表 + 搜索 -->
-<view class="status-bar" style="height: {{statusBarHeight}}px;"></view>
-<view class="page">
-  <view class="nav-title font-kai">典籍库</view>
+<!-- 手动主题/字号覆盖类挂根节点（auto 不挂类随系统；见 utils/theme.js） -->
+<view class="topbar {{themeCls}} {{fontCls}}" style="padding-top: {{statusBarHeight}}px;">
+  <view class="topbar-title font-kai">典籍库</view>
+</view>
+<view class="page {{themeCls}} {{fontCls}}" style="padding-top: calc({{statusBarHeight}}px + 88rpx);">
 
   <view class="content">
     <!-- 搜索框 -->

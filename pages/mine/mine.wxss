@@ -6,15 +6,26 @@
   background-image: radial-gradient(circle at 20% 10%, var(--tint-05) 0, transparent 140rpx),
                     radial-gradient(circle at 85% 85%, var(--rwash-05) 0, transparent 160rpx);
 }
-.nav-title {
+/* 固定顶栏：纯色不透明 + 底边细金线，滚动内容从顶栏底下过而不是钻进状态栏 */
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: var(--bg);
+  border-bottom: 1rpx solid var(--tint-30);
+}
+.topbar-title {
+  height: 88rpx;
+  line-height: 88rpx;
   text-align: center;
   font-size: 40rpx;
   color: var(--text);
   font-weight: bold;
   letter-spacing: 6rpx;
-  padding: 50rpx 0 10rpx;
 }
-.content { padding: 20rpx 28rpx 0; }
+.content { padding: 24rpx 28rpx 0; }
 
 /* ---------- 统计卡 ---------- */
 .stat-card {
@@ -151,43 +162,39 @@
   letter-spacing: 1rpx;
 }
 
-/* ---------- 背景音乐（预留接口：音源配置后点音符开启；微信规范禁自动播放） ---------- */
-.bgm-card {
+/* ---------- 设置入口（深色模式/正文字号/背景音乐在独立设置页） ---------- */
+.set-card {
   margin-top: 24rpx;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   background: var(--card);
   border: 1rpx solid var(--tint-20);
+  border-left: 6rpx solid var(--gold-lt);
   border-radius: 16rpx;
-  padding: 24rpx 28rpx;
+  padding: 22rpx 26rpx;
   box-shadow: 0 3rpx 12rpx var(--shadow-1);
 }
-.bgm-name {
+.set-glyph {
+  flex: 0 0 64rpx;
+  height: 64rpx;
+  line-height: 64rpx;
+  text-align: center;
+  font-size: 34rpx;
+  color: var(--gold);
+  background: var(--tint-10);
+  border: 1rpx solid var(--tint-30);
+  border-radius: 12rpx;
+}
+.set-info { flex: 1; margin-left: 24rpx; }
+.set-name {
   display: block;
   font-size: 30rpx;
   color: var(--text);
   letter-spacing: 2rpx;
 }
-.bgm-sub {
+.set-sub {
   display: block;
   margin-top: 8rpx;
   font-size: 22rpx;
   color: var(--text-weak);
 }
-.bgm-note {
-  width: 72rpx;
-  height: 72rpx;
-  border-radius: 50%;
-  border: 2rpx solid var(--gold-lt);
-  color: var(--text-3);
-  font-size: 40rpx;
-  line-height: 68rpx;
-  text-align: center;
-}
-.bgm-note.on {
-  background: var(--red);
-  border-color: var(--red);
-  color: #F6D77A;
-}
-.bgm-note-hover { opacity: 0.7; }

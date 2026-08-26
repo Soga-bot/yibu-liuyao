@@ -1,5 +1,5 @@
 <!-- package3d/pages/result/result.wxml — 摇卦结果（只读，与手动排盘独立） -->
-<view class="page">
+<view class="page {{themeCls}} {{fontCls}}">
   <view class="status-bar" style="height: {{statusBarHeight}}px;"></view>
 
   <view class="topbar">
@@ -115,7 +115,7 @@
       <view class="m-val">未取得卦象，请返回重摇</view>
     </view>
 
-    <button class="cast-btn" bindtap="goWenyi">问易 · AI 解卦</button>
+    <button class="cast-btn" bindtap="goWenyi">{{wenyiDone ? '回看 · 问易解读' : '问易 · AI 解卦'}}</button>
     <button class="recast-btn" hover-class="recast-btn-hover" hover-stay-time="60" bindtap="goAsk">重新起卦</button>
     <button class="recast-btn" hover-class="recast-btn-hover" hover-stay-time="60" open-type="share">分享此卦</button>
 

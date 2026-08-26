@@ -1,6 +1,7 @@
 // pages/dianji/dianji.js — 典籍库：64 卦列表 + 搜索
 import { GUA_LIST } from '../../data/gua.js'
 import { GONG_WUXING } from '../../utils/liuyao.js'
+import { themeClass, fontClass } from '../../utils/theme.js'
 
 const app = getApp()
 
@@ -25,6 +26,8 @@ const ALL = GUA_LIST.map(g => {
 Page({
   data: {
     statusBarHeight: 20,
+    themeCls: '',   // 手动主题覆盖类（t-dark/t-light，auto 为空）
+    fontCls: '',    // 阅读字号类（fs-big/fs-huge，标准为空）
     keyword: '',
     list: ALL,
     total: ALL.length
@@ -37,6 +40,7 @@ Page({
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
       this.getTabBar().setData({ selected: 2 })
     }
+    this.setData({ themeCls: themeClass(), fontCls: fontClass() })
   },
 
   // 按卦名 / 卦宫 / 传统全名（含象序写反的容错）过滤

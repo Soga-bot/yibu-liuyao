@@ -1,6 +1,6 @@
 <!-- pages/bagua/bagua.wxml — 八卦基础（通识学习页） -->
-<view class="status-bar" style="height: {{statusBarHeight}}px;"></view>
-<view class="page">
+<view class="page {{themeCls}} {{fontCls}}">
+  <view class="status-bar" style="height: {{statusBarHeight}}px;"></view>
   <view class="topbar">
     <view class="back font-kai" bindtap="goBack">‹</view>
     <text class="title font-kai">八卦基础</text>

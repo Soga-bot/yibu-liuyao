@@ -1,5 +1,5 @@
 <!-- pages/index/index.wxml — 主页面 -->
-<view class="page">
+<view class="page {{themeCls}} {{fontCls}}">
   <!-- 状态栏占位 -->
   <view class="status-bar" style="height: {{statusBarHeight}}px;"></view>
 

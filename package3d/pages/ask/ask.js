@@ -1,12 +1,15 @@
 // package3d/pages/ask/ask.js
 // 问事签：起卦前默祷所求（可不填）。独立普通页面（无 canvas，浮层永不被 3D 画布压住），
 // 确认后 redirectTo 3D 起卦页，所求经 q 参数带去排盘/历史。
+import { themeClass, fontClass } from '../../../utils/theme.js'
+
 const HISTORY_KEY = 'ly_history' // 与 result/paipan/mine 同库
 
 Page({
   data: { qiu: '' },
 
   onLoad(options) {
+    this.setData({ themeCls: themeClass(), fontCls: fontClass() })
     console.log('[流程] 问事签页进入')
     // 预填场景：暂无（每次起卦都是新问）；留参数口子不杜撰
     const q = options && options.q ? decodeURIComponent(options.q).slice(0, 30) : ''

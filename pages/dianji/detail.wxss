@@ -8,9 +8,17 @@
   flex-direction: column;
 }
 
+/* 固定顶栏：纯色不透明 + 底边细金线（顶距由内联 calc(状态栏+16rpx) 叠加，总高 88rpx） */
 .topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
   display: flex;
   align-items: center;
+  background: var(--bg);
+  border-bottom: 1rpx solid var(--tint-30);
   padding: 16rpx 24rpx 8rpx;
 }
 .back {
@@ -95,8 +103,9 @@
   letter-spacing: 3rpx;
   margin-bottom: 18rpx;
 }
+/* 阅读正文接 --fss 缩放（设置页三档：标准1 / 大1.15 / 特大1.3） */
 .guaci {
-  font-size: 32rpx;
+  font-size: calc(32rpx * var(--fss, 1));
   color: var(--text);
   line-height: 1.8;
   letter-spacing: 3rpx;
@@ -109,18 +118,18 @@
 .yao-row:last-child { border-bottom: none; }
 .y-ti {
   flex: 0 0 96rpx;
-  font-size: 27rpx;
+  font-size: calc(27rpx * var(--fss, 1));
   color: var(--red);
   font-weight: bold;
 }
 .y-ci {
   flex: 1;
-  font-size: 27rpx;
+  font-size: calc(27rpx * var(--fss, 1));
   color: var(--text);
   line-height: 1.7;
 }
 .daxiang {
-  font-size: 28rpx;
+  font-size: calc(28rpx * var(--fss, 1));
   color: var(--ink-deep);
   line-height: 1.8;
   letter-spacing: 2rpx;
@@ -129,7 +138,7 @@
 /* 白话译句（非楷体，与原文楷体区分） */
 .baihua {
   margin-top: 12rpx;
-  font-size: 25rpx;
+  font-size: calc(25rpx * var(--fss, 1));
   color: var(--text-3);
   line-height: 1.7;
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
@@ -162,7 +171,7 @@
   margin-bottom: 6rpx;
 }
 .dg-b {
-  font-size: 25rpx;
+  font-size: calc(25rpx * var(--fss, 1));
   color: var(--text-4);
   line-height: 1.7;
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
@@ -186,12 +195,12 @@
 }
 .sx-name:first-of-type { margin-top: 4rpx; }
 .sx-line {
-  font-size: 27rpx;
+  font-size: calc(27rpx * var(--fss, 1));
   color: var(--text-4);
   line-height: 1.8;
 }
 .sx-guang {
-  font-size: 26rpx;
+  font-size: calc(26rpx * var(--fss, 1));
   color: var(--text-5);
   line-height: 1.8;
   margin-top: 4rpx;
