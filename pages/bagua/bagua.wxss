@@ -13,18 +13,18 @@
 .topbar {
   display: flex;
   align-items: center;
-  padding: 16rpx 24rpx 8rpx;
+  padding: 8rpx 24rpx 8rpx;
 }
 .back {
-  width: 64rpx; height: 64rpx;
+  width: 56rpx; height: 56rpx;
   border-radius: 50%;
   background: var(--shadow-1);
-  color: var(--text-2); font-size: 48rpx; line-height: 60rpx; text-align: center;
+  color: var(--text-2); font-size: 38rpx; line-height: 56rpx; text-align: center;
 }
 .title {
   flex: 1; text-align: center;
   font-size: 38rpx; font-weight: bold; color: var(--text);
-  letter-spacing: 8rpx; margin-right: 64rpx;
+  letter-spacing: 8rpx; margin-right: 56rpx;
 }
 
 .content { flex: 1; padding: 16rpx 28rpx 0; box-sizing: border-box; }

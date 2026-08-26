@@ -6,10 +6,10 @@ import { themeClass, fontClass } from '../../../utils/theme.js'
 const HISTORY_KEY = 'ly_history' // 与 result/paipan/mine 同库
 
 Page({
-  data: { qiu: '' },
+  data: { qiu: '', statusBarHeight: 20 },
 
   onLoad(options) {
-    this.setData({ themeCls: themeClass(), fontCls: fontClass() })
+    this.setData({ statusBarHeight: getApp().globalData.statusBarHeight || 20, themeCls: themeClass(), fontCls: fontClass() })
     console.log('[流程] 问事签页进入')
     // 预填场景：暂无（每次起卦都是新问）；留参数口子不杜撰
     const q = options && options.q ? decodeURIComponent(options.q).slice(0, 30) : ''

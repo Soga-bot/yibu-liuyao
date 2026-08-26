@@ -9,18 +9,17 @@
   overflow: hidden;
 }
 
-/* 返回（与 3D 页同款） */
+/* 返回（同 3D 页节奏：顶距状态栏+8rpx，由内联 style 传 px 值——env() 部分真机失效不用） */
 .back {
   position: absolute;
-  top: calc(env(safe-area-inset-top) + 16rpx);
   left: 24rpx;
-  width: 64rpx;
-  height: 64rpx;
+  width: 56rpx;
+  height: 56rpx;
   border-radius: 50%;
   background: var(--shadow-2);
   color: var(--text-2);
-  font-size: 48rpx;
-  line-height: 64rpx;
+  font-size: 38rpx;
+  line-height: 56rpx;
   text-align: center;
   z-index: 5;
 }

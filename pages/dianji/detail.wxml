@@ -1,10 +1,10 @@
 <!-- pages/dianji/detail.wxml — 卦详情 -->
 <!-- 固定顶栏（带返回）：长正文页滚动钻不进状态栏底下；主题/字号类挂根节点 -->
-<view class="topbar {{themeCls}} {{fontCls}}" style="padding-top: calc({{statusBarHeight}}px + 16rpx);">
+<view class="topbar {{themeCls}} {{fontCls}}" style="padding-top: calc({{statusBarHeight}}px + 8rpx);">
   <view class="back font-kai" bindtap="goBack">‹</view>
   <text class="title font-kai">{{gua ? gua.name + '卦' : '卦详情'}}</text>
 </view>
-<view class="page {{themeCls}} {{fontCls}}" style="padding-top: calc({{statusBarHeight}}px + 88rpx);">
+<view class="page {{themeCls}} {{fontCls}}" style="padding-top: calc({{statusBarHeight}}px + 72rpx);">
 
   <view class="content" wx:if="{{gua}}">
     <!-- 卦首：大卦象 + 卦名 -->

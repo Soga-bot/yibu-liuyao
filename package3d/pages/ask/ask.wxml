@@ -4,7 +4,7 @@
      根因是同层渲染偶发失效，弹卡与画布同页无解，故拆独立页彻底避开 -->
 <view class="page {{themeCls}} {{fontCls}}">
   <!-- 返回 -->
-  <view class="back" hover-class="back-hover" bindtap="onBack">‹</view>
+  <view class="back" style="top: calc({{statusBarHeight}}px + 8rpx);" hover-class="back-hover" bindtap="onBack">‹</view>
 
   <!-- 签条卡 -->
   <view class="ask-card">

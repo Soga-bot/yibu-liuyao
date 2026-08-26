@@ -4,7 +4,7 @@
   <view class="back font-kai" bindtap="goBack">‹</view>
   <text class="title font-kai">十翼 · 通读</text>
 </view>
-<view class="page {{themeCls}} {{fontCls}}" style="padding-top: calc({{statusBarHeight}}px + 88rpx);">
+<view class="page {{themeCls}} {{fontCls}}" style="padding-top: calc({{statusBarHeight}}px + 72rpx);">
 
   <view class="content">
     <block wx:for="{{books}}" wx:for-item="book" wx:key="name">
