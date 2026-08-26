@@ -11,7 +11,7 @@
     <!-- 所问 + 日干支 -->
     <view class="meta-card">
       <view class="meta-row" wx:if="{{qiu}}"><text class="m-label">所问</text><text class="m-val font-kai">问：{{qiu}}</text></view>
-      <view class="meta-row"><text class="m-label">起卦</text><text class="m-val">三钱摇卦 · {{gz}}日</text></view>
+      <view class="meta-row"><text class="m-label">起卦</text><text class="m-val">{{replay ? '历史回看' : '三钱摇卦'}} · {{gz}}日</text></view>
     </view>
 
     <!-- 排盘结果（与手动排盘同观感，只读） -->

@@ -40,6 +40,7 @@ Page({
     statusBarHeight: 20,
     qiu: '',
     gz: '',
+    replay: false,   // 历史回看模式（from=history）
     result: null,
     rows: null    // 排盘显示行（上→初）
   },
@@ -47,6 +48,9 @@ Page({
   onLoad(options) {
     const app = getApp()
     this.setData({ statusBarHeight: (app && app.globalData.statusBarHeight) || 20 })
+    // from=history：历史回看（不重复落库，起卦行改标「历史回看」）；id 为原记录 id
+    const fromHist = !!(options && options.from === 'history')
+    this._histId = (options && options.id) || ''
     const qiu = options && options.q ? decodeURIComponent(options.q).slice(0, 30) : ''
     const yaoStr = options && options.yao && /^[01]{6}$/.test(options.yao) ? options.yao : ''
     if (!yaoStr) {
@@ -109,6 +113,7 @@ Page({
     this.setData({
       qiu,
       gz: jz,
+      replay: fromHist,
       result: Object.assign(r, {
         desc: kb.desc || '',
         daxiang: annotate(kb.daxiang || ''),
@@ -123,17 +128,19 @@ Page({
     })
     // 问易入口带参用（与 result 同参：yao/dong/gz/q）
     this._args = { yao: yaoStr, dong: dongStr, gz: jz, q: qiu }
-    // 落摇卦历史（与手动排盘同库：mine 页统一渲染）
-    const eff = saveHistory({
-      id: String(Date.now()),   // 唯一标识：问易解读等回写挂靠（与 paipan.js 同格式）
-      t: Date.now(),
-      yao: yaoStr,
-      dong: dongStr,
-      gz: jz,
-      name: r.name,
-      qiu
-    })
-    this._histId = eff ? (eff.id || '') : ''
+    // 落摇卦历史（与手动排盘同库：mine 页统一渲染）；历史回看跳过
+    if (!fromHist) {
+      const eff = saveHistory({
+        id: String(Date.now()),   // 唯一标识：问易解读等回写挂靠（与 paipan.js 同格式）
+        t: Date.now(),
+        yao: yaoStr,
+        dong: dongStr,
+        gz: jz,
+        name: r.name,
+        qiu
+      })
+      if (eff && eff.id) this._histId = eff.id
+    }
   },
 
   // 点爻行展开/收起爻辞（只读页里唯一交互：查原文，非编辑）

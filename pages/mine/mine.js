@@ -61,11 +61,19 @@ Page({
     })
   },
 
-  // 回看：带参进排盘页，自动复原完整卦盘（from=history 不写回记录）
+  // 回看：直达只读「卦成」结果页复原完整盘面（from=history 不重复落库；
+  // id 带原记录 id，问易解读挂靠不换目标）
   openItem(e) {
     const d = e.currentTarget.dataset
+    let url = '/package3d/pages/result/result?yao=' + d.yao + '&dong=' + d.dong + '&gz=' + d.gz + '&from=history'
+    if (d.qiu) url += '&q=' + encodeURIComponent(d.qiu)
+    if (d.id) url += '&id=' + d.id
     wx.navigateTo({
-      url: '/pages/paipan/paipan?yao=' + d.yao + '&dong=' + d.dong + '&gz=' + d.gz + '&from=history'
+      url,
+      fail: (err) => {
+        console.error('[我的] 回看卦盘失败', err)
+        wx.showToast({ title: '进入失败', icon: 'none' })
+      }
     })
   },
 

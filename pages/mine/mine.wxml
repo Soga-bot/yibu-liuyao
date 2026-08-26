@@ -20,6 +20,7 @@
     <block wx:if="{{items.length}}">
       <view class="his-card" wx:for="{{items}}" wx:key="i"
             data-yao="{{item.yao}}" data-dong="{{item.dong}}" data-gz="{{item.gz}}" data-i="{{index}}"
+            data-qiu="{{item.qiu}}" data-id="{{item.id}}"
             bindtap="openItem" bindlongpress="delItem">
         <view class="gx">
           <block wx:for="{{item.xiang}}" wx:for-item="b" wx:for-index="bi" wx:key="*this">
