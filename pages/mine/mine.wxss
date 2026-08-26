@@ -25,6 +25,14 @@
 /* tabbar 让位：实体垫块——scroll-view 自带 padding-bottom 部分机型吞掉，不依赖它 */
 .tab-clear { height: calc(170rpx + env(safe-area-inset-bottom)); }
 
+/* ===== 标题定位（v0.3.11·tab 三页统一）：栏中心 = 6.4vh，带底不透明 =====
+   tab 三页（解卦/典籍库/我的）spacer 同被压顶进状态栏（同五行 v0.3.4 病，
+   锚点1 ≈3.8% 屏高），五行同款校准链 5/6 → 2/3 = 6.4vh 直接对齐其余 8 页。
+   margin 不参与 flex 收缩，定位确定；spacer 藏起由 margin 顶替。顶栏加
+   实底（同固定顶栏 3 页既有做法），内容从栏后过不透出、标题常清。 */
+.status-bar { display: none; }
+.topbar { margin-top: calc(6.4vh - 44rpx); background: var(--bg); }
+
 /* ---------- 统计卡 ---------- */
 .stat-card {
   display: flex;
