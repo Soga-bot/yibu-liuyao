@@ -29,13 +29,15 @@
   letter-spacing: 8rpx; margin-right: 64rpx;
 }
 
-/* ===== 标题定位定稿（v0.3.6）：栏中心 = 11.5vh（用户校准分值换算） =====
-   校准过程：v0.3.5 顶栏曾钉 50vh 正中，用户目测给「上移 = 之前锚点（被前置
-   摄像头遮挡处 ≈3.8% 屏高）到正中距离的 5/6」→ 50% − 5/6×(50% − 3.8%) =
-   11.5vh。margin 不参与 flex 收缩、栏体禁缩，真机定位确定；spacer 藏起由
-   margin 顶替（避免与设备状态栏实际高度叠加偏移）。本页验证通过后迁移其余 8 页。 */
+/* ===== 标题定位（v0.3.7·校准第二档）：栏中心 = 6.4vh =====
+   校准链：v0.3.4 被压顶进状态栏（锚点 ≈3.8% 屏高）→ v0.3.5 钉正中 50vh →
+   分值 5/6 → v0.3.6 = 11.5vh（用户报偏低）→ 分值「上移 = 之前锚点到当前
+   锚点距离的 2/3」→ 11.5% − 2/3×7.7% = 6.4vh。margin 不参与 flex 收缩、
+   栏体禁缩，定位确定；spacer 藏起由 margin 顶替。仍仅此一页。
+   注意：6.4vh 字顶距状态栏底仅约 3px（用户机型），迁移轮拟加
+   max(vh 档, 状态栏 px) 双下限保护防更高状态栏机型侵入。 */
 .status-bar { display: none; }
-.topbar { margin-top: calc(11.5vh - 44rpx); flex-shrink: 0; }
+.topbar { margin-top: calc(6.4vh - 44rpx); flex-shrink: 0; }
 
 .content { flex: 1; padding: 16rpx 28rpx 0; box-sizing: border-box; }
 
