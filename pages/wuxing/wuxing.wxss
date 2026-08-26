@@ -29,13 +29,13 @@
   letter-spacing: 8rpx; margin-right: 64rpx;
 }
 
-/* ===== 校准临时块（v0.3.5）：顶栏钉屏幕正中，真机目测给分值后整块删除 =====
-   取证：真机截图 633×1371 逐行扫描——状态栏带 y 0–69，「五行基础」字形
-   y≈35–69 骑进状态栏被前置摄像头遮挡（spacer 被压至≈0–20px，应≈70px）。
-   校准法：藏 spacer，顶栏改 margin 定位——margin 不参与 flex 收缩、栏体
-   禁缩，栏中心（44rpx = 88rpx 之半）恰落 50vh 屏幕正中，定位确定性。 */
+/* ===== 标题定位定稿（v0.3.6）：栏中心 = 11.5vh（用户校准分值换算） =====
+   校准过程：v0.3.5 顶栏曾钉 50vh 正中，用户目测给「上移 = 之前锚点（被前置
+   摄像头遮挡处 ≈3.8% 屏高）到正中距离的 5/6」→ 50% − 5/6×(50% − 3.8%) =
+   11.5vh。margin 不参与 flex 收缩、栏体禁缩，真机定位确定；spacer 藏起由
+   margin 顶替（避免与设备状态栏实际高度叠加偏移）。本页验证通过后迁移其余 8 页。 */
 .status-bar { display: none; }
-.topbar { margin-top: calc(50vh - 44rpx); flex-shrink: 0; }
+.topbar { margin-top: calc(11.5vh - 44rpx); flex-shrink: 0; }
 
 .content { flex: 1; padding: 16rpx 28rpx 0; box-sizing: border-box; }
 
