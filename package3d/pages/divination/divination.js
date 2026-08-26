@@ -326,30 +326,30 @@ Page({
     this._released = false
     this._shaking = true
     this._shakeAmp = 1
+    this.playLoop()   // 摇卦过程音起（循环，倒出时止）
     this.updateBtn({
       phase: 'shaking', shaking: true, qiuRemind: true,
       tip: '第' + (this.data.lines.length + 1) + '爻 · 摇一摇手机（或连点屏幕）'
     })
   },
 
-  // 一次有效晃动：壳摆一下，壳内铜钱翻个身，一记钱壳碰撞短音——音随手动
-  addShakeHit(delta) {
+  // 一次有效晃动：壳摆一下，壳内铜钱翻个身
+  addShakeHit() {
     this._hits += 1
     this._lastHitAt = Date.now()
     this._shakeAmp = 1
     this.buzz('medium')   // 每次有效晃动一记中震：手腕发力的触觉回响
-    // 实时音效：每次命中即一响（替代旧循环过程音）；音量随本次晃动强度，带微抖更自然
-    const v = (delta ? clamp(0.35 + delta / 14, 0.35, 0.85) : 0.6) * rand(0.85, 1.1)
-    this.play('clink', Math.min(v, 1))
+    this.playLoop()       // 停顿时过程音已止，再晃随手动重新起
     this._coins.forEach((c) => {
       c.mesh.rotation.x += rand(-0.6, 0.6)
       c.mesh.rotation.y += rand(-0.6, 0.6)
     })
   },
 
-  // 停手（静默越阈）或点按钮 → 前倾倒钱
+  // 静默越阈（停手）→ 前倾倒钱
   beginPour() {
     this._phase = 'pouring'
+    this.stopLoop()   // 摇卦过程音止（摇动结束 → 前倾倒钱）
     this._tiltTarget = POUR_ANGLE
     this._tiltCb = null
     this._released = false
@@ -383,7 +383,7 @@ Page({
   // 落定：停物理，交给压平动画——四元数 slerp 到「就近翻倒」的平躺姿态
   //（翻倒方向由法线 y 符号定，保留翻滚物理得出的正反面），同时滑到落位
   settleCoin(c) {
-    this.play('dump')   // 落地一响（三枚错开落，池轮转可叠声）
+    this.play('dump', 0.8)   // 落地一响（三枚错开落，池轮转可叠声）；0.8 收敛音量（1.0 实测显大显杂）
     this.buzz('light')  // 落桌一记轻震
     c.vel.set(0, 0, 0)
     c.angVel.set(0, 0, 0)
@@ -470,6 +470,11 @@ Page({
     if (this._phase === 'shaking' && this._hits >= 1 &&
         this._lastHitAt && Date.now() - this._lastHitAt > SHAKE_QUIET) {
       this.beginPour()
+    }
+    // 手一停过程音先止（比倒出判定早），再晃再起——声音跟着手动
+    if (this._phase === 'shaking' && this._loopOn && this._lastHitAt &&
+        Date.now() - this._lastHitAt > 450) {
+      this.stopLoop()
     }
 
     if (this._shellPivot) {
@@ -851,6 +856,7 @@ Page({
 
   // 清零重摇（同一所问之内重摇，_qiu 保留）
   onReset() {
+    this.stopLoop()                // 摇动中重摇：过程音随之止
     this._inscribe = null          // 刻录仪式进行中重摇：取消时间线
     this._inscribedCount = 0
     if (this._marksGroup) {        // 壳背刻线全清（几何/贴图/材质逐一释放；每爻各持贴图）
@@ -892,7 +898,7 @@ Page({
     this.loop()
   },
 
-  // ====== 音效：入壳/摇动碰撞/倒出落地（挂接点对齐流程状态机，时长天然解耦） ======
+  // ====== 音效：入壳/摇卦循环/倒出落地（挂接点对齐流程状态机，时长天然解耦） ======
   initAudio() {
     const mk = (src) => {
       const a = wx.createInnerAudioContext()
@@ -904,12 +910,15 @@ Page({
     // 短音用小池轮转：三枚铜钱错开落地的响声要能叠着放（单实例重播会掐断前一声）
     this._sfxPool = {
       getIn: [mk('/package3d/audio/get_into.mp3'), mk('/package3d/audio/get_into.mp3'), mk('/package3d/audio/get_into.mp3')],
-      dump: [mk('/package3d/audio/dump_out.mp3'), mk('/package3d/audio/dump_out.mp3'), mk('/package3d/audio/dump_out.mp3')],
-      // 摇动命中的钱壳碰撞短音：一晃一响实时随手动（旧循环过程音已撤，起播
-      // 延迟/停顿重起/循环接缝三类问题连根除）；与入壳同素材不同实例，互不掐声
-      clink: [mk('/package3d/audio/get_into.mp3'), mk('/package3d/audio/get_into.mp3'), mk('/package3d/audio/get_into.mp3')]
+      dump: [mk('/package3d/audio/dump_out.mp3'), mk('/package3d/audio/dump_out.mp3'), mk('/package3d/audio/dump_out.mp3')]
     }
-    this._sfxIdx = { getIn: 0, dump: 0, clink: 0 }
+    this._sfxIdx = { getIn: 0, dump: 0 }
+    // 摇卦过程音：无缝循环——摇卦时长不定（用户行为），循环起停由状态机控制。
+    // （v0.3.13 曾改「每命中一记碰撞短音」求实时感：实测音感零散、摇动节奏
+    //  感尽失反觉「经常自己结束」，v0.3.17 回摆循环——连续声垫才是摇动手感）
+    this._loopSfx = mk('/package3d/audio/process.mp3')
+    this._loopSfx.loop = true
+    this._loopSfx.volume = 0.7
   },
   // 短触觉（微信只有短脉冲无连震马达）：绑物理事件，与音效同点触发——
   // 晃动命中=中、钱落桌/钱入壳=轻、刻爻落刀=重、成爻=轻、卦成=重
@@ -929,9 +938,22 @@ Page({
       a.play()
     } catch (e) { /* 音效失败不影响流程 */ }
   },
+  playLoop() {
+    if (!this._loopSfx || this._destroyed || this._loopOn) return
+    this._loopOn = true
+    try { this._loopSfx.play() } catch (e) { /* 同上 */ }
+  },
+  stopLoop() {
+    this._loopOn = false
+    if (!this._loopSfx) return
+    try { this._loopSfx.stop() } catch (e) { /* 同上 */ }
+  },
   destroyAudio() {
+    this.stopLoop()
     if (this._sfxPool) Object.keys(this._sfxPool).forEach((k) => this._sfxPool[k].forEach((a) => a.destroy()))
+    if (this._loopSfx) this._loopSfx.destroy()
     this._sfxPool = null
+    this._loopSfx = null
   },
 
   // ====== 摇一摇（真机）：加速度计触发，等价于点按钮 ======
@@ -951,7 +973,7 @@ Page({
       if (this._phase === 'shaking') {
         if (delta < SHAKE_DELTA) return
         this._lastShakeAt = now
-        this.addShakeHit(delta)
+        this.addShakeHit()
       } else if (this._phase === 'idle') {
         if (delta < SHAKE_DELTA_START) return
         this._lastShakeAt = now
@@ -1203,6 +1225,7 @@ Page({
   onHide() {
     this._running = false
     this.stopAcc()
+    this.stopLoop()   // 退后台静音（回来后摇卦阶段重新起）
   },
   // 强停本实例：杀渲染循环/传感器，释放 GL 上下文（onUnload 与热重载杀旧实例共用）
   stopLoopHard() {
