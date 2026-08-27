@@ -44,13 +44,16 @@ Page({
   },
 
   // 按卦名 / 卦宫 / 传统全名（含象序写反的容错）过滤
+  // 校勘约定（docs/校勘备注.md）：经传原文作「遯」、程序卦名作「遁」——
+  // 关键词归一化后古字「遯」同样命中（搜「天山遯」→ 天山遁）
   onSearch(e) {
-    const k = (e.detail.value || '').trim()
-    const list = !k ? ALL : ALL.filter(g =>
+    const raw = (e.detail.value || '').trim()
+    const k = raw.replace(/遯/g, '遁')
+    const list = !raw ? ALL : ALL.filter(g =>
       g.name.indexOf(k) >= 0 || g.gongLabel.indexOf(k) >= 0 ||
       g.full.indexOf(k) >= 0 || (g.alias && g.alias.indexOf(k) >= 0)
     )
-    this.setData({ keyword: k, list })
+    this.setData({ keyword: raw, list })
   },
 
   goDetail(e) {

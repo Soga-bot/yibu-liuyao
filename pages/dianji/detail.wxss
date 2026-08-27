@@ -237,3 +237,12 @@
   width: 600px;
   height: 480px;
 }
+
+/* 校勘脚注（仅遁卦，遯/遁两存）：弱化小字，随 --fss */
+.jiaokan {
+  margin-top: 10rpx;
+  font-size: calc(21rpx * var(--fss, 1));
+  color: var(--text-weak);
+  line-height: 1.6;
+  text-align: center;
+}

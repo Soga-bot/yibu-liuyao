@@ -34,6 +34,10 @@ Page({
         name: g.name,
         nameP: namePinyin(g.name),
         full,
+        // 校勘脚注（遯/遁两存约定，详见 docs/校勘备注.md）：仅遁卦需要
+        jiaokan: g.name === '遁'
+          ? '校勘：本卦卦名古经本作「遯」，后世多通作「遁」，二字为古今异体通写。本页经传原文依古本作「遯」，卦名从通行作「遁」。'
+          : '',
         desc: g.desc,
         guaci: annotate(g.guaci),
         guaciB: bh.guaci || '',

@@ -17,6 +17,8 @@
       </view>
       <view class="hero-name font-kai">{{gua.nameP}}</view>
       <view class="hero-desc">{{gua.desc}}</view>
+      <!-- 校勘脚注：仅遁卦（遯/遁两存约定） -->
+      <view wx:if="{{gua.jiaokan}}" class="jiaokan">{{gua.jiaokan}}</view>
     </view>
 
     <!-- 卦宫 / 上下卦 -->
