@@ -1,5 +1,5 @@
 // tools/convert-baihua-shiyi.mjs — 十翼白话（系辞上/下传 + 说卦传）校验与生成
-// 输入：docs/待校对-十翼白话.txt（校对闭环后为归档，勿再改动）
+// 输入：docs/已校对-十翼白话.txt（外审闭环归档，勿再改动）
 // 输出：data/baihua-shiyi.js（供 pages/dianji/shiyi 逐句对照渲染）
 // 硬校验（不过不出文件）：
 //   1) 每章所有「原｜」句拼接（剔除空白与全角空格）须与 data/shiyi.js 对应章文
@@ -11,7 +11,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { SHUOGUA, getXici } from '../data/shiyi.js'
 
-const SRC = 'docs/待校对-十翼白话.txt'
+const SRC = 'docs/已校对-十翼白话.txt'
 const OUT = 'data/baihua-shiyi.js'
 const HEAD = /^【(系辞上传|系辞下传|说卦传)｜([一二三四五六七八九十]+)】$/
 const BAN = /算命|预测|占算|运势|改运/ // 审核红线词（古籍语境允许「占筮/占问」）
@@ -23,7 +23,7 @@ const seen = new Set()
 let cur = null
 for (const raw of readFileSync(SRC, 'utf8').split(/\r?\n/)) {
   const line = raw.trim()
-  if (!line || line.startsWith('＞') || line.startsWith('#')) continue // 空行/说明
+  if (!line || /^[>＞]/.test(line) || line.startsWith('#')) continue // 空行/校注/标题
   const h = line.match(HEAD)
   if (h) {
     if (cur) chapters.push(cur)
@@ -93,7 +93,7 @@ for (const bk of order) {
   }
 }
 const out = `// data/baihua-shiyi.js — 十翼通读白话（系辞上/下传 + 说卦传逐句对照）
-// 由 docs/待校对-十翼白话.txt 生成，tools/convert-baihua-shiyi.mjs
+// 由 docs/已校对-十翼白话.txt 生成，tools/convert-baihua-shiyi.mjs
 // （生成时已机器校验：每章原句拼接与 data/shiyi.js 章文全等，不脱不漏）
 // 定位：帮助阅读的白话参考译文（依通行译注传统直译，非学术定本，原文为准）
 export const BH_SHIYI = {
