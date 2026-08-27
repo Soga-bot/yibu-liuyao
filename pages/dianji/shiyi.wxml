@@ -1,4 +1,4 @@
-<!-- pages/dianji/shiyi.wxml — 十翼通读：系辞上/下、说卦传 -->
+<!-- pages/dianji/shiyi.wxml — 十翼通读：系辞上/下、文言（乾坤）、说卦、序卦、杂卦 -->
 <!-- 固定顶栏（带返回）：长正文页滚动钻不进状态栏底下；主题/字号类挂根节点 -->
 <view class="topbar {{themeCls}} {{fontCls}}" style="padding-top: calc(6.4vh - 44rpx);">
   <view class="back font-kai" bindtap="goBack">‹</view>
@@ -10,7 +10,7 @@
     <block wx:for="{{books}}" wx:for-item="book" wx:key="name">
       <view class="book-name font-kai">{{book.name}}</view>
       <view class="sec" wx:for="{{book.chapters}}" wx:for-item="c" wx:key="h">
-        <view class="sec-title font-kai">第{{c.h}}章</view>
+        <view class="sec-title font-kai">{{c.ti || '第' + c.h + '章'}}</view>
         <view wx:if="{{c.zz}}" class="zhangzhi">章旨：{{c.zz}}</view>
         <!-- 逐句对照：有白话数据的章按「原句（楷体）/译句」对渲染；无则整段原文兜底 -->
         <block wx:if="{{c.pairs.length > 0}}">
