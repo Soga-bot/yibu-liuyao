@@ -8,10 +8,11 @@
 //           由云端大模型生成（key 只存云函数环境变量，不下发小程序端）；
 //           云端失败时自动降级本地合成
 //
-// 切 'cloud' 前须完成（详见 docs/问易解读规格.md 云函数部署节）：
+// 切 'cloud' 前须完成（详见 docs/问易解读规格.md §八 与 docs/AI问易接入方案.md §七）：
 //   1. 开发者工具开通云开发，环境 ID 填入 WENYI_CLOUD_ENV；
 //   2. 上传部署 cloudfunctions/wenyi，控制台配环境变量
-//      WENYI_BASE_URL / WENYI_API_KEY / WENYI_MODEL / WENYI_TIMEOUT_MS。
+//      WENYI_BASE_URL / WENYI_API_KEY / WENYI_MODEL / WENYI_TIMEOUT_MS
+//      （供应商已定豆包·火山方舟，base_url 与 Model ID 见上述文档）。
 export const WENYI_MODE = 'mock'
 
 // 云开发环境 ID（WENYI_MODE='cloud' 时必填；app.js 由此决定是否 wx.cloud.init）
