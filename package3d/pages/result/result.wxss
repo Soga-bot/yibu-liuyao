@@ -53,6 +53,7 @@
   margin: 32rpx 0 8rpx;
   background: linear-gradient(135deg, var(--red) 0%, var(--red-deep) 100%);
   color: #F6D77A; font-size: 34rpx; letter-spacing: 12rpx;
+  white-space: nowrap;   /* 标签限单行：默认胶囊宽约 368rpx，8 字曾折行错位 */
   border-radius: 48rpx; border: 2rpx solid #E6C158;
   box-shadow: 0 6rpx 16rpx var(--rwash-30);
 }
@@ -209,6 +210,13 @@
   padding-top: 18rpx;
   margin-top: 14rpx;
 }
+/* 讲解区卦辞：去居中随文流（居中只留给无动爻单卦头）；
+   续行挂「卦辞：」宽 = 3字×(26rpx+2rpx字距)，折行后对齐冒号 */
+.ex-block .gua-guaci {
+  text-align: left;
+  padding-left: calc(84rpx * var(--fss, 1));
+  text-indent: calc(-84rpx * var(--fss, 1));
+}
 .ex-title {
   font-size: 30rpx;
   color: var(--text);
@@ -235,10 +243,17 @@
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
 }
 
-/* 分享卡隐藏画布：屏外定位（本页无 webgl，无同层渲染冲突；divination 页禁用此法） */
+/* 分享卡画布：零尺寸容器裁剪（屏外 fixed 定位是同层渲染雷区，divination 页教训）；
+   cardDone 后 wxml 直接拆节点，常驻时间仅 onLoad 后绘制一瞬 */
+.share-holder {
+  position: relative;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
 .share-canvas {
-  position: fixed;
-  left: -9999rpx;
+  position: absolute;
+  left: 0;
   top: 0;
   width: 600px;
   height: 480px;

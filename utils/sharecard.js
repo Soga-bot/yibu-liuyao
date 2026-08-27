@@ -1,6 +1,7 @@
 // utils/sharecard.js — 卦象分享卡绘制（宣纸风 5:4，600×480）
 // 卡面固定浅色：分享卡对外代表品牌脸面，不随系统深色模式翻转（红/墨/金在宣纸底上才是本味）。
-// 用法：页面 wxml 放隐藏画布 <canvas type="2d" id="shareCard" class="share-canvas">，
+// 用法：页面 wxml 放零尺寸裁剪容器内的画布
+// <view class="share-holder"><canvas wx:if="{{!cardDone}}" type="2d" id="shareCard" class="share-canvas"></canvas></view>，
 // 数据就绪后 makeShareCard(this, { name, full, xiang, dong, line })，
 // 成功后 page._shareImg 为临时图路径，onShareAppMessage 里作 imageUrl 用（未生成则省略走默认截图）。
 // 注意：只放无 webgl 的页面（result / dianji detail）；divination 页同层渲染教训见其页内注释。
@@ -109,10 +110,14 @@ function drawCard(ctx, opts) {
 }
 
 function makeShareCard(page, opts) {
+  // 画布用完即拆（页面 wxml 挂 wx:if="{{!cardDone}}"）：常驻的 2d 画布节点
+  // （dpr 放大后原生层远大于视口）会诱发同层渲染失效挡住整页触摸（divination 页教训），
+  // 导出成败都置 cardDone，让页面把节点从树里摘掉
+  const done = () => page.setData({ cardDone: true })
   const query = wx.createSelectorQuery().in(page)
   query.select('#shareCard').fields({ node: true }).exec((res) => {
     const cv = res && res[0] && res[0].node
-    if (!cv) return
+    if (!cv) { done(); return }
     let dpr = 2
     try { dpr = wx.getWindowInfo().pixelRatio || 2 } catch (e) { /* 旧基础库降级 */ }
     cv.width = W * dpr
@@ -122,8 +127,8 @@ function makeShareCard(page, opts) {
     drawCard(ctx, opts)
     wx.canvasToTempFilePath({
       canvas: cv,
-      success: (r) => { page._shareImg = r.tempFilePath },
-      fail: (e) => console.error('[分享卡] 导出失败', e)
+      success: (r) => { page._shareImg = r.tempFilePath; done() },
+      fail: (e) => { console.error('[分享卡] 导出失败', e); done() }
     })
   })
 }

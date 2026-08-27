@@ -27,7 +27,6 @@
     "pages/index/index": { "network": "wifi", "packages": ["packageBooks"] },
     "pages/dianji/dianji": { "network": "wifi", "packages": ["packageBooks"] }
   },
-  "lazyCodeLoading": "requiredComponents",
   "window": {
     "navigationBarBackgroundColor": "@navBg",
     "navigationBarTextStyle": "@navTxt",

@@ -45,6 +45,7 @@ Page({
     replay: false,      // 回放态（历史回看 / 好友分享）：不落库
     replayLabel: '三钱摇卦',
     wenyiDone: false,   // 该卦已有问易解读 → 主按钮改「回看」态（直达已存文字）
+    cardDone: false,    // 分享卡已导出（成败皆算）→ wxml 拆除画布节点（同层渲染雷区，不常驻）
     result: null,
     rows: null    // 排盘显示行（上→初）
   },
@@ -181,11 +182,12 @@ Page({
     this.setData({ ['rows[' + i + '].showCi']: !this.data.rows[i].showCi })
   },
 
-  // 问易（AI 解卦）：带同一卦参数进解读页（AI 经自有服务器中转，密钥不下发端上）
+  // 问易（AI 解卦）：带同一卦参数进解读页（AI 经云函数中转，密钥只在云端环境变量）
   goWenyi() {
     const a = this._args
     if (!a || !a.yao) {
-      wx.showToast({ title: '未取得卦象', icon: 'none' })
+      console.error('[结果页] 问易缺参', a)
+      wx.showToast({ title: '未取得卦象', icon: 'none', duration: 2500 })
       return
     }
     wx.navigateTo({
@@ -194,7 +196,7 @@ Page({
            '&id=' + (this._histId || ''),
       fail: (e) => {
         console.error('[结果页] 进问易失败', e)
-        wx.showToast({ title: '进入失败：' + (e.errMsg || '未知'), icon: 'none' })
+        wx.showToast({ title: '进入失败：' + (e.errMsg || '未知'), icon: 'none', duration: 2500 })
       }
     })
   },

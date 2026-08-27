@@ -115,7 +115,7 @@
       <view class="m-val">未取得卦象，请返回重摇</view>
     </view>
 
-    <button class="cast-btn" bindtap="goWenyi">{{wenyiDone ? '回看 · 问易解读' : '问易 · 合参此卦'}}</button>
+    <button class="cast-btn" bindtap="goWenyi">{{wenyiDone ? '回看 · 问易' : '问易 · 合参'}}</button>
     <button class="recast-btn" hover-class="recast-btn-hover" hover-stay-time="60" bindtap="goAsk">重新起卦</button>
     <button class="recast-btn" hover-class="recast-btn-hover" hover-stay-time="60" open-type="share">分享此卦</button>
 
@@ -123,6 +123,9 @@
     <view class="bottom-pad"></view>
   </scroll-view>
 
-  <!-- 分享卡隐藏画布：屏外定位（display:none 取不到 2d 节点，须真实布局） -->
-  <canvas type="2d" id="shareCard" class="share-canvas"></canvas>
+  <!-- 分享卡画布：零尺寸裁剪容器收纳（position:fixed 的屏外画布会诱发同层渲染失效，
+       挡住整页触摸——divination 页教训）；导出完成 sharecard.js 置 cardDone 拆节点 -->
+  <view class="share-holder">
+    <canvas wx:if="{{!cardDone}}" type="2d" id="shareCard" class="share-canvas"></canvas>
+  </view>
 </view>
