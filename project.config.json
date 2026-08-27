@@ -62,6 +62,18 @@
       {
         "value": "local",
         "type": "folder"
+      },
+      {
+        "value": ".claude",
+        "type": "folder"
+      },
+      {
+        "value": ".vscode",
+        "type": "folder"
+      },
+      {
+        "value": "utils/package.json",
+        "type": "prefix"
       }
     ],
     "include": []

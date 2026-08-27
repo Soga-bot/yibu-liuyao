@@ -5,7 +5,7 @@ import {
   themeClass, fontClass, setThemeMode, setFont, sysTheme,
   themeMode as getThemeMode, fontMode as getFontMode
 } from '../../utils/theme.js'
-import { bgmState, bgmToggle } from '../../utils/bgm.js'
+import { bgmState, bgmToggle } from '../utils/bgm.js'
 
 const app = getApp()
 
