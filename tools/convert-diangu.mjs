@@ -1,12 +1,17 @@
-// tools/convert-diangu.mjs — 把 docs/待填充-卦爻典故.txt 的条目生成 data/diangu.js
+// tools/convert-diangu.mjs — 合并各典故素材批次的条目生成 data/diangu.js
 // 用法：node tools/convert-diangu.mjs
 // 规范（审核红线）：只收录有典可查的条目并注明来源；不引入吉凶判断、不与现代占断挂钩。
+// 素材文件皆为校对闭环后的归档（勿再改动）；后列文件的同键条目覆盖先列的（修订机制）。
 import { readFileSync, writeFileSync } from 'node:fs'
 import { GUA_LIST } from '../data/gua.js'
 
 const byName = new Map(GUA_LIST.map(g => [g.name, g]))
 const HEAD = /^(.+?)｜(卦辞|彖传|初六|初九|九二|六二|九三|六三|九四|六四|九五|六五|上九|上六)｜(.+)$/
-const lines = readFileSync('docs/待填充-卦爻典故.txt', 'utf8').split(/\r?\n/)
+const SRC = [
+  'docs/待填充-卦爻典故.txt', // 首批（46 条）
+  'docs/已校对-典故扩充.txt'  // 扩充第一批（37 条，2026-08-27 校对闭环）
+]
+const lines = SRC.flatMap(f => readFileSync(f, 'utf8').split(/\r?\n/))
 
 const map = new Map() // 卦名+爻题 -> {ti, gu, lai}
 let cur = null, field = null, buf = []
@@ -49,7 +54,7 @@ const rank = ti => ti === '卦辞' ? 0 : ti === '彖传' ? 1 : 2
 out.sort((a, b) => GUA_LIST.findIndex(g => g.key === a.key) - GUA_LIST.findIndex(g => g.key === b.key) || rank(a.ti) - rank(b.ti))
 
 const esc = v => JSON.stringify(v)
-let js = `// data/diangu.js — 卦爻典故注释卡（由 docs/待填充-卦爻典故.txt 生成，tools/convert-diangu.mjs）
+let js = `// data/diangu.js — 卦爻典故注释卡（由 docs/待填充-卦爻典故.txt + docs/已校对-典故扩充.txt 合并生成，tools/convert-diangu.mjs）
 // 定位：说明爻辞背后的史事掌故与出处，帮助阅读理解；不用于断卦（审核红线）。
 // 键：卦key:爻题（爻题为「卦辞」或初九…上六）。
 
