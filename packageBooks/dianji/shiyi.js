@@ -1,4 +1,4 @@
-// pages/dianji/shiyi.js — 十翼通读页：系辞上/下、文言传（乾坤）、说卦、序卦、杂卦
+// packageBooks/dianji/shiyi.js — 十翼通读页：系辞上/下、文言传（乾坤）、说卦、序卦、杂卦
 // （章旨提要 + 逐句白话对照；彖/象随卦详情页展示，此处即十翼全书通读）
 import { getXici, SHUOGUA, getZhangzhi, WENYAN_QIAN, WENYAN_KUN, XUGUA_CH, ZAGUA_CH } from '../../data/shiyi.js'
 import { getShiyiBh } from '../../data/baihua-shiyi.js'
@@ -40,7 +40,7 @@ Page({
   },
 
   onShareAppMessage() {
-    return { title: '周易十翼 · 系辞文言说序杂通读', path: '/pages/dianji/shiyi' }
+    return { title: '周易十翼 · 系辞文言说序杂通读', path: '/packageBooks/dianji/shiyi' }
   },
   onShareTimeline() {
     return { title: '周易十翼 · 系辞文言说序杂通读' }

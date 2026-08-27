@@ -2,7 +2,7 @@
 //
 // 本文件是全站唯一的禁用词字面量枚举处（cloudfunctions/ 不进小程序包，
 // packOptions ignore）；端上红线扫描见 utils/wenyi.test.mjs（不进包）。
-// 断法口径与端上本地合成器 utils/wenyi-mock.js 保持一致：
+// 断法口径与端上本地合成器 package3d/utils/wenyi-mock.js 保持一致：
 //   用神速选词表、四段结构、400–700 字、敏感所问提示线下专业渠道。
 
 const engine = require('./liuyao.js')
@@ -42,7 +42,7 @@ const SYSTEM_PROMPT = [
   '- 只输出解读正文，不写前言、确认或解释。'
 ].join('\n')
 
-// —— 用神速选词表（与 utils/wenyi-mock.js 同口径；云端独立维护一份）——
+// —— 用神速选词表（与 package3d/utils/wenyi-mock.js 同口径；云端独立维护一份）——
 const YONGSHEN_WORDS = [
   { qin: '父母', words: ['长辈', '老人', '父亲', '母亲', '爸妈', '文书', '合同', '证件', '房产', '房屋', '车子', '消息', '考试', '升学', '论文'] },
   { qin: '妻财', words: ['财运', '钱财', '资金', '收入', '工资', '生意', '买卖', '求财'] },

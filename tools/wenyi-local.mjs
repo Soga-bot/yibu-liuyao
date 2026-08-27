@@ -90,7 +90,7 @@ function buildFuzz(n) {
   return out
 }
 
-// 敏感所问速判（与 utils/wenyi-mock.js isSensitive 同口径的简化版，仅测试用）
+// 敏感所问速判（与 package3d/utils/wenyi-mock.js isSensitive 同口径的简化版，仅测试用）
 function isSensitiveQ(q) {
   return /[病医药孕产]|官司|诉讼|判决|投资|股票|基金|理财/.test(q || '')
 }

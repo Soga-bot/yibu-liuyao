@@ -1,24 +1,28 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/paipan/paipan",
     "pages/paigua/paigua",
     "pages/dianji/dianji",
     "pages/dianji/detail",
-    "pages/dianji/shiyi",
-    "pages/wuxing/wuxing",
-    "pages/bagua/bagua",
-    "pages/bagong/bagong",
-    "pages/mine/mine",
-    "pages/settings/settings"
+    "pages/mine/mine"
   ],
   "subPackages": [
     {
       "root": "package3d",
       "name": "divination3d",
       "pages": ["pages/ask/ask", "pages/divination/divination", "pages/result/result", "pages/wenyi/wenyi"]
+    },
+    {
+      "root": "packageBooks",
+      "name": "books",
+      "pages": ["wuxing/wuxing", "bagua/bagua", "bagong/bagong", "paipan/paipan", "dianji/shiyi", "settings/settings"]
     }
   ],
+  "preloadRule": {
+    "pages/index/index": { "network": "wifi", "packages": ["packageBooks"] },
+    "pages/dianji/dianji": { "network": "wifi", "packages": ["packageBooks"] }
+  },
+  "lazyCodeLoading": "requiredComponents",
   "window": {
     "navigationBarBackgroundColor": "@navBg",
     "navigationBarTextStyle": "@navTxt",

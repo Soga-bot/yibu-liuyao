@@ -1,4 +1,4 @@
-// pages/bagua/bagua.js — 八卦基础（通识学习页，静态内容）
+// packageBooks/bagua/bagua.js — 八卦基础（通识学习页，静态内容）
 // 与五行基础并立的「体」页：卦画、先后天方位、说卦取象速查。
 // 取象短表从 data/shiyi.js 的 TRIGRAM_XIANG（已校对原文 + 载入断言）派生，
 // 不另手录一份，两处文本不会分叉。
@@ -94,7 +94,7 @@ Page({
   onSuCha() {
     // 卦象速查：京房八宫六十四卦整表（点卦可入典籍详情）
     wx.navigateTo({
-      url: '/pages/bagong/bagong',
+      url: '/packageBooks/bagong/bagong',
       fail: (e) => {
         console.error('[八卦基础] 进卦象速查失败', e)
         wx.showToast({ title: '进入失败：' + (e.errMsg || '未知'), icon: 'none' })
@@ -103,7 +103,7 @@ Page({
   },
 
   onShareAppMessage() {
-    return { title: '八卦基础 · 先天后天八卦与取象速查', path: '/pages/bagua/bagua' }
+    return { title: '八卦基础 · 先天后天八卦与取象速查', path: '/packageBooks/bagua/bagua' }
   },
   onShareTimeline() {
     return { title: '八卦基础 · 先后天八卦与取象速查' }

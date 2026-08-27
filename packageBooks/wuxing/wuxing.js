@@ -1,4 +1,4 @@
-// pages/wuxing/wuxing.js — 五行基础（通识学习页，静态内容）
+// packageBooks/wuxing/wuxing.js — 五行基础（通识学习页，静态内容）
 // 解卦 tab 的六亲/六神是「用」，本页是「体」：生克、干支归属、旬空的来龙去脉。
 // 内容皆为传统通识，写死在此，不依赖网络与知识库。
 
@@ -115,7 +115,7 @@ Page({
   },
 
   onShareAppMessage() {
-    return { title: '五行基础 · 生克乘侮与方位速查', path: '/pages/wuxing/wuxing' }
+    return { title: '五行基础 · 生克乘侮与方位速查', path: '/packageBooks/wuxing/wuxing' }
   },
   onShareTimeline() {
     return { title: '五行基础 · 生克乘侮与方位速查' }

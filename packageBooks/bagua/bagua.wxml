@@ -1,4 +1,4 @@
-<!-- pages/bagua/bagua.wxml — 八卦基础（通识学习页） -->
+<!-- packageBooks/bagua/bagua.wxml — 八卦基础（通识学习页） -->
 <view class="page {{themeCls}} {{fontCls}}">
   <view class="status-bar" style="height: {{statusBarHeight}}px;"></view>
   <view class="topbar">

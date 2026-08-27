@@ -61,7 +61,7 @@ Page({
   },
 
   goShiyi() {
-    wx.navigateTo({ url: '/pages/dianji/shiyi' })
+    wx.navigateTo({ url: '/packageBooks/dianji/shiyi' })
   },
 
   onShareAppMessage() {

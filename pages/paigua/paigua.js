@@ -140,7 +140,7 @@ Page({
     })
   },
   goManual() {
-    wx.navigateTo({ url: '/pages/paipan/paipan' })
+    wx.navigateTo({ url: '/packageBooks/paipan/paipan' })
   },
 
   onShareAppMessage() {

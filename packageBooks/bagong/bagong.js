@@ -1,4 +1,4 @@
-// pages/bagong/bagong.js — 卦象速查（京房八宫六十四卦）
+// packageBooks/bagong/bagong.js — 卦象速查（京房八宫六十四卦）
 // 整表不手录：从 data/gua.js 的八个纯卦按京房变卦规则生成，
 // 生成结果逐条回查断言（key 能找到卦、宫名相符、上下卦与 nei/wai 相符、
 // 全名与文末八宫锚点逐字一致）——规则错或数据错，载入即刻报错。
@@ -123,7 +123,7 @@ Page({
   },
 
   onShareAppMessage() {
-    return { title: '卦象速查 · 京房八宫六十四卦表', path: '/pages/bagong/bagong' }
+    return { title: '卦象速查 · 京房八宫六十四卦表', path: '/packageBooks/bagong/bagong' }
   },
   onShareTimeline() {
     return { title: '卦象速查 · 京房八宫六十四卦表' }

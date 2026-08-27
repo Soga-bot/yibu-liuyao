@@ -10,20 +10,23 @@
 ```text
 ├── app.js / app.json / app.wxss   全局配置（自定义导航/TabBar，宣纸米黄+墨色宣纸双主题）
 ├── custom-tab-bar/                自定义底部 TabBar
-├── pages/
+├── pages/                         主包页（4 个 tab + 卦详情数据锚点）
 │   ├── index/                     首页：摇卦起卦(3D) / 手动排盘 双入口 + 知识页入口
-│   ├── paipan/                    手动排盘：6爻+日干支 → 完整盘
 │   ├── paigua/                    解卦速查（用神/断法口径）
-│   ├── dianji/ detail shiyi/      典籍库：64卦浏览 / 卦详情 / 十翼通读
-│   ├── wuxing/ bagua/ bagong/     知识页：五行 / 八卦 / 八宫六十四卦表
-│   └── mine/ settings/            我的（历史/版本/音乐）/ 设置（字号三档）
+│   ├── dianji/ detail             典籍库 tab：64卦浏览 / 卦详情（全站卦库数据锚点）
+│   └── mine/                      我的（历史/版本/音乐）
 ├── package3d/                     分包：3D 起卦链路 ★ 主打
 │   ├── libs/three/ models/        threejs-miniprogram + glb 模型（非 Draco）
+│   ├── utils/wenyi-mock.js        本地经文合成器（模拟态：零随机零联网）
 │   └── pages/ ask→divination→result→wenyi   问事 → 摇卦 → 卦成 → 问易解读
+├── packageBooks/                  分包：通识与工具页（首页/典籍库 tab 预载）
+│   ├── wuxing/ bagua/ bagong/     知识页：五行 / 八卦 / 八宫六十四卦表
+│   ├── paipan/                    手动排盘：6爻+日干支 → 完整盘
+│   ├── dianji/shiyi               十翼通读（系辞文言说序杂）
+│   └── settings/ utils/bgm.js     设置（字号三档/深色/背景音乐）
 ├── utils/
 │   ├── liuyao.js                  ★ 六爻排盘引擎（纯算法零依赖）
 │   ├── wenyi-config.js            问易三态开关（''/mock/cloud，唯一改动点）
-│   ├── wenyi-mock.js              本地经文合成器（模拟态：零随机零联网）
 │   └── *.test.mjs                 测试（wenyi 84 / liuyao 35 / gua 13，node 直跑）
 ├── data/                          机器生成勿手改：gua(64卦经文) shiyi(十翼) baihua* diangu
 ├── cloudfunctions/wenyi/          问易云函数（服务端复核+提示词 v1.1+豆包调用；key 只存环境变量）
@@ -53,5 +56,5 @@
 
 1. **v0.4.0 云端切换**：云开发部署四步 + `WENYI_MODE='cloud'`（`docs/AI问易接入方案.md` §七）
 2. 上线前补：云函数限流（openid 每日次数）、AIGC 标识提审前复核
-3. BGM 音源未配置（`utils/bgm.js` 预留接口，`BGM_SRC` 为空）
+3. BGM 音源未配置（`packageBooks/utils/bgm.js` 预留接口，`BGM_SRC` 为空）
 4. 真机回归清单逐轮走查（`docs/真机回归清单.md`）

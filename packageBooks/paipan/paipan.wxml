@@ -1,4 +1,4 @@
-<!-- pages/paipan/paipan.wxml — 手动排盘 -->
+<!-- packageBooks/paipan/paipan.wxml — 手动排盘 -->
 <view class="page {{themeCls}} {{fontCls}}">
   <view class="status-bar" style="height: {{statusBarHeight}}px;"></view>
 

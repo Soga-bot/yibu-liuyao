@@ -1,4 +1,4 @@
-// pages/paipan/paipan.js — 手动排盘（输入6爻+日干支 → 排盘展示）
+// packageBooks/paipan/paipan.js — 手动排盘（输入6爻+日干支 → 排盘展示）
 import { paipan, dateToGanZhi, TIAN_GAN, DI_ZHI } from '../../utils/liuyao.js'
 import { GUA_DATA } from '../../data/gua.js'
 import { themeClass, fontClass } from '../../utils/theme.js'

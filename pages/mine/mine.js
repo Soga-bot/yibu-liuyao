@@ -69,7 +69,7 @@ Page({
   // 设置：深色模式三态 / 阅读正文字号 / 背景音乐（独立设置页）
   goSettings() {
     wx.navigateTo({
-      url: '/pages/settings/settings',
+      url: '/packageBooks/settings/settings',
       fail: (err) => {
         console.error('[我的] 进设置失败', err)
         wx.showToast({ title: '进入失败', icon: 'none' })

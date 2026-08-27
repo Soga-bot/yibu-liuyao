@@ -7,7 +7,7 @@ import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, extname } from 'node:path'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
-import { synthesizeWenyi, pickYongshen, isSensitive } from './wenyi-mock.js'
+import { synthesizeWenyi, pickYongshen, isSensitive } from '../package3d/utils/wenyi-mock.js'
 import { WENYI_MODE, WENYI_CLOUD_ENV } from './wenyi-config.js'
 import { paipan, hexagramFromKey } from './liuyao.js'
 import { GUA_DATA, GUA_LIST } from '../data/gua.js'
@@ -128,7 +128,7 @@ console.log('—— 包全域七禁词扫描（模拟上传包内容）——')
 {
   // 扫描范围 = packOptions 后实际进包的代码区；排除 *.test.mjs（suffix ignore）
   // 与 cloudfunctions/（folder ignore，云端另测）
-  const DIRS = ['pages', 'package3d', 'utils', 'data', 'custom-tab-bar', 'models', 'libs']
+  const DIRS = ['pages', 'package3d', 'packageBooks', 'utils', 'data', 'custom-tab-bar', 'models', 'libs']
   const EXT = new Set(['.js', '.wxml', '.json', '.wxss'])
   const files = []
   const walk = (dir) => {

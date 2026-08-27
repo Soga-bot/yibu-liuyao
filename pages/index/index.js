@@ -42,13 +42,13 @@ Page({
   },
 
   onManual() {
-    wx.navigateTo({ url: '/pages/paipan/paipan' })
+    wx.navigateTo({ url: '/packageBooks/paipan/paipan' })
   },
 
   onWuxing() {
     // 典籍库入口已由底部 TabBar 承载（首页不再重复）；五行基础为独立学习页
     wx.navigateTo({
-      url: '/pages/wuxing/wuxing',
+      url: '/packageBooks/wuxing/wuxing',
       fail: (e) => {
         console.error('[首页] 进五行基础失败', e)
         wx.showToast({ title: '进入失败：' + (e.errMsg || '未知'), icon: 'none' })
@@ -59,7 +59,7 @@ Page({
   onBagua() {
     // 八卦基础：与五行基础并立的通识学习页
     wx.navigateTo({
-      url: '/pages/bagua/bagua',
+      url: '/packageBooks/bagua/bagua',
       fail: (e) => {
         console.error('[首页] 进八卦基础失败', e)
         wx.showToast({ title: '进入失败：' + (e.errMsg || '未知'), icon: 'none' })

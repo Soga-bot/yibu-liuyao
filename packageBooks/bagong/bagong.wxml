@@ -1,4 +1,4 @@
-<!-- pages/bagong/bagong.wxml — 卦象速查（京房八宫六十四卦） -->
+<!-- packageBooks/bagong/bagong.wxml — 卦象速查（京房八宫六十四卦） -->
 <view class="page {{themeCls}} {{fontCls}}">
   <view class="status-bar" style="height: {{statusBarHeight}}px;"></view>
   <view class="topbar">

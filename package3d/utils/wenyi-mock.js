@@ -1,4 +1,5 @@
-// utils/wenyi-mock.js — 问易·本地经文合成器（模拟态）
+// package3d/utils/wenyi-mock.js — 问易·本地经文合成器（模拟态）
+// 随问易页居分包；排盘引擎与卦库留主包（主包页面亦用，分包引主包属正当依赖）。
 //
 // 纯函数、零随机、零网络：输入卦参，用排盘引擎 + 64 卦经文库在端上合成
 // 一篇「本变合参」参考文（结构与红线同 docs/问易解读规格.md）。
@@ -9,8 +10,8 @@
 // 措辞红线：自撰文字只用「示／居／临／在／指向／传统读法认为」等分析性措辞，
 // 不下吉凶断语、不给趋避指令；引文内的吉凶字样属古籍原文，不在此限。
 
-import { paipan, ganZhiToIdx, hexagramFromKey, wuxingRelation, GONG_WUXING, ZHI_WUXING, DI_ZHI } from './liuyao.js'
-import { GUA_DATA } from '../data/gua.js'
+import { paipan, ganZhiToIdx, hexagramFromKey, wuxingRelation, GONG_WUXING, ZHI_WUXING, DI_ZHI } from '../../utils/liuyao.js'
+import { GUA_DATA } from '../../data/gua.js'
 
 const POS_CN = ['初', '二', '三', '四', '五', '上']
 const QIN_ORDER = ['父母', '兄弟', '子孙', '妻财', '官鬼']

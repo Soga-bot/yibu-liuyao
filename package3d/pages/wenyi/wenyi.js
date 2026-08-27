@@ -1,7 +1,7 @@
 // package3d/pages/wenyi/wenyi.js — 问易（AI 解卦壳页）
 // 「问易」：摇卦成卦后的解读入口。三态由 utils/wenyi-config.js 的 WENYI_MODE 决定：
 //   ''      未开通——引导先读本卦/变卦卦辞，不做死胡同；
-//   'mock'  本地合成——utils/wenyi-mock.js 用排盘+经文库在端上合成参考文（模拟态）；
+//   'mock'  本地合成——package3d/utils/wenyi-mock.js 用排盘+经文库在端上合成参考文（模拟态）；
 //   'cloud' 云函数——密钥只在云端环境变量，不下发小程序端（安全与审核双重要求）；
 //           云端失败自动降级本地合成。
 // 入参与 result 页同：yao/dong/gz/q。解读生成即落库，「我的」历史出现「问易」标记。
@@ -9,7 +9,7 @@ import { paipan, dateToGanZhi, TIAN_GAN, DI_ZHI } from '../../../utils/liuyao.js
 import { GUA_DATA } from '../../../data/gua.js'
 import { themeClass, fontClass } from '../../../utils/theme.js'
 import { WENYI_MODE } from '../../../utils/wenyi-config.js'
-import { synthesizeWenyi } from '../../../utils/wenyi-mock.js'
+import { synthesizeWenyi } from '../../utils/wenyi-mock.js'
 
 const JIAZI = []
 for (let n = 0; n < 60; n++) JIAZI.push(TIAN_GAN[n % 10] + DI_ZHI[n % 12])

@@ -1,4 +1,4 @@
-// pages/settings/settings.js — 设置：深色模式三态 / 阅读正文字号 / 背景音乐
+// packageBooks/settings/settings.js — 设置：深色模式三态 / 阅读正文字号 / 背景音乐
 // 深色三态与字号档位存 storage（utils/theme.js），本页切换即时生效做预览；
 // 各页面 onLoad/onShow 重读覆盖类。本页不定义转发（个人设置，无分享价值）。
 import {
