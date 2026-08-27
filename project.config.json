@@ -58,6 +58,10 @@
       {
         "value": ".test.mjs",
         "type": "suffix"
+      },
+      {
+        "value": "local",
+        "type": "folder"
       }
     ],
     "include": []

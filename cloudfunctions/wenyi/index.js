@@ -8,7 +8,7 @@
 //   → 输出内容安全检查（明确风险 fail-closed；接口不可用放行并记 log）
 // 成功返回 { text }；失败返回 { errCode, errMsg }（端上一律降级本地合成）。
 const cloud = require('wx-server-sdk')
-const https = require('https')
+const llm = require('./llm.js')
 const prompt = require('./prompt.js')
 const { ganZhiToIdx } = require('./liuyao.js')
 
@@ -18,49 +18,6 @@ function bad(errCode, errMsg) { return { errCode, errMsg } }
 
 function validGz(gz) {
   return typeof gz === 'string' && gz.length === 2 && ganZhiToIdx(gz[0], gz[1]) >= 0
-}
-
-// OpenAI 兼容 POST（Node 内置 https，零第三方依赖）
-function postJson(baseUrl, apiKey, body, timeoutMs) {
-  return new Promise((resolve, reject) => {
-    let u
-    try { u = new URL(baseUrl) } catch (e) { reject(new Error('WENYI_BASE_URL 无法解析')); return }
-    if (u.protocol !== 'https:' && u.protocol !== 'http:') { reject(new Error('WENYI_BASE_URL 协议不支持')); return }
-    const data = JSON.stringify(body)
-    const req = https.request({
-      hostname: u.hostname,
-      port: u.port || (u.protocol === 'http:' ? 80 : 443),
-      path: u.pathname + (u.search || ''),
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + apiKey,
-        'Content-Length': Buffer.byteLength(data)
-      },
-      timeout: timeoutMs
-    }, (res) => {
-      let buf = ''
-      res.setEncoding('utf8')
-      res.on('data', (c) => { buf += c })
-      res.on('end', () => {
-        if (res.statusCode < 200 || res.statusCode >= 300) {
-          reject(new Error('HTTP ' + res.statusCode + ' ' + buf.slice(0, 200)))
-          return
-        }
-        try { resolve(JSON.parse(buf)) } catch (e) { reject(new Error('响应非 JSON：' + buf.slice(0, 200))) }
-      })
-    })
-    req.on('timeout', () => { req.destroy(new Error('请求超时')) })
-    req.on('error', reject)
-    req.write(data)
-    req.end()
-  })
-}
-
-function pickText(d) {
-  const msg = d && d.choices && d.choices[0] && d.choices[0].message
-  if (msg && typeof msg.content === 'string' && msg.content.trim()) return msg.content.trim()
-  return ''
 }
 
 // 内容安全：true=通过 / false=明确风险 / null=接口不可用（处置由调用侧定）
@@ -109,17 +66,19 @@ exports.main = async (event) => {
     return bad('SEC_CHECK', '所问内容未通过安全检查')
   }
 
-  // 4) 调模型（供应商三要素全在环境变量）
-  const BASE = process.env.WENYI_BASE_URL
-  const KEY = process.env.WENYI_API_KEY
-  const MODEL = process.env.WENYI_MODEL
-  const TIMEOUT = Number(process.env.WENYI_TIMEOUT_MS) || 45000
-  if (!BASE || !KEY || !MODEL) {
+  // 4) 调模型（供应商三要素全在环境变量；thinkingOff 默认开，见 llm.js 头注）
+  const cfg = {
+    baseUrl: process.env.WENYI_BASE_URL,
+    apiKey: process.env.WENYI_API_KEY,
+    model: process.env.WENYI_MODEL,
+    timeoutMs: Number(process.env.WENYI_TIMEOUT_MS) || 45000
+  }
+  if (!cfg.baseUrl || !cfg.apiKey || !cfg.model) {
     return bad('CONF', '环境变量未配置：WENYI_BASE_URL / WENYI_API_KEY / WENYI_MODEL')
   }
-  const call = (msgs) => postJson(BASE, KEY, {
-    model: MODEL, messages: msgs, temperature: 0.7, max_tokens: 1200, stream: false
-  }, TIMEOUT).then(pickText)
+  // 实测 doubao-seed 系开思考单次 >60s，必超函数超时 → 默认关思考（WENYI_THINKING_OFF=0 显式放开）
+  const opts = { temperature: 0.7, maxTokens: 1200, thinkingOff: process.env.WENYI_THINKING_OFF !== '0' }
+  const call = (msgs) => llm.chat(cfg, msgs, opts).then(llm.pickText)
 
   let text = ''
   try {

@@ -11,4 +11,7 @@ project.private.config.json
 node_modules/
 tools/_chk/
 
+# 本地联调（tools/wenyi-local.mjs 的 key 与输出，绝不入库不进包）
+local/
+
 .claude/
