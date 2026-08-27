@@ -28,7 +28,7 @@ packageEngine/
 - **体积治理二期（2026-08-27）**：three 引擎 698K 拆出独立分包 `packageEngine` 后，
   package3d 源码 1.67M→约 1.05M（回到 1.5M 质量线内），引擎分包约 0.7M；两包各留约 1M 硬限余量。
   代价：引擎改异步加载（divination.js `init` 头部 `require.async`），首进弱网多一段下载，
-  wifi 场景由 preloadRule（首页/问事页预载 engine）掩盖；加载失败走页面既有 failed→redirectTo 重试通道。
+  wifi 场景由 preloadRule（首页/问事页预载 packageEngine 分包）掩盖；加载失败走页面既有 failed→redirectTo 重试通道。
 - 模型加载方式：`FileSystemManager.readFile`（按小程序根路径）→ `GLTFLoader.parse(ArrayBuffer)`。
 
 ## ★ 「摇卦 → 排盘」闭环（2026-08-24 已打通）
