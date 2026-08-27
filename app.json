@@ -24,9 +24,8 @@
     }
   ],
   "preloadRule": {
-    "pages/index/index": { "network": "wifi", "packages": ["packageBooks", "packageEngine"] },
-    "pages/dianji/dianji": { "network": "wifi", "packages": ["packageBooks"] },
-    "package3d/pages/ask/ask": { "network": "wifi", "packages": ["packageEngine"] }
+    "pages/index/index": { "network": "wifi", "packages": ["packageBooks"] },
+    "pages/dianji/dianji": { "network": "wifi", "packages": ["packageBooks"] }
   },
   "lazyCodeLoading": "requiredComponents",
   "window": {

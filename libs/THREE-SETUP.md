@@ -27,8 +27,9 @@ packageEngine/
   原始模型备份在 `tools/reference/models-orig/`。长期方案：升级 three 移植版后对两个模型做量化。
 - **体积治理二期（2026-08-27）**：three 引擎 698K 拆出独立分包 `packageEngine` 后，
   package3d 源码 1.67M→约 1.05M（回到 1.5M 质量线内），引擎分包约 0.7M；两包各留约 1M 硬限余量。
-  代价：引擎改异步加载（divination.js `init` 头部 `require.async`），首进弱网多一段下载，
-  wifi 场景由 preloadRule（首页/问事页预载 packageEngine 分包）掩盖；加载失败走页面既有 failed→redirectTo 重试通道。
+  代价：引擎改异步加载（divination.js `init` 头部 `require.async`），首进多一段 0.67M 下载（页面有装载文案）；
+  加载失败走页面既有 failed→redirectTo 重试通道。
+  （原配的 preloadRule 引擎预载因工具对空页面分包报「未找到」编译失败而撤除，详见 docs/备份日志 B 修订记录。）
 - 模型加载方式：`FileSystemManager.readFile`（按小程序根路径）→ `GLTFLoader.parse(ArrayBuffer)`。
 
 ## ★ 「摇卦 → 排盘」闭环（2026-08-24 已打通）

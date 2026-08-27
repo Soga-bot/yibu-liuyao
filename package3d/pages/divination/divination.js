@@ -8,7 +8,7 @@
 //
 // 依赖（three 引擎已拆独立分包 packageEngine/three/，本页 require.async 异步注入：
 // 体积治理——package3d 曾 1.67M 超 1.5M 单包质量线，引擎 698K 拆出后回落 ~1.0M；
-// 引擎分包由 preloadRule 在首页/问事页 wifi 预载，首进弱网才需现场下载）：
+// 引擎 0.67M 进本页时现下载——preloadRule 预载空页面分包会致工具编译失败，已撤，见备份日志 B）：
 //   three/index.js       → createScopedThreejs（webpack 预打包整包，自洽无外部依赖）
 //   three/gltf-loader.js → registerGLTFLoader（不反向依赖 index.js，可并行取）
 // ⚠️ 模型必须是非 Draco 压缩的 glb（本 threejs-miniprogram 不含 DRACOLoader）
@@ -159,7 +159,7 @@ Page({
 
   async init(canvas) {
     // ---- three 引擎异步注入（packageEngine 分包，跨分包 require.async）----
-    // 首进弱网会多等一段引擎下载（wifi 预载场景无感）；失败复用既有 failed 通道
+    // 首进会多等一段引擎下载（0.67M，页面有装载文案）；失败复用既有 failed 通道
     // （按钮变「重新加载」→ redirectTo 自身重建实例，require.async 随之重试）。
     this.setData({ status: '3D 引擎装载中…' })
     let engine, loaderMod
