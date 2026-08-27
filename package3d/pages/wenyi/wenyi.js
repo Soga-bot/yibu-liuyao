@@ -108,9 +108,9 @@ Page({
     if (this.data.mode !== '' && !ai) this.onAsk()
   },
 
-  // 摘要行：时间 + 来源（模拟态标「本地合成」，云端/历史留白）
+  // 摘要行：时间 + 来源标注（云端标「AI 生成」——AIGC 内容显式标识；模拟态标本地合成）
   metaOf(ai) {
-    return '问易解读 · ' + fmtTime(ai.at) + (ai.src === 'mock' ? ' · 本地合成（模拟）' : '')
+    return '问易解读 · ' + fmtTime(ai.at) + (ai.src === 'mock' ? ' · 本地合成（模拟）' : ' · AI 生成')
   },
 
   onAsk() {
@@ -138,7 +138,13 @@ Page({
       })
       .catch((err) => {
         console.error('[问易] 云端不可用，降级本地合成', err)
-        wx.showToast({ title: '云端暂不可用，改用本地参考', icon: 'none' })
+        // LIMIT=每日云端次数用完（云函数限额），与一般不可用分开告知
+        const overLimit = err && err.message === 'LIMIT'
+        wx.showToast({
+          title: overLimit ? '今日云端解读次数已用完，改用本地参考' : '云端暂不可用，改用本地参考',
+          icon: 'none',
+          duration: 2500
+        })
         this.askMock(true)
       })
   },

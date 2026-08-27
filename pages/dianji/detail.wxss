@@ -234,14 +234,10 @@
 .empty-tip { display: block; margin-top: 30rpx; font-size: 32rpx; color: var(--text-2); }
 .empty-sub { display: block; margin-top: 16rpx; font-size: 24rpx; }
 
-/* 分享卡隐藏画布：屏外定位（display:none 取不到 2d 节点，须真实布局） */
-.share-canvas {
-  position: fixed;
-  left: -9999rpx;
-  top: 0;
-  width: 600px;
-  height: 480px;
-}
+/* 分享卡画布：零尺寸容器裁剪（屏外 fixed 定位是同层渲染雷区，result 页教训）；
+   cardDone 后 wxml 直接拆节点，不常驻 */
+.share-holder { position: relative; width: 0; height: 0; overflow: hidden; }
+.share-canvas { position: absolute; left: 0; top: 0; width: 600px; height: 480px; }
 
 /* 校勘脚注（仅遁卦，遯/遁两存）：弱化小字，随 --fss */
 .jiaokan {

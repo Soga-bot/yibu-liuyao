@@ -72,7 +72,7 @@
       </block>
     </view>
 
-    <view class="foot-note">问易解读仅供传统文化学习参考 · 不构成任何决策依据</view>
+    <view class="foot-note">问易解读由 AI 生成，仅供传统文化学习参考 · 不构成任何决策依据</view>
     <view class="bottom-pad"></view>
   </scroll-view>
 </view>

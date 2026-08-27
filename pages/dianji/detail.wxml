@@ -129,6 +129,9 @@
     <text class="empty-sub">请从典籍库列表重新进入</text>
   </view>
 
-  <!-- 分享卡隐藏画布：屏外定位（display:none 取不到 2d 节点，须真实布局） -->
-  <canvas type="2d" id="shareCard" class="share-canvas"></canvas>
+  <!-- 分享卡画布：零尺寸裁剪容器收纳（屏外 fixed 定位是同层渲染雷区，result 页教训）；
+       导出完成 sharecard.js 置 cardDone 拆节点，常驻时间仅 onLoad 后绘制一瞬 -->
+  <view class="share-holder">
+    <canvas wx:if="{{!cardDone}}" type="2d" id="shareCard" class="share-canvas"></canvas>
+  </view>
 </view>

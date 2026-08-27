@@ -14,6 +14,7 @@ import { themeClass, fontClass } from '../../utils/theme.js'
 Page({
   data: {
     statusBarHeight: 20,
+    cardDone: false,  // 分享卡已导出（成败皆算）→ wxml 拆除画布节点（同层渲染雷区，不常驻）
     gua: null
   },
 

@@ -3,6 +3,7 @@
 // 流程：参数校验 → 服务端按 yao/dong/gz 复核排盘（不信端上富数据，防注入）
 //   → 组装提示词（prompt.js，经文逐字注入【经文原文】块）
 //   → 输入内容安全检查（fail-open：不可用仅记 log）
+//   → 每用户每日限额（quota.js：openid 计数，超限返回 LIMIT）
 //   → 调 OpenAI 兼容 /chat/completions（环境变量配供应商，key 不进代码）
 //   → 输出红线扫描（命中七禁词则纠偏重试一次）
 //   → 输出内容安全检查（明确风险 fail-closed；接口不可用放行并记 log）
@@ -10,6 +11,7 @@
 const cloud = require('wx-server-sdk')
 const llm = require('./llm.js')
 const prompt = require('./prompt.js')
+const quota = require('./quota.js')
 const { ganZhiToIdx } = require('./liuyao.js')
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
@@ -64,6 +66,12 @@ exports.main = async (event) => {
   const wxContext = cloud.getWXContext()
   if (await secCheck(qq, wxContext, 'input') === false) {
     return bad('SEC_CHECK', '所问内容未通过安全检查')
+  }
+
+  // 3.5) 每用户每日限额（openid 维度，quota.js 计数于云数据库；
+  //      WENYI_DAILY_LIMIT 缺省 10、显式 0 关闭；设施故障 fail-open 放行）
+  if (!await quota.take(wxContext.OPENID)) {
+    return bad('LIMIT', '今日云端解读次数已用完（每日 ' + quota.dailyLimit() + ' 次）')
   }
 
   // 4) 调模型（供应商三要素全在环境变量；thinkingOff 默认开，见 llm.js 头注）
