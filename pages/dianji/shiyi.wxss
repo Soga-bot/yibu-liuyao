@@ -61,10 +61,11 @@
   line-height: 1.9;
   letter-spacing: 2rpx;
 }
-/* 逐句对照（v0.3.20）：原句楷体同 .daxiang 基准，译句小一号弱一档（非楷体，
-   与卦详情页 .baihua 同层级思路），句对之间留呼吸感 */
+/* 逐句对照（v0.3.20）：原句楷体同 .daxiang 基准为「主」；译句为「注」——
+   小一号、弱一档、整块缩进挂在原句之下（与卦详情页 .baihua 同层级），
+   句对之间留呼吸感分组 */
 .duiju {
-  margin-bottom: 20rpx;
+  margin-bottom: 24rpx;
 }
 .dj-y {
   font-size: calc(28rpx * var(--fss, 1));
@@ -73,10 +74,11 @@
   letter-spacing: 2rpx;
 }
 .dj-b {
-  margin-top: 4rpx;
-  font-size: calc(25rpx * var(--fss, 1));
+  margin-top: 6rpx;
+  padding-left: 14rpx;
+  font-size: calc(24rpx * var(--fss, 1));
   color: var(--text-3);
-  line-height: 1.75;
+  line-height: 1.7;
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
 }
 /* 章旨提要（非楷体，与原文楷体区分；仅供阅读辅助） */
