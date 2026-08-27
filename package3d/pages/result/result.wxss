@@ -215,15 +215,14 @@
   margin: 10rpx 0 8rpx;
 }
 
-/* 白话译句（非楷体，与原文楷体区分）：次级层级——小一号、弱一档、
-   缩进一级（原文为主、白话为注，与卦详情页 .baihua 同层级） */
+/* 白话译句（非楷体，与原文楷体区分）：次级层级——小一号、弱一档，
+   「白话：」标签在 wxml 文本内，不缩进（原文为主、白话为注） */
 .gua-baihua {
-  padding-left: 14rpx;
   font-size: calc(23rpx * var(--fss, 1));
   color: var(--text-3);
 }
 
-/* 爻行展开区内的小象/白话（小象为传文原文随 --fss；白话再小一号并缩进） */
+/* 爻行展开区内的小象/白话（小象为传文原文随 --fss；白话再小一号） */
 .ci-sub {
   margin-top: 8rpx;
   font-size: calc(24rpx * var(--fss, 1));
@@ -231,7 +230,6 @@
   letter-spacing: 1rpx;
 }
 .ci-baihua {
-  padding-left: 14rpx;
   font-size: calc(23rpx * var(--fss, 1));
   color: var(--text-3);
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;

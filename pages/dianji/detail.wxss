@@ -138,18 +138,17 @@
   letter-spacing: 2rpx;
 }
 
-/* 白话译句（非楷体，与原文楷体区分）：次级层级——小一号、弱一档色、
-   整块缩进一级挂在所译原文之下（原文为主、白话为注） */
+/* 白话译句（非楷体，与原文楷体区分）：次级层级——小一号、弱一档色，
+   「白话：」标签在 wxml 文本内标明身份，不缩进（原文为主、白话为注） */
 .baihua {
   margin-top: 10rpx;
-  padding-left: 14rpx;
   font-size: calc(24rpx * var(--fss, 1));
   color: var(--text-3);
   line-height: 1.65;
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
 }
 
-/* 爻辞下方的小象/白话（小象为传文原文随 --fss；白话再小一号并缩进） */
+/* 爻辞下方的小象/白话（小象为传文原文随 --fss；白话再小一号） */
 .y-sub {
   margin-top: 6rpx;
   font-size: calc(24rpx * var(--fss, 1));
@@ -157,7 +156,6 @@
   letter-spacing: 1rpx;
 }
 .y-baihua {
-  padding-left: 14rpx;
   font-size: calc(23rpx * var(--fss, 1));
   color: var(--text-3);
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
