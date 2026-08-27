@@ -128,7 +128,7 @@ console.log('—— 包全域七禁词扫描（模拟上传包内容）——')
 {
   // 扫描范围 = packOptions 后实际进包的代码区；排除 *.test.mjs（suffix ignore）
   // 与 cloudfunctions/（folder ignore，云端另测）
-  const DIRS = ['pages', 'package3d', 'packageBooks', 'utils', 'data', 'custom-tab-bar', 'models', 'libs']
+  const DIRS = ['pages', 'package3d', 'packageBooks', 'packageEngine', 'utils', 'data', 'custom-tab-bar', 'models', 'libs']
   const EXT = new Set(['.js', '.wxml', '.json', '.wxss'])
   const files = []
   const walk = (dir) => {

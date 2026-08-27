@@ -16,11 +16,17 @@
       "root": "packageBooks",
       "name": "books",
       "pages": ["wuxing/wuxing", "bagua/bagua", "bagong/bagong", "paipan/paipan", "dianji/shiyi", "settings/settings"]
+    },
+    {
+      "root": "packageEngine",
+      "name": "engine",
+      "pages": []
     }
   ],
   "preloadRule": {
-    "pages/index/index": { "network": "wifi", "packages": ["packageBooks"] },
-    "pages/dianji/dianji": { "network": "wifi", "packages": ["packageBooks"] }
+    "pages/index/index": { "network": "wifi", "packages": ["packageBooks", "engine"] },
+    "pages/dianji/dianji": { "network": "wifi", "packages": ["packageBooks"] },
+    "package3d/pages/ask/ask": { "network": "wifi", "packages": ["engine"] }
   },
   "lazyCodeLoading": "requiredComponents",
   "window": {

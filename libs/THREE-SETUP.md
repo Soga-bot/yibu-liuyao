@@ -1,27 +1,34 @@
 # 3D 起卦页 —— 结构与状态
 
-3D 功能全部在**分包 `package3d`**（重型功能懒加载，不占主包 2MB 额度）。
+3D 功能分布在两个**分包**：`package3d`（页面/模型/音效）+ `packageEngine`（three 引擎，2026-08-27 体积治理拆出，
+divination 页经 `require.async` 跨分包异步注入，官方「分包异步化」特性，基础库 ≥2.17.3）。
 
 ```text
 package3d/
-├── libs/three/
-│   ├── index.js         ← three.js 引擎（createScopedThreejs，webpack 预打包，自洽）
-│   └── gltf-loader.js   ← registerGLTFLoader（ESM export，靠 es6:true 转译）
 ├── models/
-│   ├── shell.glb        ← 龟壳（非 Draco，已验证）
-│   └── coin.glb         ← 铜钱（非 Draco，已验证）
+│   └── shell.glb        ← 龟壳（非 Draco，已验证；coin.glb 在主包 models/，体积平衡）
+├── audio/               ← 摇卦音效
 └── pages/divination/    ← 3D 起卦页
+
+packageEngine/
+└── three/
+    ├── index.js         ← three.js 引擎（createScopedThreejs，webpack 预打包，自洽）
+    └── gltf-loader.js   ← registerGLTFLoader（ESM export，靠 es6:true 转译）
 ```
 
 ## 关键事实
 
-- **引擎已就位**：`libs/three/index.js` 是 threejs-miniprogram 预打包整包，`abab` 等依赖已内联，无外部 require。
+- **引擎已就位**：`packageEngine/three/index.js` 是 threejs-miniprogram 预打包整包，`abab` 等依赖已内联，无外部 require。
 - **该库不含 DRACOLoader**，模型必须是普通（非 Draco）glb。
   当前两个模型已实测 `KHR_draco_mesh_compression` 计数为 0（非压缩），加载正常。
 - **体积（2026-08-24 调整）**：引擎 r108 不支持 `KHR_mesh_quantization`，模型无法量化压缩（实测贴图本就很小——
   shell 内嵌 webp 共 56KB、coin 一张 PNG 11KB，体积大头是 float32 顶点属性；weld/prune/simplify 均无收益）。
   解法：**coin.glb 移到主包 `models/`，shell.glb 留分包**——主包 ~841KB ✓、package3d ~1585KB ✓，均低于 2MB 限额。
   原始模型备份在 `tools/reference/models-orig/`。长期方案：升级 three 移植版后对两个模型做量化。
+- **体积治理二期（2026-08-27）**：three 引擎 698K 拆出独立分包 `packageEngine` 后，
+  package3d 源码 1.67M→约 1.05M（回到 1.5M 质量线内），引擎分包约 0.7M；两包各留约 1M 硬限余量。
+  代价：引擎改异步加载（divination.js `init` 头部 `require.async`），首进弱网多一段下载，
+  wifi 场景由 preloadRule（首页/问事页预载 engine）掩盖；加载失败走页面既有 failed→redirectTo 重试通道。
 - 模型加载方式：`FileSystemManager.readFile`（按小程序根路径）→ `GLTFLoader.parse(ArrayBuffer)`。
 
 ## ★ 「摇卦 → 排盘」闭环（2026-08-24 已打通）

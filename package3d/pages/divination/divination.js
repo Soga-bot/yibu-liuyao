@@ -6,12 +6,12 @@
 // 浮层（同层渲染偶发失效），弹卡与画布同页无解，拆独立页彻底避开。
 // 真机增强：摇一摇手机=摇卦（加速度计）＋震动反馈；支持横竖屏（pageOrientation: auto）。
 //
-// 依赖（已放进分包 package3d/libs/three/）：
-//   index.js        → createScopedThreejs（webpack 预打包整包，自洽无外部依赖）
-//   gltf-loader.js  → registerGLTFLoader
+// 依赖（three 引擎已拆独立分包 packageEngine/three/，本页 require.async 异步注入：
+// 体积治理——package3d 曾 1.67M 超 1.5M 单包质量线，引擎 698K 拆出后回落 ~1.0M；
+// 引擎分包由 preloadRule 在首页/问事页 wifi 预载，首进弱网才需现场下载）：
+//   three/index.js       → createScopedThreejs（webpack 预打包整包，自洽无外部依赖）
+//   three/gltf-loader.js → registerGLTFLoader（不反向依赖 index.js，可并行取）
 // ⚠️ 模型必须是非 Draco 压缩的 glb（本 threejs-miniprogram 不含 DRACOLoader）
-import { createScopedThreejs } from '../../libs/three/index.js'
-import { registerGLTFLoader } from '../../libs/three/gltf-loader.js'
 import { GUA_DATA } from '../../../data/gua.js'   // 卦成时报卦名（主包数据，分包可引）
 
 // ====== 模型来源 ======
@@ -158,8 +158,24 @@ Page({
   },
 
   async init(canvas) {
-    THREE = createScopedThreejs(canvas)
-    registerGLTFLoader(THREE)
+    // ---- three 引擎异步注入（packageEngine 分包，跨分包 require.async）----
+    // 首进弱网会多等一段引擎下载（wifi 预载场景无感）；失败复用既有 failed 通道
+    // （按钮变「重新加载」→ redirectTo 自身重建实例，require.async 随之重试）。
+    this.setData({ status: '3D 引擎装载中…' })
+    let engine, loaderMod
+    try {
+      [engine, loaderMod] = await Promise.all([
+        require.async('../../../packageEngine/three/index.js'),
+        require.async('../../../packageEngine/three/gltf-loader.js')
+      ])
+    } catch (e) {
+      console.error('[3D] 引擎分包加载失败', e)
+      this.setData({ failed: true, btnLabel: '重新加载', status: '3D 引擎加载失败（多为网络），点下方按钮重试' })
+      return
+    }
+    THREE = engine.createScopedThreejs(canvas)
+    loaderMod.registerGLTFLoader(THREE)
+    this.setData({ status: '加载模型中…' })   // 引擎到位，转回模型装载文案
 
     // ---- 渲染器（用真实窗口尺寸，避免画布宽高比错乱导致拉伸变形）----
     const info = wx.getWindowInfo()

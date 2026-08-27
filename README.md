@@ -16,9 +16,10 @@
 │   ├── dianji/ detail             典籍库 tab：64卦浏览 / 卦详情（全站卦库数据锚点）
 │   └── mine/                      我的（历史/版本/音乐）
 ├── package3d/                     分包：3D 起卦链路 ★ 主打
-│   ├── libs/three/ models/        threejs-miniprogram + glb 模型（非 Draco）
+│   ├── models/ audio/             shell.glb 龟壳模型（非 Draco）+ 摇卦音效
 │   ├── utils/wenyi-mock.js        本地经文合成器（模拟态：零随机零联网）
 │   └── pages/ ask→divination→result→wenyi   问事 → 摇卦 → 卦成 → 问易解读
+├── packageEngine/                 分包：three 引擎（divination 页 require.async 异步注入）
 ├── packageBooks/                  分包：通识与工具页（首页/典籍库 tab 预载）
 │   ├── wuxing/ bagua/ bagong/     知识页：五行 / 八卦 / 八宫六十四卦表
 │   ├── paipan/                    手动排盘：6爻+日干支 → 完整盘
