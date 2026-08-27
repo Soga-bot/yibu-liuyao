@@ -30,6 +30,7 @@
   },
   "appid": "wx7987b9ad6da9d286",
   "projectname": "yibu-liuyao",
+  "cloudfunctionRoot": "cloudfunctions/",
   "libVersion": "3.15.2",
   "simulatorPluginLibVersion": {},
   "packOptions": {
@@ -49,6 +50,14 @@
       {
         "value": ".mypy_cache",
         "type": "folder"
+      },
+      {
+        "value": "cloudfunctions",
+        "type": "folder"
+      },
+      {
+        "value": ".test.mjs",
+        "type": "suffix"
       }
     ],
     "include": []

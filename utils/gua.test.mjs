@@ -121,7 +121,7 @@ console.log('—— 文言/序/杂节选白话映射（详情页）——')
 
 console.log('—— 审核禁词全库扫描 ——')
 {
-  const BAN = /算命|预测|占算|运势|改运/
+  const BAN = /算命|预测|占算|运势|改运|消灾|法事/
   const leaves = o => Object.values(o).flatMap(v => typeof v === 'string' ? [v] : (v && typeof v === 'object' ? leaves(v) : []))
   const texts = [
     ...GUA_LIST.flatMap(leaves),

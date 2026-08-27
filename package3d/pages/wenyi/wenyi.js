@@ -1,26 +1,15 @@
 // package3d/pages/wenyi/wenyi.js — 问易（AI 解卦壳页）
-// 「问易」：摇卦成卦后的 AI 解读入口。AI 接口必须走自有服务器中转，
-// 密钥不下发小程序端（安全与审核双重要求）；AI_API 为空即「未开通」态，
-// 页面引导先读本卦/变卦卦辞，不做死胡同。入参与 result 页同：yao/dong/gz/q。
+// 「问易」：摇卦成卦后的解读入口。三态由 utils/wenyi-config.js 的 WENYI_MODE 决定：
+//   ''      未开通——引导先读本卦/变卦卦辞，不做死胡同；
+//   'mock'  本地合成——utils/wenyi-mock.js 用排盘+经文库在端上合成参考文（模拟态）；
+//   'cloud' 云函数——密钥只在云端环境变量，不下发小程序端（安全与审核双重要求）；
+//           云端失败自动降级本地合成。
+// 入参与 result 页同：yao/dong/gz/q。解读生成即落库，「我的」历史出现「问易」标记。
 import { paipan, dateToGanZhi, TIAN_GAN, DI_ZHI } from '../../../utils/liuyao.js'
 import { GUA_DATA } from '../../../data/gua.js'
 import { themeClass, fontClass } from '../../../utils/theme.js'
-
-// 服务器中转地址：接入时只改此处（POST { yao, dong, gz, q, name, bian, bianName }，
-// 返回 { text }；解读须按「本变合参」规格生成，见 docs/问易解读规格.md）
-const AI_API = ''
-
-// 后续接入的请求骨架：现在留着不调用，接后端时补渲染逻辑即可
-function askAI(payload) {
-  return new Promise((resolve, reject) => {
-    if (!AI_API) { reject(new Error('问易服务未配置')); return }
-    wx.request({
-      url: AI_API, method: 'POST', data: payload,
-      success: (res) => resolve(res.data),
-      fail: reject
-    })
-  })
-}
+import { WENYI_MODE } from '../../../utils/wenyi-config.js'
+import { synthesizeWenyi } from '../../../utils/wenyi-mock.js'
 
 const JIAZI = []
 for (let n = 0; n < 60; n++) JIAZI.push(TIAN_GAN[n % 10] + DI_ZHI[n % 12])
@@ -50,8 +39,8 @@ Page({
   data: {
     statusBarHeight: 20,
     ready: false,      // 是否取得有效卦参
-    open: false,       // 问易服务是否已开通（AI_API 已配置）
-    loading: false,    // 解读生成中（服务开通后用）
+    mode: WENYI_MODE,  // ''|'mock'|'cloud'（utils/wenyi-config.js）
+    loading: false,    // 解读生成中
     qiu: '',
     gz: '',
     name: '',
@@ -59,7 +48,7 @@ Page({
     bianName: '',
     bianKey: '',
     aiText: '',        // 已存的问易解读（本页生成或历史回看）
-    aiAtStr: '',
+    aiMeta: '',        // 摘要行：时间 + 来源标注
     ring: BAGUA_RING   // 等待动画的八卦环
   },
 
@@ -67,8 +56,7 @@ Page({
     this.setData({ themeCls: themeClass(), fontCls: fontClass() })
     const app = getApp()
     this.setData({
-      statusBarHeight: (app && app.globalData.statusBarHeight) || 20,
-      open: !!AI_API
+      statusBarHeight: (app && app.globalData.statusBarHeight) || 20
     })
     // 问易入口带全参；「我的」历史回看只带 id——从记录里取参（含已存解读）
     let yaoStr = options && options.yao && /^[01]{6}$/.test(options.yao) ? options.yao : ''
@@ -113,35 +101,73 @@ Page({
       ready: true,
       qiu, gz: jz, name: r.name, key: yaoStr, bianName, bianKey,
       aiText: ai ? ai.text : '',
-      aiAtStr: ai ? fmtTime(ai.at) : ''
+      aiMeta: ai ? this.metaOf(ai) : ''
     })
     this._args = { yao: yaoStr, dong: dongStr, gz: jz, q: qiu }
   },
 
-  // 未开通态的引导：先读原文（本卦/变卦），典籍详情里有卦辞白话与取象
-  // 服务开通后的取读入口（AI_API 配置后 wxml 切换出按钮）
+  // 摘要行：时间 + 来源（模拟态标「本地合成」，云端/历史留白）
+  metaOf(ai) {
+    return '问易解读 · ' + fmtTime(ai.at) + (ai.src === 'mock' ? ' · 本地合成（模拟）' : '')
+  },
+
   onAsk() {
-    if (!AI_API || !this._args) return
+    if (!this._args || this.data.loading) return
+    if (this.data.mode === 'cloud') this.askCloud()
+    else if (this.data.mode === 'mock') this.askMock()
+  },
+
+  // 云函数：密钥只在云端环境变量；errCode/缺 text 一律降级本地合成
+  askCloud() {
     this.setData({ loading: true })
-    // 本变合参：payload 带卦名与变卦（无动爻时 bian/bianName 为空串，后端只解本卦）
-    askAI({
-      yao: this._args.yao, dong: this._args.dong, gz: this._args.gz, q: this._args.q,
-      name: this.data.name,
-      bian: this.data.bianKey, bianName: this.data.bianName
+    wx.cloud.callFunction({
+      name: 'wenyi',
+      data: {
+        yao: this._args.yao, dong: this._args.dong, gz: this._args.gz, q: this._args.q,
+        name: this.data.name,
+        bian: this.data.bianKey, bianName: this.data.bianName
+      }
     })
-      .then((d) => {
+      .then((res) => {
+        const d = res && res.result
         const text = d && d.text ? String(d.text) : ''
-        this.setData({ aiText: text, aiAtStr: fmtTime(Date.now()), loading: false })
-        this.saveAiText(text)   // 解读即时落库，「我的」历史出现「问易」标记
+        if (!text) throw new Error((d && d.errCode) || 'NO_TEXT')
+        this.done(text, 'cloud')
       })
-      .catch(() => {
-        this.setData({ loading: false })
-        wx.showToast({ title: '问易服务暂不可用', icon: 'none' })
+      .catch((err) => {
+        console.error('[问易] 云端不可用，降级本地合成', err)
+        wx.showToast({ title: '云端暂不可用，改用本地参考', icon: 'none' })
+        this.askMock(true)
       })
   },
 
+  // 本地合成：排盘+经文库规则合成，稍候片刻让等待动画走一圈
+  askMock(quick) {
+    this.setData({ loading: true })
+    setTimeout(() => {
+      let text = ''
+      try {
+        text = synthesizeWenyi(this._args)
+      } catch (e) {
+        console.error('[问易] 本地合成失败', e)
+      }
+      if (!text) {
+        this.setData({ loading: false })
+        wx.showToast({ title: '生成失败，请重试', icon: 'none' })
+        return
+      }
+      this.done(text, 'mock')
+    }, quick ? 400 : 900)
+  },
+
+  done(text, src) {
+    const at = Date.now()
+    this.setData({ aiText: text, aiMeta: this.metaOf({ at, src }), loading: false })
+    this.saveAiText(text, at, src)   // 解读即时落库，「我的」历史出现「问易」标记
+  },
+
   // AI 解读落库：写回对应历史条目（先按 id，老数据无 id 时按卦参兜底匹配）
-  saveAiText(text) {
+  saveAiText(text, at, src) {
     if (!text) return
     const list = wx.getStorageSync(HISTORY_KEY) || []
     const a = this._args || {}
@@ -149,7 +175,7 @@ Page({
       (this._id && x.id === this._id) ||
       (x.yao === a.yao && x.dong === a.dong && x.gz === a.gz && (x.qiu || '') === (a.q || '')))
     if (!e) return
-    e.ai = { text, at: Date.now() }
+    e.ai = { text, at, src }
     wx.setStorageSync(HISTORY_KEY, list)
   },
 
