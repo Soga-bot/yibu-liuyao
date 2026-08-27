@@ -92,6 +92,13 @@
   line-height: 1.7;
   text-align: center;
 }
+.done-tip {
+  margin-top: 10rpx;
+  font-size: 23rpx;
+  color: var(--text-weak);
+  line-height: 1.8;
+  text-align: center;
+}
 
 /* ---------- 解读生成中：八卦盘等待动画 ----------
    外环先天序卦画径向排布，依次点亮熄灭追逐一圈；整盘缓慢自转；

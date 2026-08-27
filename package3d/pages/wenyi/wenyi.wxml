@@ -61,8 +61,12 @@
           <view class="ask-txt">解读生成中…</view>
         </view>
         <block wx:else>
-          <button class="lead-btn" hover-class="lead-hover" bindtap="onAsk">{{aiText ? '再问一次' : '开始问易'}}{{mode === 'mock' ? ' · 模拟' : ''}}</button>
-          <view wx:if="{{mode === 'mock'}}" class="mock-tip">模拟态：解读由本机排盘与《周易》经文库按固定规则合成，正式版将接入云端模型。</view>
+          <!-- 未生成：取读入口；已生成：本轮终局，不再提供重问（一事一占） -->
+          <block wx:if="{{!aiText}}">
+            <button class="lead-btn" hover-class="lead-hover" bindtap="onAsk">开始问易{{mode === 'mock' ? ' · 模拟' : ''}}</button>
+            <view wx:if="{{mode === 'mock'}}" class="mock-tip">模拟态：解读由本机排盘与《周易》经文库按固定规则合成，正式版将接入云端模型。</view>
+          </block>
+          <view wx:else class="done-tip">此卦已解，本轮问易完成。蒙卦辞云「初筮告，再三渎」，一事一占，如需再问请另起一卦。</view>
         </block>
       </block>
     </view>
