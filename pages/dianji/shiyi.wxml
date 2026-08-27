@@ -12,10 +12,17 @@
       <view class="sec" wx:for="{{book.chapters}}" wx:for-item="c" wx:key="h">
         <view class="sec-title font-kai">第{{c.h}}章</view>
         <view wx:if="{{c.zz}}" class="zhangzhi">章旨：{{c.zz}}</view>
-        <view class="daxiang font-kai">{{c.t}}</view>
+        <!-- 逐句对照：有白话数据的章按「原句（楷体）/译句」对渲染；无则整段原文兜底 -->
+        <block wx:if="{{c.pairs.length > 0}}">
+          <view class="duiju" wx:for="{{c.pairs}}" wx:for-item="p" wx:key="index">
+            <view class="dj-y font-kai">{{p.y}}</view>
+            <view class="dj-b">{{p.b}}</view>
+          </view>
+        </block>
+        <view wx:else class="daxiang font-kai">{{c.t}}</view>
       </view>
     </block>
 
-    <view class="src-note">原文出自《周易》十翼 · 生僻字随文括注拼音 · 已依通行本核校 · 章旨为内容提要仅供阅读参考</view>
+    <view class="src-note">原文出自《周易》十翼 · 生僻字随文括注拼音 · 已依通行本核校 · 白话为今译参考（依通行译注传统直译，原文为准） · 章旨为内容提要</view>
   </view>
 </view>
