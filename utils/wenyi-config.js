@@ -13,7 +13,7 @@
 //   2. 上传部署 cloudfunctions/wenyi，控制台配环境变量
 //      WENYI_BASE_URL / WENYI_API_KEY / WENYI_MODEL / WENYI_TIMEOUT_MS
 //      （供应商已定豆包·火山方舟，base_url 与 Model ID 见上述文档）。
-export const WENYI_MODE = 'mock'
+export const WENYI_MODE = 'cloud'
 
 // 云开发环境 ID（WENYI_MODE='cloud' 时必填；app.js 由此决定是否 wx.cloud.init）
-export const WENYI_CLOUD_ENV = ''
+export const WENYI_CLOUD_ENV = 'cloud1-d6gvakuwi74623d41'

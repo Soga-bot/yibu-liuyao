@@ -24,8 +24,9 @@ const require = createRequire(import.meta.url)
 const BAN = /算命|预测|占算|运势|改运|消灾|法事/
 
 console.log('—— 模式开关 ——')
-assert(WENYI_MODE === 'mock', 'WENYI_MODE 应为 mock（v0.3.24 默认），得 ' + JSON.stringify(WENYI_MODE))
-assert(WENYI_MODE !== 'cloud' || !!WENYI_CLOUD_ENV, 'cloud 态必须配 WENYI_CLOUD_ENV')
+// 模式守门：v0.3.25 起默认 cloud（豆包经云函数中转）；mock 仅本地联调时临时切回
+assert(WENYI_MODE === 'cloud', 'WENYI_MODE 应为 cloud（v0.3.25 起），得 ' + JSON.stringify(WENYI_MODE))
+assert(!!WENYI_CLOUD_ENV, 'cloud 态必须配 WENYI_CLOUD_ENV')
 
 console.log('—— 用神速选 / 敏感所问 ——')
 assert(pickYongshen('问文书合同')?.qin === '父母', '文书合同 → 父母')
