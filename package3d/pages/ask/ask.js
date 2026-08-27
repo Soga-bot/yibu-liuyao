@@ -6,7 +6,7 @@ import { themeClass, fontClass } from '../../../utils/theme.js'
 const HISTORY_KEY = 'ly_history' // 与 result/paipan/mine 同库
 
 Page({
-  data: { qiu: '', statusBarHeight: 20 },
+  data: { qiu: '', qiuFocus: false, statusBarHeight: 20 },
 
   onLoad(options) {
     this.setData({ statusBarHeight: getApp().globalData.statusBarHeight || 20, themeCls: themeClass(), fontCls: fontClass() })
@@ -58,7 +58,15 @@ Page({
   onQiuConfirm() {
     if (!this.gateOk()) return
     const q = (this.data.qiu || '').trim()
-    console.log('[问事签] 确认', q || '(未填)')
+    // 走「凝神起卦」却未署所问：提醒并聚焦输入框；确无所问请走下方「直接起卦」
+    if (!q) {
+      console.log('[问事签] 未填所问，提醒')
+      wx.showToast({ title: '请写下所问，或点「直接起卦」', icon: 'none', duration: 2000 })
+      // focus 属性变化才触发，先复位再置位，重复点也能再次唤起键盘
+      this.setData({ qiuFocus: false }, () => this.setData({ qiuFocus: true }))
+      return
+    }
+    console.log('[问事签] 确认', q)
     if (this.askedToday(q)) {
       wx.showModal({
         title: '一事一占',
