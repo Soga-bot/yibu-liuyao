@@ -1,5 +1,5 @@
 // tools/convert-baihua-shiyi.mjs — 十翼白话（系辞上/下传 + 说卦传 + 文言/序/杂）校验与生成
-// 输入：docs/已校对-十翼白话.txt（外审闭环归档）+ docs/待校对-文言序杂白话.txt（外审中）
+// 输入：docs/已校对-十翼白话.txt + docs/已校对-文言序杂白话.txt（均外审闭环归档，2026-08-27）
 // 输出：data/baihua-shiyi.js（供 pages/dianji/shiyi 逐句对照渲染）
 // 硬校验（不过不出文件）：
 //   1) 每章所有「原｜」句拼接（剔除空白与全角空格）须与 data/shiyi.js 对应章文
@@ -11,7 +11,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { SHUOGUA, getXici, WENYAN_QIAN, WENYAN_KUN, XUGUA_CH, ZAGUA_CH } from '../data/shiyi.js'
 
-const SRC = ['docs/已校对-十翼白话.txt', 'docs/待校对-文言序杂白话.txt']
+const SRC = ['docs/已校对-十翼白话.txt', 'docs/已校对-文言序杂白话.txt']
 const OUT = 'data/baihua-shiyi.js'
 const HEAD = /^【(系辞上传|系辞下传|说卦传|文言传·乾|文言传·坤|序卦传|杂卦传)｜([一二三四五六七八九十上中下全]+)】$/
 const BAN = /算命|预测|占算|运势|改运/ // 审核红线词（古籍语境允许「占筮/占问」）
@@ -101,7 +101,7 @@ for (const bk of order) {
   }
 }
 const out = `// data/baihua-shiyi.js — 十翼通读白话（系辞上下/说卦/文言乾坤/序卦/杂卦逐句对照）
-// 由 docs/已校对-十翼白话.txt 与 docs/待校对-文言序杂白话.txt 生成，tools/convert-baihua-shiyi.mjs
+// 由 docs/已校对-十翼白话.txt 与 docs/已校对-文言序杂白话.txt 生成，tools/convert-baihua-shiyi.mjs
 // （生成时已机器校验：每章原句拼接与 data/shiyi.js 章文全等，不脱不漏）
 // 定位：帮助阅读的白话参考译文（依通行译注传统直译，非学术定本，原文为准）
 // 末尾 getWenyanBh/getXuguaBh/getZaguaBh 为卦详情页节选白话映射（改须改转换器模板，勿直改本文件）

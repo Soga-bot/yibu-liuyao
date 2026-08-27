@@ -1,12 +1,12 @@
-// tools/qa-baihua-shiyi.mjs — 文言/序/杂白话素材外审前机器复核
-// 定位：docs/待校对-文言序杂白话.txt 终审（人工）前的辅助扫描——
+// tools/qa-baihua-shiyi.mjs — 文言/序/杂白话素材机器复核（外审前辅助 + 归档后回归）
+// 定位：对 docs/已校对-文言序杂白话.txt（2026-08-27 终审闭环归档）的扫描——
 //   硬闸（失败退出）：章头集合齐全无重、原/译交替成对、译句非空、审核红线词；
 //   软报告（不判死，供外审聚焦）：繁体字标注（允许出现，仅提示）、术语译例偏离、译文/原文长度比异常。
 // 注：原文与 data/shiyi.js 的字级全等由 tools/convert-baihua-shiyi.mjs 生成时硬校验，此处不重复。
 // 用法：node tools/qa-baihua-shiyi.mjs
 import { readFileSync } from 'node:fs'
 
-const SRC = 'docs/待校对-文言序杂白话.txt'
+const SRC = 'docs/已校对-文言序杂白话.txt'
 const HEAD = /^【(文言传·乾|文言传·坤|序卦传|杂卦传)｜([一二三四五六七八九十上中下全]+)】$/
 const BAN = /算命|预测|占算|运势|改运/ // 审核红线词（古籍语境允许「占筮/占问」）
 // 简体文本不应出现的常见繁体形（「遯」为校勘约定保留字，原/译两层皆合法，不在扫描列）
@@ -60,7 +60,7 @@ for (const ch of chapters) {
     if (t) focus.push('繁体「' + t[0] + '」（允许，仅标注）：' + p.y.slice(0, 24))
     if (/贞/.test(p.y) && !/守正|正固|固守|贞|征/.test(p.b)) focus.push('术语「贞」未见对应译语：' + p.y.slice(0, 24))
     const r = p.b.length / Math.max(1, p.y.replace(/[，。、；：？！「」]/g, '').length)
-    if (r > 3 || r < 0.5) focus.push('译/原长度比 ' + r.toFixed(1) + ' 异常：' + p.y.slice(0, 24))
+    if (!/一说|或说/.test(p.b) && (r > 3 || r < 0.5)) focus.push('译/原长度比 ' + r.toFixed(1) + ' 异常：' + p.y.slice(0, 24))
   }
 }
 if (focus.length) {
@@ -69,4 +69,4 @@ if (focus.length) {
 } else {
   console.log('\n▶ 软扫描零命中：无繁体标注项、术语与长度比均正常')
 }
-console.log('\n机器复核毕：可移交人工终审（义理与语感通读）')
+console.log('\n机器复核毕：档案健康（义理终审已于 2026-08-27 闭环）')
