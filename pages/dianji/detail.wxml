@@ -85,10 +85,13 @@
       <view wx:if="{{gua.daxiangB}}" class="baihua">白话：{{gua.daxiangB}}</view>
     </view>
 
-    <!-- 文言传（仅乾坤） -->
+    <!-- 文言传（仅乾坤）+ 逐段白话 -->
     <view class="sec" wx:if="{{gua.wy.length}}">
       <view class="sec-title font-kai">文言传</view>
-      <view class="daxiang font-kai wenyan-p" wx:for="{{gua.wy}}" wx:key="index">{{item}}</view>
+      <block wx:for="{{gua.wy}}" wx:key="index">
+        <view class="daxiang font-kai wenyan-p">{{item.t}}</view>
+        <view wx:if="{{item.bh}}" class="baihua wy-bh">白话：{{item.bh}}</view>
+      </block>
     </view>
 
     <!-- 说卦传 · 取象（上下卦） -->
@@ -101,16 +104,18 @@
       </block>
     </view>
 
-    <!-- 序卦传（卦序由来） -->
+    <!-- 序卦传（卦序由来）+ 白话 -->
     <view class="sec" wx:if="{{gua.xu}}">
       <view class="sec-title font-kai">序卦传</view>
       <view class="daxiang font-kai">{{gua.xu}}</view>
+      <view wx:if="{{gua.xuB}}" class="baihua">白话：{{gua.xuB}}</view>
     </view>
 
-    <!-- 杂卦传（卦义对举） -->
+    <!-- 杂卦传（卦义对举）+ 白话 -->
     <view class="sec" wx:if="{{gua.za}}">
       <view class="sec-title font-kai">杂卦传</view>
       <view class="daxiang font-kai">{{gua.za}}</view>
+      <view wx:if="{{gua.zaB}}" class="baihua">白话：{{gua.zaB}}</view>
     </view>
 
     <view class="src-note">原文出自《周易》经传 · 生僻字随文括注拼音 · 白话与典故仅供阅读参考</view>

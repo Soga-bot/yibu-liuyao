@@ -6,6 +6,7 @@ import { getBaihua } from '../../data/baihua.js'
 import { getZhuanBh } from '../../data/baihua-zhuan.js'
 import { getDiangu } from '../../data/diangu.js'
 import { getWenyan, getXugua, getZagua, getTrigramXiang } from '../../data/shiyi.js'
+import { getWenyanBh, getXuguaBh, getZaguaBh } from '../../data/baihua-shiyi.js'
 import { annotate, namePinyin } from '../../utils/pinyin.js'
 import { makeShareCard } from '../../utils/sharecard.js'
 import { themeClass, fontClass } from '../../utils/theme.js'
@@ -25,6 +26,8 @@ Page({
     const zh = getZhuan(g.key) || {}
     const bh = getBaihua(g.key) || {}
     const zhb = getZhuanBh(g.key) || {}
+    // 文言/序/杂节选白话：与节选原文同源机器映射（见 data/baihua-shiyi.js 尾注）
+    const wyBh = getWenyanBh(g.key) || []
     // 传统全称：上象+下象+卦名（如火水未济）；八纯卦作「乾为天」式
     const full = g.waiXiang === g.neiXiang
       ? g.name + '为' + g.waiXiang
@@ -61,7 +64,7 @@ Page({
           xyong: zh.xyong ? annotate(zh.xyong) : '',
           yongB: bh.yong || ''
         } : null,
-        wy: (getWenyan(g.key) || []).map(annotate),
+        wy: (getWenyan(g.key) || []).map((seg, i) => ({ t: annotate(seg), bh: wyBh[i] || '' })),
         sg: [g.wai, g.nei].map((name, i) => {
           const x = getTrigramXiang(name)
           return x && {
@@ -72,7 +75,9 @@ Page({
           }
         }).filter(Boolean),
         xu: annotate(getXugua(g.key)),
+        xuB: getXuguaBh(g.key),
         za: annotate(getZagua(g.key)),
+        zaB: getZaguaBh(g.key),
         meta: [
           { k: '全称', v: full },
           { k: '卦宫', v: g.gong + '宫 · ' + wx },

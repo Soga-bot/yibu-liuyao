@@ -6,6 +6,8 @@ import { BAIHUA, getBaihua } from '../data/baihua.js'
 import { ZHUAN, getZhuan } from '../data/zhuan.js'
 import { getZhuanBh, ZHUAN_BH_COUNT } from '../data/baihua-zhuan.js'
 import { DIANGU } from '../data/diangu.js'
+import { getWenyan } from '../data/shiyi.js'
+import { getWenyanBh, getXuguaBh, getZaguaBh } from '../data/baihua-shiyi.js'
 import { hexagramFromKey } from './liuyao.js'
 
 let pass = 0, fail = 0
@@ -99,6 +101,22 @@ console.log('—— 典故键引用合法性 ——')
     else if (!c.lai.includes('《')) bad2.push(k + ' lai 无出处书名号')
   }
   assert(bad2.length === 0, '典故 ' + Object.keys(DIANGU).length + ' 条核查: ' + bad2.join('；'))
+}
+
+console.log('—— 文言/序/杂节选白话映射（详情页）——')
+{
+  // 机器对齐兜底：节选或句对任一侧变更导致失配，映射返回空串，此处报警
+  const bad3 = []
+  for (const g of GUA_LIST) {
+    if (!getXuguaBh(g.key)) bad3.push(g.name + ' 序卦白话未命中')
+    if (!getZaguaBh(g.key)) bad3.push(g.name + ' 杂卦白话未命中')
+  }
+  assert(bad3.length === 0, '64 卦序/杂节选白话应全命中: ' + bad3.slice(0, 6).join('；'))
+  for (const [key, nm] of [['111111', '乾'], ['000000', '坤']]) {
+    const segs = getWenyan(key) || []
+    const bh = getWenyanBh(key) || []
+    assert(segs.length > 0 && segs.length === bh.length && bh.every(s => s), nm + '文言 ' + segs.length + ' 段应段段命中白话，得 ' + bh.filter(Boolean).length)
+  }
 }
 
 console.log('—— 审核禁词全库扫描 ——')

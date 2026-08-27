@@ -191,6 +191,11 @@
   margin-top: 20rpx;
 }
 
+/* 文言逐段白话：插入白话行后原文段不再相邻，原 +20rpx 段距规则失效，改由白话行下边距承担 */
+.wy-bh {
+  margin-bottom: 20rpx;
+}
+
 /* 说卦取象 */
 .sx-name {
   font-size: 26rpx;

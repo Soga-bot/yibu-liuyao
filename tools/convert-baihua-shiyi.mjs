@@ -104,13 +104,67 @@ const out = `// data/baihua-shiyi.js — 十翼通读白话（系辞上下/说�
 // 由 docs/已校对-十翼白话.txt 与 docs/待校对-文言序杂白话.txt 生成，tools/convert-baihua-shiyi.mjs
 // （生成时已机器校验：每章原句拼接与 data/shiyi.js 章文全等，不脱不漏）
 // 定位：帮助阅读的白话参考译文（依通行译注传统直译，非学术定本，原文为准）
+// 末尾 getWenyanBh/getXuguaBh/getZaguaBh 为卦详情页节选白话映射（改须改转换器模板，勿直改本文件）
+import { WENYAN, getXugua, getZagua } from './shiyi.js'
+
 export const BH_SHIYI = {
 ${body.join('\n')}
 }
 
-// 取某章句对（book 为「系辞上传/系辞下传/说卦传」，h 为中文章号）
+// 取某章句对（book 为「系辞上传/系辞下传/说卦传/文言传·乾/文言传·坤/序卦传/杂卦传」，h 为中文章号）
 export function getShiyiBh(book, h) {
   return BH_SHIYI[book + '|' + h] || null
+}
+
+// —— 卦详情页节选白话映射（文言乾坤逐段 / 序卦 / 杂卦） ——
+// 归一化口径与 tools/check-shiyi-vs-zhouyi.mjs 一致：去编者括注与空白、去全部
+// 标点（中西文引号），遯→遁（校勘约定，docs/校勘备注.md）。以归一化文本在句对
+// 中定位连续原文区间，取对应译句拼接——与 data/shiyi.js 节选（getXugua 等）同源，
+// 机器保证对齐：节选或句对任一侧变更，此处即失配返回空串，由测试兜底报警。
+const CN_NUM = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一']
+const BH_NORM = s => s
+  .replace(/（[^）]*）/g, '')
+  .replace(/[\\s　]/g, '')
+  .replace(/遯/g, '遁')
+  .replace(/[，。、；：？！,.;:?!「」『』“”‘’"'《》〈〉（）()·—…\\-～]/g, '')
+
+// 在指定章句对中找连续区间：原文归一化拼接全等于 frag 时返回译句拼接
+const bhRun = (frag, keys) => {
+  const target = BH_NORM(frag)
+  for (const k of keys) {
+    const pairs = BH_SHIYI[k] || []
+    for (let i = 0; i < pairs.length; i++) {
+      let acc = ''
+      for (let j = i; j < pairs.length; j++) {
+        acc += BH_NORM(pairs[j].y)
+        if (acc === target) return pairs.slice(i, j + 1).map(p => p.b).join('')
+        if (acc.length >= target.length) break
+      }
+    }
+  }
+  return ''
+}
+
+// 文言（仅乾坤）：逐段白话，段序与 getWenyan() 一致（章号即段序，十一段封顶）
+export function getWenyanBh(key) {
+  const qian = key === '111111', kun = key === '000000'
+  if (!qian && !kun) return null
+  const segs = qian ? WENYAN.qian : WENYAN.kun
+  const book = qian ? '文言传·乾' : '文言传·坤'
+  return segs.map((t, i) => bhRun(t, [book + '|' + CN_NUM[i]]))
+}
+
+// 序卦：本卦序卦句白话（坤条复用乾起首语并含编者括注、咸条复用下篇起首长句，
+// 均由归一化剔除括注后按原文区间命中）
+export function getXuguaBh(key) {
+  const frag = getXugua(key)
+  return frag ? bhRun(frag, ['序卦传|上', '序卦传|下']) : ''
+}
+
+// 杂卦：本卦杂卦句白话（相邻两卦共用一句，如大壮/遯）
+export function getZaguaBh(key) {
+  const frag = getZagua(key)
+  return frag ? bhRun(frag, ['杂卦传|全']) : ''
 }
 `
 writeFileSync(OUT, out)
