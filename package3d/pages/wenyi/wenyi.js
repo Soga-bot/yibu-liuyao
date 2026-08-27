@@ -104,6 +104,8 @@ Page({
       aiMeta: ai ? this.metaOf(ai) : ''
     })
     this._args = { yao: yaoStr, dong: dongStr, gz: jz, q: qiu }
+    // 进页即自动起问（不设开始按钮）；已存解读只回看不重问——一事一占，也不重复计费
+    if (this.data.mode !== '' && !ai) this.onAsk()
   },
 
   // 摘要行：时间 + 来源（模拟态标「本地合成」，云端/历史留白）

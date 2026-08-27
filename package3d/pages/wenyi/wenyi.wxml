@@ -42,7 +42,7 @@
         <button wx:if="{{bianName}}" class="lead-btn ghost" hover-class="lead-hover" bindtap="onBianGuaci">读变卦《{{bianName}}》</button>
       </block>
 
-      <!-- 已开通（模拟/云端）：取读按钮（解读生成后即时落库，历史可回看） -->
+      <!-- 已开通（模拟/云端）：进页自动起问（onLoad 即触发，生成后即时落库，历史可回看） -->
       <block wx:else>
         <view wx:if="{{loading}}" class="ask-wrap">
           <view class="bagua-disc">
@@ -61,9 +61,10 @@
           <view class="ask-txt">解读生成中…</view>
         </view>
         <block wx:else>
-          <!-- 未生成：取读入口；已生成：本轮终局，不再提供重问（一事一占） -->
+          <!-- 进页即自动起问：非加载、无解读只可能是生成失败——留重试入口；
+               已生成：本轮终局，不再提供重问（一事一占） -->
           <block wx:if="{{!aiText}}">
-            <button class="lead-btn" hover-class="lead-hover" bindtap="onAsk">开始问易{{mode === 'mock' ? ' · 模拟' : ''}}</button>
+            <button class="lead-btn" hover-class="lead-hover" bindtap="onAsk">重新生成</button>
             <view wx:if="{{mode === 'mock'}}" class="mock-tip">模拟态：解读由本机排盘与《周易》经文库按固定规则合成，正式版将接入云端模型。</view>
           </block>
           <view wx:else class="done-tip">此卦已解，本轮问易完成。蒙卦辞云「初筮告，再三渎」，一事一占，如需再问请另起一卦。</view>
