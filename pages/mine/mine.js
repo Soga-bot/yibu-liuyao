@@ -4,7 +4,7 @@ import { themeClass, fontClass } from '../../utils/theme.js'
 const app = getApp()
 
 const HISTORY_KEY = 'ly_history' // 与 paipan.js 保持一致
-const VERSION = '0.4.0' // 与 docs/版本说明.md 对齐（v0.4.0 = 云端切换·豆包经云函数上线 + 成卦页触摸双根因修复 + 问易自动起问）
+const VERSION = '0.4.1' // 与 docs/版本说明.md 对齐（v0.4.1 = 卦爻辞白话外审闭环·原稿为基择优吸收 6 条）
 
 function pad(n) { return n < 10 ? '0' + n : '' + n }
 function fmtTime(t) {

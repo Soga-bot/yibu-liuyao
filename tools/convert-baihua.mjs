@@ -1,13 +1,15 @@
-// tools/convert-baihua.mjs — 把 docs/待填充-白话翻译.txt 的填写内容并入 data/baihua.js
+// tools/convert-baihua.mjs — 把 docs/已校对-白话翻译.txt 的内容并入 data/baihua.js
 // 用法：node tools/convert-baihua.mjs
-// 已完成的 8 试点卦（乾坤屯蒙需讼师比）以 txt 为准前不覆盖（txt 里本就没有它们）。
-// txt 中某卦若与 baihua.js 重复，以 txt 为准（用户最新填写）。
+// 已完成的 8 试点卦（乾坤屯蒙需讼师比）为原手写版（txt 里本就没有它们）。
+// txt 中某卦若与 baihua.js 重复，以 txt 为准。
+// 档案沿革：待填充-白话翻译.txt（素材档）→ 2026-08-28 外审闭环后定稿为
+// 已校对-白话翻译.txt（以原稿为基择优吸收修订 6 条，明细见 docs/校对记录-白话翻译.md）。
 import { readFileSync, writeFileSync } from 'node:fs'
 import { GUA_LIST } from '../data/gua.js'
 import { BAIHUA } from '../data/baihua.js'
 
 const SLOT = /^(卦辞|初六|初九|九二|六二|九三|六三|九四|六四|九五|六五|上九|上六|用九|用六)：(.*)$/
-const lines = readFileSync('docs/待填充-白话翻译.txt', 'utf8').split(/\r?\n/)
+const lines = readFileSync('docs/已校对-白话翻译.txt', 'utf8').split(/\r?\n/)
 
 const parsed = new Map() // seq -> {n, guaci, yaoci[], yong?}
 let seq = null, pendingTi = null, collecting = false, buf = []
@@ -54,7 +56,7 @@ for (const g of GUA_LIST) {
 // 生成 data/baihua.js
 const esc = v => JSON.stringify(v)
 let out = `// data/baihua.js — 卦辞/爻辞白话翻译层（全 64 卦）
-// 由 docs/待填充-白话翻译.txt 填写内容生成（tools/convert-baihua.mjs），
+// 由 docs/已校对-白话翻译.txt 生成（tools/convert-baihua.mjs；外审定稿 2026-08-28），
 // 试点 8 卦（乾坤屯蒙需讼师比）为原手写版。
 // 规范（审核红线）：
 //   1. 只译字面与传统注疏共识，不作吉凶断言、不作前瞻断语
