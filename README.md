@@ -38,7 +38,7 @@
 
 **安全与合规**（提审红线设计）：
 
-- 密钥只存云函数环境变量（`WENYI_BASE_URL` / `WENYI_API_KEY` / `WENYI_MODEL` / `WENYI_TIMEOUT_MS`），绝不进小程序包，也不进 git（`local/` 双排除）；
+- 密钥只存云函数环境变量（`WENYI_BASE_URL` / `WENYI_API_KEY` / `WENYI_MODEL` / `WENYI_TIMEOUT_MS`，另有限流 `WENYI_DAILY_LIMIT` 与思考开关 `WENYI_THINKING_OFF`），绝不进小程序包，也不进 git（`local/` 双排除）；
 - 服务端按 `yao/dong/gz` **独立复核排盘**——端上伪造的卦名/变卦名进不了提示词（防注入）；
 - 审核红线七禁词端到端扫描：提示词声明 + 云函数输出扫描 + 命中一次纠偏重试；
 - `security.msgSecCheck` 双检：入口 fail-open（平台抖动不误伤）、出口 fail-closed（明确风险拦截）；
