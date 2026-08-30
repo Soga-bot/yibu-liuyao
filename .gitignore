@@ -15,3 +15,6 @@ tools/_chk/
 local/
 
 .claude/
+
+# 截图原图存放区（归位副本在 docs/img/）
+配图/

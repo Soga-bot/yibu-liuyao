@@ -23,6 +23,16 @@
 | 知识页 | 五行生克 / 八卦取象 / 八宫六十四卦表 |
 | 体验 | 宣纸米黄 + 墨色双主题、楷体正文、字号三档、BGM 预留接口、历史记录（摇卦与排盘同库） |
 
+## 运行预览（真机截图）
+
+| 3D 龟壳摇卦 | 卦成 · 排盘 | 问易 · AI 解读 |
+| --- | --- | --- |
+| ![3D 龟壳摇卦](docs/img/divination.jpg) | ![卦成 · 排盘](docs/img/result.jpg) | ![问易 · AI 解读](docs/img/wenyi.jpg) |
+
+| 首页 | 典籍库 · 卦详情 | 十翼通读 | 手动排盘 |
+| --- | --- | --- | --- |
+| ![首页](docs/img/index.jpg) | ![典籍库 · 卦详情](docs/img/detail.jpg) | ![十翼通读](docs/img/shiyi.jpg) | ![手动排盘](docs/img/paipan.jpg) |
+
 ## 问易（AI 解卦）
 
 三态开关 `utils/wenyi-config.js`（唯一改动点）：`''` 未开通 / `'mock'` 本地合成（零联网，降级层）/ `'cloud'` 云函数（**v0.4.0 起默认**）。
